@@ -1,7 +1,10 @@
 <!-- topics/templates/topics/topic_prompt.html -->
+{% load static %}
 
 <div id="topic-prompt">
 	<h2>{{ prompt_message }}</h2>
 	{% csrf_token %}
 	<input type="text" name="topic" placeholder="Enter a topic..." required>
 </div>
+
+<script src="{% static 'js/topics_prompt.js' %}"></script>
