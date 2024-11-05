@@ -7,4 +7,5 @@ app_name = "topics"
 
 urlpatterns = [
 	path( "prompt/", views.prompt, name="prompt" ),
+	path( "process/", views.process, name="process" ),
 ]
