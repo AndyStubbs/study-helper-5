@@ -4,18 +4,20 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>StudyHelper Dashboard</title>
+	<title>StudyHelper</title>
 	<link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-	<div id="dashboard">
-		<h1>Welcome to StudyHelper</h1>
-		<p>
-			{{ welcome_message }}
-		</p>
-	</div>
-	<div id="dashboard">
-		{% include "topics/topic_prompt.html" %}
+	<header id="main-header">
+		<h1>Study Helper</h1>
+		<p>{{ welcome_message }}</p>
+	</header>
+	<div id="page-wrap">
+		<main>
+			<section id="study-prompt">
+				<div id="topic-prompt" data-view="topics:prompt"></div>
+			</section>
+		</main>
 	</div>
 	<script src="{% static 'js/main.js' %}"></script>
 </body>

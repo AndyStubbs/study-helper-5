@@ -3,9 +3,7 @@ from django.shortcuts import render
 
 
 def homepage(request):
-	# Fetch recent topics, proficiency data, and AI insights
-	welcome_message = "Hello User!"
-
+	welcome_message = "Your AI-assisted study companion"
 	context = {
 		"welcome_message": welcome_message,
 	}

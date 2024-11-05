@@ -6,5 +6,5 @@ from . import views
 app_name = "topics"
 
 urlpatterns = [
-	path( "start/", views.topic_prompt, name="start_study_session"),
+	path( "prompt/", views.prompt, name="prompt" ),
 ]
