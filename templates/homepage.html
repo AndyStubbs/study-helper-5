@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>StudyHelper Dashboard</title>
+	<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+	<div id="dashboard">
+		<h1>Welcome to StudyHelper</h1>
+		<p>
+			{{ welcome_message }}
+		</p>
+	</div>
+	<div id="dashboard">
+		{% include "topics/topic_prompt.html" %}
+	</div>
+	<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

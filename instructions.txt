@@ -1,0 +1,208 @@
+I am building the following application.  Please keep the following in memory:
+
+StudyHelper Application Design Document
+Project Overview
+StudyHelper is a single-page application (SPA) built with Django as the backend, using plain JavaScript and Django’s templating system for the frontend. The application enables users to study various topics through dynamic question generation and proficiency tracking, with a primary focus on interactions between the user and an AI assistant. The homepage serves as a dashboard, displaying user progress, recent study topics, and key concepts.
+
+Key Features
+User Registration and Authentication:
+
+Guest access with limited features.
+Option for guests to register, allowing their data to transfer to a registered profile.
+Standard user authentication (login/logout), with session-based authentication to enable seamless use within Django’s templating system.
+Dashboard:
+
+A centralized dashboard that serves as the SPA’s main view.
+Sections for recent topics, proficiency tracking, and AI-driven progress insights.
+The interface will hide and display sections as needed, with most of the interaction focused on the AI responses and study questions.
+Topic Creation and Management:
+
+Users can create and manage topics they want to study.
+AI assistance to refine topic names and descriptions.
+Each topic links to associated concepts and tracks user progress.
+Study Session and Question Generation:
+
+During study sessions, AI-generated questions are presented based on selected topics.
+Key concepts from each question are stored in the user’s profile, tracking proficiency over time.
+Users can switch topics within a study session to cover a broader range of concepts.
+Progress Analysis:
+
+Tracks and analyzes user learning progress and proficiency levels.
+AI-driven recommendations for topics or concepts that need improvement.
+Displays concise insights on user progress across topics.
+Architectural Overview
+Frontend
+Single-Page Application (SPA) with Plain JavaScript:
+Django’s templating system will handle the initial HTML layout of the SPA.
+JavaScript will dynamically hide or display sections as users navigate between views (e.g., dashboard, topic management, study session).
+AJAX (or fetch API) will manage data interactions with the backend, enabling smooth transitions without reloading the page.
+Minimalist, clean design focusing primarily on text interactions with the AI.
+Backend
+Django Framework:
+Django serves as the backend, organizing features across multiple apps.
+The backend provides REST-like API endpoints for data operations but uses session authentication compatible with Django’s template rendering.
+Each feature is organized into a separate app (e.g., users, topics, study, analysis).
+Core Application Components
+1. User Management (Users App)
+Authentication: Supports guest sessions and registered users, allowing guests to upgrade their profile upon registration.
+Profile Management: Tracks user-specific data, such as learning progress and proficiency in key concepts.
+API Endpoints and Views:
+POST /users/register/: Register a new user and transfer guest data, if applicable.
+POST /users/login/: Login endpoint.
+POST /users/logout/: Logout endpoint.
+GET /users/profile/: Retrieve user profile and progress data.
+2. Topic Management (Topics App)
+Topic Creation and Modification: Allows users to create, edit, and delete topics.
+AI Integration: AI refines topic names and descriptions based on user input.
+API Endpoints and Views:
+POST /topics/create/: Create a new topic.
+GET /topics/<id>/: Retrieve a topic and its associated concepts.
+PUT /topics/<id>/: Update topic name or description.
+DELETE /topics/<id>/: Delete a topic.
+3. Study Session (Study App)
+Question Generation: Presents AI-generated questions during study sessions.
+Concept Tracking: Tracks key concepts linked to each question and proficiency updates.
+Topic Switching: Enables users to switch topics during a study session.
+API Endpoints and Views:
+POST /study/<topic_id>/start/: Start a study session.
+POST /study/<topic_id>/next-question/: Fetch the next AI-generated question.
+POST /study/<topic_id>/submit-answer/: Submit an answer and update proficiency.
+4. Progress Analysis (Analysis App)
+Learning Insights: Provides AI-driven analysis of user progress and proficiency for each concept.
+Recommendations: Suggests areas or concepts needing improvement.
+API Endpoints and Views:
+GET /analysis/progress/: Retrieve overall progress data.
+GET /analysis/concepts/: List proficiency scores for each concept.
+Frontend-Backend Interaction
+Django Templating and HTML Structure:
+
+The initial HTML structure for the SPA is provided by Django’s templates, allowing Django to inject server-side data on the first page load.
+Each main view (dashboard, topic management, study session) will be an HTML section hidden by default, then dynamically shown or hidden based on user interactions.
+JavaScript for Dynamic Content:
+
+JavaScript will handle interactions such as showing/hiding sections and making AJAX requests to Django’s API endpoints.
+Example: The dashboard will load user data on initial load, while specific study questions or analysis results will load when users switch views.
+Session-Based Authentication:
+
+Django’s session-based authentication will handle user sessions without requiring a separate token-based system.
+This allows seamless integration with Django’s templating and is ideal for an SPA that stays on the same domain.
+Database Schema
+Users
+CustomUser Model:
+Fields: username, email, is_guest, profile (FK to GuestProfile).
+GuestProfile Model:
+Fields: session_id, created_at, user (FK to CustomUser).
+Topics
+Topic Model:
+Fields: name, description, user (FK to CustomUser).
+Concept Model:
+Fields: name, topic (FK to Topic).
+Study
+StudySession Model:
+Fields: user, topic, start_time, end_time.
+Question Model:
+Fields: text, concepts (many-to-many with Concept), study_session (FK to StudySession).
+Analysis
+Progress Model:
+Fields: user, concept (FK to Concept), proficiency_score.
+Implementation Plan
+Backend:
+
+Set up Django apps for users, topics, study, and analysis.
+Create models and API views for each app to support necessary operations.
+Configure session-based authentication for smooth integration with Django’s template rendering.
+Frontend:
+
+Build the SPA’s structure using Django templates, with sections hidden by default.
+Use JavaScript to toggle sections and make AJAX calls to Django’s backend.
+Set up event listeners to handle user actions (e.g., starting a study session, viewing analysis) and dynamically update content.
+AI Integration:
+
+Implement a separate AI services module (ai_services) for question generation and progress analysis, which can be accessed from the study and analysis apps.
+Define functions for generating questions and analyzing progress, with corresponding API views for the frontend.
+Testing and Optimization:
+
+Test API endpoints, SPA interactions, and AI responses to ensure smooth functionality.
+Optimize JavaScript functions and backend queries for efficiency and responsiveness.
+
+Keep in mind that I'm using windows and Visual Studio Code. I have the django extension already installed.
+
+
+# Users App
+
+# CustomUser
+# Inherits from AbstractUser.
+# Fields: is_guest, last_active.
+
+class CustomUser(AbstractUser):
+	is_guest = models.BooleanField(default=True)
+	last_active = models.DateTimeField(auto_now=True)
+
+# Profile
+# Fields: user (One-to-One with CustomUser), completed_topics (Many-to-Many with Topic), proficiency_score.
+
+class Profile(models.Model):
+	user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+	completed_topics = models.ManyToManyField('topics.Topic', blank=True)
+	proficiency_score = models.FloatField(default=0.0)
+
+
+# Topics App
+
+# Topic
+# Fields: name, description, created_by (ForeignKey to CustomUser), last_studied.
+
+class Topic(models.Model):
+	name = models.CharField(max_length=100)
+	description = models.TextField(blank=True, null=True)
+	created_by = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True, blank=True)
+	last_studied = models.DateTimeField(null=True, blank=True)
+
+# Concept
+# Fields: name, description, topic (ForeignKey to Topic).
+
+class Concept(models.Model):
+	name = models.CharField(max_length=100)
+	description = models.TextField(blank=True, null=True)
+	topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+
+
+# Study App
+
+# StudySession
+# Fields: user (ForeignKey to CustomUser), topic (ForeignKey to Topic), start_time, end_time, score.
+
+class StudySession(models.Model):
+	user = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE)
+	topic = models.ForeignKey('topics.Topic', on_delete=models.CASCADE)
+	start_time = models.DateTimeField(auto_now_add=True)
+	end_time = models.DateTimeField(null=True, blank=True)
+	score = models.FloatField(default=0.0)
+
+# Question
+# Fields: text, concepts (Many-to-Many with Concept), study_session (ForeignKey to StudySession), answer.
+
+class Question(models.Model):
+	text = models.TextField()
+	concepts = models.ManyToManyField('topics.Concept')
+	study_session = models.ForeignKey(StudySession, on_delete=models.CASCADE)
+	answer = models.TextField(blank=True, null=True)
+
+
+# Analysis App
+
+# Progress
+# Fields: user (ForeignKey to CustomUser), concept (ForeignKey to Concept), proficiency_score.
+
+class Progress(models.Model):
+	user = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE)
+	concept = models.ForeignKey('topics.Concept', on_delete=models.CASCADE)
+	proficiency_score = models.FloatField(default=0.0)
+
+# Recommendation
+# Fields: user (ForeignKey to CustomUser), concept (ForeignKey to Concept), message.
+
+class Recommendation(models.Model):
+	user = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE)
+	concept = models.ForeignKey('topics.Concept', on_delete=models.CASCADE)
+	message = models.TextField()
