@@ -4,6 +4,7 @@ from django.contrib.auth import login
 from django.utils.deprecation import MiddlewareMixin
 from users.models import CustomUser
 
+# This middleware automatically logs in a user as a guest account
 class GuestUserMiddleware( MiddlewareMixin ):
 	def process_request( self, request ):
 		if not request.user.is_authenticated:
