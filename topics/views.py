@@ -4,13 +4,14 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from utils.decorators import restrict_to_view
+from services.ai_services import evaluate_topic 
 
 # Create your views here.
 
 @restrict_to_view( "topics:prompt" )
 def prompt( request ):
 	context = {
-		"prompt_message": "What would you like to study today?"
+		"prompt_message": "What topic would you like to study?"
 	}
 	return render( request, "topics/prompt.html", context )
 
@@ -19,7 +20,7 @@ def process( request ):
 	if request.method == "POST":
 		data = json.loads( request.body )
 		topic = data.get( "topic", "" )
-		msg = f"Topic: {topic} recieved"
-		return JsonResponse( { "response": msg } )
+		ai_response = evaluate_topic( topic )
+		return JsonResponse( ai_response )
 	else:
 		return JsonResponse( { "error": "Invalid request" }, status=400 )

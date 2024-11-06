@@ -2,7 +2,14 @@
 {% load static %}
 
 <div id="topic-prompt">
-	<h2>{{ prompt_message }}</h2>
+	<img
+		id="prompt-loading"
+		src="{% static 'svg/bars-scale-middle.svg' %}"
+		alt="Loading..."
+		style="display: none;"
+	>
+	<h2 id="prompt-message">{{ prompt_message }}</h2>
+	<div id="prompt-response" style="display: none"></div>
 	{% csrf_token %}
 	<input type="text" name="topic" placeholder="Enter a topic..." required>
 </div>
