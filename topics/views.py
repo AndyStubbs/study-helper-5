@@ -21,6 +21,8 @@ def process( request ):
 		data = json.loads( request.body )
 		topic = data.get( "topic", "" )
 		ai_response = evaluate_topic( topic )
+		if ai_response[ "status" ] == "error":
+			return JsonResponse( { "error": "Internal Server Error" }, status=500 )
 		return JsonResponse( ai_response )
 	else:
 		return JsonResponse( { "error": "Invalid request" }, status=400 )

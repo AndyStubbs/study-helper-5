@@ -29,10 +29,10 @@ def evaluate_topic( topic ):
 		if not isinstance( ai_response.get("summary"), str ):
 			raise ValueError( "The 'summary' field must be a string." )
 		if (
-			not isinstance( ai_response.get( "alternatives" ), list ) or
-			not all( isinstance(item, str) for item in ai_response["alternatives"] )
+			not isinstance( ai_response.get( "suggestions" ), list ) or
+			not all( isinstance( item, str ) for item in ai_response[ "suggestions" ] )
 		):
-			raise ValueError( "The 'alternatives' field must be a list of strings." )
+			raise ValueError( "The 'suggestions' field must be a list of strings." )
 
 		ai_response[ "status" ] = "success"
 		return ai_response

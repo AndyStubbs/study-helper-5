@@ -1,0 +1,41 @@
+<svg 
+	width="24" 
+	height="24" 
+	viewBox="0 0 24 24" 
+	xmlns="http://www.w3.org/2000/svg"
+>
+	<style>
+		.spinner_bar {
+			animation: spinner_animation 0.9s linear infinite;
+			animation-delay: -0.9s;
+		}
+		
+		.spinner_bar_delay1 {
+			animation-delay: -0.7s;
+		}
+		
+		.spinner_bar_delay2 {
+			animation-delay: -0.5s;
+		}
+
+		@keyframes spinner_animation {
+			0%, 66.66% {
+				animation-timing-function: cubic-bezier(0.14, 0.73, 0.34, 1);
+				y: 6px;
+				height: 12px;
+			}
+			
+			33.33% {
+				animation-timing-function: cubic-bezier(0.65, 0.26, 0.82, 0.45);
+				y: 1px;
+				height: 22px;
+			}
+		}
+	</style>
+	
+	<rect class="spinner_bar spinner_bar_delay2" x="1" y="6" width="2.8" height="12" fill="#888" />
+	<rect class="spinner_bar spinner_bar_delay1" x="5.8" y="6" width="2.8" height="12" fill="#888" />
+	<rect class="spinner_bar" x="10.6" y="6" width="2.8" height="12" fill="#888" />
+	<rect class="spinner_bar spinner_bar_delay1" x="15.4" y="6" width="2.8" height="12" fill="#888" />
+	<rect class="spinner_bar spinner_bar_delay2" x="20.2" y="6" width="2.8" height="12" fill="#888" />
+</svg>

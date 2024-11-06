@@ -14,12 +14,16 @@
 		<p id="topic-summary">
 		</p>
 		<div class="continue-btn-container">
-			<button>Continue</button>
+			<button id="continue-btn">Continue</button>
 		</div>
 		<div>Suggestions:</div>
-		<ul id="topic-alternatives"></ul>
+		<ul id="topic-suggestions"></ul>
+		<div class="reset-btn-container">
+			<button id="reset-btn">Reset</button>
+		</div>
 	</div>
 	{% csrf_token %}
+	<div id="prompt-error" style="display: none"></div>
 	<input type="text" name="topic" placeholder="Enter a topic..." required>
 </div>
 
