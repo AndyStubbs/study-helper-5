@@ -5,7 +5,7 @@
 	/* global main */
 
 	// Setup input
-	const m_input = document.querySelector( "#topic-prompt input[name='topic']" );
+	const m_input = document.querySelector( "#input-topic" );
 	m_input.addEventListener( "keydown", function ( event ) {
 		if( event.key === "Enter" ) {
 			event.preventDefault();
@@ -79,6 +79,7 @@
 					button.innerHTML = data.suggestions[ i ];
 					button.title = data.suggestions[ i ];
 					button.addEventListener( "click", ( e ) => {
+						e.preventDefault();
 						m_topicName = e.target.dataset.topic;
 						m_topicDescription = "";
 						selectTopic();
@@ -131,7 +132,77 @@
 	}
 
 	function selectTopic() {
-		alert( m_topicName + ": " + m_topicDescription );
+		
+		// Hide the prompt message
+		const promptMessage = document.querySelector( "#prompt-message" );
+		promptMessage.style.display = "none";
+		promptMessage.innerHTML = m_topicName;
+
+		// Get textarea description container
+		const txtDescContainer = document.querySelector( "#txt-description-container" );
+		
+		// Get textarea description
+		const txtDescription = document.querySelector( "#txt-description" );
+
+		// Hide prompt response
+		const promptResponse = document.querySelector( "#prompt-response" );
+		promptResponse.style.display = "none";
+
+		// Get the loading bar
+		const promptLoading = document.querySelector( "#prompt-loading" );
+
+		// Load the topic description textarea
+		if( m_topicDescription === "" ) {
+
+			// Show the prompt loading bars
+			promptLoading.style.display = "";
+
+			// Fetch the topic description
+			fetch( "/topics/summarize/", {
+				"method": "POST",
+				"headers": {
+					"Content-Type": "application/json",
+					"X-CSRFToken": main.getCSRFToken()
+				},
+				"body": JSON.stringify( { "topic": m_topicName } )
+			} )
+			.then( response => {
+				if( !response.ok ) {
+					throw new Error( `Server error: ${response.status}` );
+				}
+				return response.json();
+			} )
+			.then( data => {
+				
+				// Hide loading bar
+				promptLoading.style.display = "none";
+
+				// Update the description
+				m_topicDescription = data.summary;
+
+				// Show the prompt message
+				promptMessage.style.display = "";
+
+				// Update the text area
+				txtDescription.innerHTML = m_topicDescription;
+				txtDescContainer.style.display = "";
+
+			} ).catch( error => {
+				console.error( "Error processing description:", error );
+
+				// Show Error Message
+				const promptError = document.querySelector( "#prompt-error" );
+				promptError.innerHTML = "Something went wrong.";
+				promptError.style.display = "";
+
+				resetPrompt();
+			} );
+		} else {
+			promptLoading.style.display = "none";
+			promptMessage.style.display = "";
+			txtDescription.innerHTML = m_topicDescription;
+			txtDescContainer.style.display = "";
+		}
 	}
 
 } )();

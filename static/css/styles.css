@@ -12,6 +12,36 @@ body {
 	min-height: 100vh;
 }
 
+::-webkit-scrollbar {
+	width: 16px;
+}
+
+::-webkit-scrollbar-track {
+	background: #333;
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #555;
+	border-radius: 10px;
+	border: 3px solid #333;
+	cursor: default;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #666;
+}
+
+::-webkit-scrollbar-track:horizontal {
+	height: 16px;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+	height: 12px;
+	border-radius: 10px;
+	border: 3px solid #333;
+}
+
 #main-header {
 	width: 100%;
 	padding: 20px 0;
@@ -57,7 +87,6 @@ body {
 	margin-top: -80px;
 }
 
-
 /* 
 	TOPIC PROMPT
 */
@@ -91,7 +120,7 @@ body {
 	margin-bottom: 8px;
 }
 
-#prompt-response button {
+button {
 	color: #e0e0e0;
 	height: 48px; /* Fixed height for uniform button size */
 	padding: 8px 12px;
@@ -110,13 +139,15 @@ body {
 	text-align: left;
 }
 
-.continue-btn-container button {
+.continue-btn-container button,
+.submit-btn-container button {
 	width: 100px;
 	background-color: #252;
 	margin-bottom: 16px;
 }
 
-.continue-btn-container button:hover {
+.continue-btn-container button:hover,
+.submit-btn-container button:hover {
 	background-color: #262;
 }
 
@@ -188,3 +219,30 @@ body {
 #topic-prompt input[type="text"]::placeholder {
 	color: #b0b0b0;
 }
+
+/* 
+	TOPIC DESCRIPTION
+*/
+
+#txt-description-container {
+	text-align: left;
+}
+
+#txt-description-container label {
+	font-weight: bold;
+}
+
+#txt-description {
+	width: calc(100% - 50px);
+	height: 100px;
+	background-color: #222;
+	color: #eee;
+	border-color: #555;
+	border-radius: 8px;
+	padding: 19px;
+	font-size: 15px;
+	margin: 6px;
+	margin-bottom: 12px;
+	resize: none;
+}
+

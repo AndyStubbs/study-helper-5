@@ -1,6 +1,5 @@
 # services/ai_prompts.py
 
-# TODO Simplify this and just return a summary and offer possible alternatives.
 def topic_evaluator_system_prompt():
 	return """
 You are a topic evaluator for a study helper app. Your task is to evaluate topics submitted 
@@ -38,4 +37,31 @@ Example JSON format:
 def topic_evaluator_user_prompt( topic ):
 	return f"""
 Please evaluate the topic '{topic}'
+"""
+
+def topic_summary_system_prompt():
+	return """
+You are a topic summarizer for a study helper app. Your task is to create summary of topics 
+submitted by users, generate a brief summary based on your best interpretation of the topic, 
+identify key concepts for quiz preparation.
+
+Your summary should include:
+- A concise description of the topic.
+- Key concepts or ideas that would be central to quiz questions on this topic.
+
+Your response should be educational and guide the user toward a well-defined topic.
+
+Return the response as JSON:
+- Include a `"summary"` field with a brief description of the topic and the main concepts for quiz 
+	preparation.
+
+Example JSON format:
+{ 
+    "summary": "A brief explanation of the topic with key concepts like X, Y, and Z.",
+}
+"""
+
+def topic_summary_user_prompt( topic ):
+	return f"""
+Please summarize the topic '{topic}'
 """

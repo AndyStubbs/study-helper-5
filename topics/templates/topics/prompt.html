@@ -24,7 +24,14 @@
 	</div>
 	{% csrf_token %}
 	<div id="prompt-error" style="display: none"></div>
-	<input type="text" name="topic" placeholder="Enter a topic..." required>
+	<input id="input-topic" type="text" name="topic" placeholder="Enter a topic..." required>
+	<div id="txt-description-container" style="display: none">
+		<label for="txt-description">Topic Description:</label>
+		<textarea id="txt-description" maxlength="1000"></textarea>
+		<div class="submit-btn-container">
+			<button id="submit-btn">Submit</button>
+		</div>
+	</div>
 </div>
 
 <script src="{% static 'js/topics_prompt.js' %}"></script>
