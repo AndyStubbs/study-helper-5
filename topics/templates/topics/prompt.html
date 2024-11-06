@@ -9,7 +9,16 @@
 		style="display: none;"
 	>
 	<h2 id="prompt-message">{{ prompt_message }}</h2>
-	<div id="prompt-response" style="display: none"></div>
+	<div id="prompt-response" style="display: none">
+		<div id="topic-name"></div>
+		<p id="topic-summary">
+		</p>
+		<div class="continue-btn-container">
+			<button>Continue</button>
+		</div>
+		<div>Suggestions:</div>
+		<ul id="topic-alternatives"></ul>
+	</div>
 	{% csrf_token %}
 	<input type="text" name="topic" placeholder="Enter a topic..." required>
 </div>
