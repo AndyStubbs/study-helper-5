@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 	# Custom apps
 	"apps.users",
 	"apps.topics",
+	"apps.about",
 ]
 
 MIDDLEWARE = [

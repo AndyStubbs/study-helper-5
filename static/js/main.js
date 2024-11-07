@@ -44,10 +44,14 @@ document.addEventListener( "DOMContentLoaded", function () {
 
 	placeholders.forEach( placeholder => {
 		const viewName = placeholder.getAttribute( "data-view" );
-		const [appName, viewEndpoint] = viewName.split( ":" );
-
-		// Construct the URL based on the app name and view endpoint
-		const url = `/${appName}/${viewEndpoint}/`;
+		const parts = viewName.split( ":" );
+		let url = "";
+		if( parts.length > 1 ) {
+			// Construct the URL based on the app name and view endpoint
+			url = `/${parts[ 0 ]}/${parts[ 1 ]}/`;
+		} else {
+			url = `/${parts[ 0 ]}`;
+		}
 
 		// Fetch the HTML content from the specified view
 		fetch( url, { "headers": { "X-Requested-View": viewName } } )
