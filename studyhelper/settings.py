@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
 	# Custom apps
-	"users",
-	"topics",
+	"apps.users",
+	"apps.topics",
 ]
 
 MIDDLEWARE = [
@@ -56,7 +56,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
 	# Custom guest user middleware
-	"users.middleware.guest_user_middleware.GuestUserMiddleware",
+	"apps.users.middleware.guest_user_middleware.GuestUserMiddleware",
 ]
 
 ROOT_URLCONF = 'studyhelper.urls'

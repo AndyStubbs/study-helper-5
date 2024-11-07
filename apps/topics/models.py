@@ -1,7 +1,7 @@
 # topics/models.py
 
 from django.db import models
-from users.models import CustomUser
+from apps.users.models import CustomUser
 
 class Topic( models.Model ):
 	name = models.CharField( max_length=100 )
