@@ -64,9 +64,11 @@
 		document.getElementById( "final-submit-btn" ).style.display = "block";
 	}
 
-	topicInput.addEventListener( "click", () => {
-		if( resultArea.style.display === "block" ) {
-			summarizeTopic( topicInput.value );
+	topicInput.addEventListener( "keypress", ( event ) => {
+		if( event.key === "Enter" ) {
+			if( resultArea.style.display === "block" ) {
+				summarizeTopic( topicInput.value );
+			}
 		}
 	} );
 
