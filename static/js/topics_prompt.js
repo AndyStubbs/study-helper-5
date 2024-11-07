@@ -1,5 +1,7 @@
 // static/js/topic_prompt.js
-
+// TODO: When the user selects a similar topic, it should stay highlighted when selected.
+// 		 If the user enters a new topic manually it should no longer be highlighted.
+// TODO: Need to rename this file and view to something better like create_topic.
 
 ( function () {
 	/* global main */
