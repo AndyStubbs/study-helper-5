@@ -6,7 +6,9 @@ from .ai_prompts import (
 	topic_evaluator_system_prompt,
 	topic_evaluator_user_prompt,
 	topic_summary_system_prompt,
-	topic_summary_user_prompt
+	topic_summary_user_prompt,
+	json_validator_system_prompt,
+	json_validator_user_prompt
 )
 
 
@@ -60,7 +62,7 @@ def validate_summary_response( ai_response ):
 	if not isinstance( ai_response.get("summary"), str ):
 		raise ValueError( "The 'summary' field must be a string." )
 
-def run_chat_json( model, messages, validator ):
+def run_chat_json( model, messages, validator, retry_json=True ):
 	try:
 		client = OpenAI()
 		completion = client.chat.completions.create(
@@ -68,7 +70,33 @@ def run_chat_json( model, messages, validator ):
 			messages=messages
 		)
 		message = completion.choices[ 0 ].message.content
-		ai_response = json.loads( message )
+		
+		try:
+			ai_response = json.loads( message )
+		except json.JSONDecodeError as e:
+			print( "****** JSON ERROR ********" )
+			print( "Model:", model )
+			print( "Messages:", messages )
+			print( "Raw AI response:", message )
+			if retry_json:
+				corrected_response = run_chat_json(
+					model="gpt-4o",
+					messages=[
+						{
+							"role": "system",
+							"content": json_validator_system_prompt()
+						},
+						{
+							"role": "user",
+							"content": json_validator_user_prompt( message )
+						}
+					],
+					validator=validator,
+					retry_json=False
+				)
+				return corrected_response
+			raise ValueError( "The AI response is not valid JSON: " + str( e ) )
+		
 		validator( ai_response )
 		ai_response[ "status" ] = "success"
 		

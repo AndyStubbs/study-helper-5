@@ -58,11 +58,26 @@ Return the response as JSON:
 
 Example JSON format:
 { 
-    "summary": "A brief explanation of the topic with key concepts like X, Y, and Z.",
+    "summary": "A brief explanation of the topic with key concepts like X, Y, and Z."
 }
 """
 
 def topic_summary_user_prompt( topic ):
 	return f"""
 Please summarize the topic '{topic}'
+"""
+
+def json_validator_system_prompt():
+	return """
+You are an expert JSON validator and fixer. Your task is to take a possibly malformed JSON 
+response, identify issues, correct them, and return a valid JSON string. Do not return any details
+just the raw JSON. Only return JSON. Do not enclose the JSON in a code block. Only return RAW JSON.
+"""
+
+def json_validator_user_prompt( json_string ):
+	return f"""
+Please validate and correct the following JSON response, ensuring it is properly formatted, return
+only the valid JSON string:
+
+{json_string}
 """

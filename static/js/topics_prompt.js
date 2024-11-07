@@ -4,10 +4,21 @@
 ( function () {
 	/* global main */
 
-	const m_promptMessage = document.querySelector( "#prompt-message" ).innerHTML;
+	const m_input = document.querySelector( "#input-topic" );
+	const m_promptMessage = document.querySelector( "#prompt-message" );
+	const m_submitButton = document.querySelector( "#submit-btn" );
+	const m_resetButton = document.querySelector( "#reset-btn" );
+	const m_continueButton = document.querySelector( "#continue-btn" );
+	const m_promptResponse = document.querySelector( "#prompt-response" );
+	const m_promptError = document.querySelector( "#prompt-error" );
+	const m_promptLoading = document.querySelector( "#prompt-loading" );
+	const m_textDescriptionContainer = document.querySelector( "#txt-description-container" );
+	const m_textDescription = document.querySelector( "#txt-description" );
+
+	// Save original prompt message
+	const m_promptMessageText = m_promptMessage.innerHTML;
 
 	// Setup input
-	const m_input = document.querySelector( "#input-topic" );
 	m_input.addEventListener( "keydown", function ( event ) {
 		if( event.key === "Enter" ) {
 			event.preventDefault();
@@ -17,14 +28,12 @@
 	m_input.focus();
 
 	// Setup reset button
-	const m_resetButton = document.querySelector( "#reset-btn" );
 	m_resetButton.addEventListener( "click", resetPrompt );
 
 	// Setup continue button
 	let m_topicName = "";
 	let m_topicDescription = "";
-	const continueButton = document.querySelector( "#continue-btn" );
-	continueButton.addEventListener( "click", selectTopic );
+	m_continueButton.addEventListener( "click", selectTopic );
 
 	function submitTopic() {
 		const topic = m_input.value.trim();
@@ -51,10 +60,10 @@
 				m_topicDescription = data.summary;
 
 				// Hide error message
-				document.querySelector( "#prompt-error" ).style.display = "none";
+				m_promptError.style.display = "none";
 
 				// Hide the loading bar
-				document.querySelector( "#prompt-loading" ).style.display = "none";
+				m_promptLoading.style.display = "none";
 
 				// Update the topic name
 				const topicName = document.querySelector( "#topic-name" );
@@ -88,21 +97,24 @@
 				}
 
 				// Unhide prompt response
-				document.querySelector( "#prompt-response" ).style.display = "";
+				m_promptResponse.style.display = "";
+
+				// Enable continue button
+				m_continueButton.disabled = false;
 
 				// Hide input
 				m_input.style.display = "none";
 
 				// Show reset button
 				m_resetButton.style.display = "";
+				m_resetButton.disabled = false;
 			} )
 			.catch( error => {
 				console.error( "Error processing topic:", error );
 
 				// Show Error Message
-				const promptError = document.querySelector( "#prompt-error" );
-				promptError.innerHTML = "Something went wrong.";
-				promptError.style.display = "";
+				m_promptError.innerHTML = "Something went wrong.";
+				m_promptError.style.display = "";
 
 				resetPrompt();
 			} );
@@ -112,15 +124,17 @@
 	function resetPrompt() {
 
 		// Hide prompt response
-		document.querySelector( "#prompt-response" ).style.display = "none";
+		m_promptResponse.style.display = "none";
+
+		// Disable continue button
+		m_continueButton.disabled = true;
 
 		// Hide loading bars
-		document.querySelector( "#prompt-loading" ).style.display = "none";
+		m_promptLoading.style.display = "none";
 
 		// Show Prompt message
-		const promptMessage = document.querySelector( "#prompt-message" );
-		promptMessage.innerHTML = m_promptMessage;
-		promptMessage.style.display = "";
+		m_promptMessage.innerHTML = m_promptMessageText;
+		m_promptMessage.style.display = "";
 
 		// Reset the input prompt
 		m_input.style.display = "";
@@ -129,23 +143,27 @@
 
 		// Hide reset button
 		m_resetButton.style.display = "none";
+		m_resetButton.disabled = true;
 
 		// Hide submit button
-		document.querySelector( "#submit-btn" ).style.display = "none";
+		m_submitButton.style.display = "none";
+		m_submitButton.disabled = true;
 
 		// Hide Description
-		document.querySelector( "#txt-description-container" ).style.display = "none";
+		m_textDescriptionContainer.style.display = "none";
 	}
 
 	function selectTopic() {
 		
 		// Hide the prompt message
-		const promptMessage = document.querySelector( "#prompt-message" );
-		promptMessage.style.display = "none";
-		promptMessage.innerHTML = m_topicName;
+		m_promptMessage.style.display = "none";
+		m_promptMessage.innerHTML = m_topicName;
 
 		// Hide prompt response
-		document.querySelector( "#prompt-response" ).style.display = "none";
+		m_promptResponse.style.display = "none";
+
+		// Diable continue button
+		m_continueButton.disabled = true;
 
 		// Load the topic description textarea
 		if( m_topicDescription === "" ) {
@@ -178,9 +196,8 @@
 				console.error( "Error processing description:", error );
 
 				// Show Error Message
-				const promptError = document.querySelector( "#prompt-error" );
-				promptError.innerHTML = "Something went wrong.";
-				promptError.style.display = "";
+				m_promptError.innerHTML = "Something went wrong.";
+				m_promptError.style.display = "";
 
 				resetPrompt();
 			} );
@@ -192,29 +209,34 @@
 	function showDescription() {
 
 		// Hide loading bar
-		document.querySelector( "#prompt-loading" ).style.display = "none";
+		m_promptLoading.style.display = "none";
 
 		// Show the prompt message
-		document.querySelector( "#prompt-message" ).style.display = "";
+		m_promptMessage.style.display = "";
 
 		// Update the text area
-		document.querySelector( "#txt-description" ).innerHTML = m_topicDescription;
-		document.querySelector( "#txt-description-container" ).style.display = "";
+		m_textDescription.innerHTML = m_topicDescription;
+		m_textDescriptionContainer.style.display = "";
 
 		// Show reset button
 		m_resetButton.style.display = "";
+		m_resetButton.disabled = false;
 
 		// Show submit button
-		document.querySelector( "#submit-btn" ).style.display = "";
+		m_submitButton.style.display = "";
+		m_submitButton.disabled = false;
 	}
 
 	function showLoadingBars() {
-		document.querySelector( "#prompt-message" ).style.display = "none";
-		document.querySelector( "#prompt-response" ).style.display = "none";
-		document.querySelector( "#prompt-error" ).style.display = "none";
-		document.querySelector( "#submit-btn" ).style.display = "none";
-		document.querySelector( "#reset-btn" ).style.display = "none";
-		document.querySelector( "#prompt-loading" ).style.display = "";
+		m_promptMessage.style.display = "none";
+		m_promptResponse.style.display = "none";
+		m_continueButton.disabled = true;
+		m_promptError.style.display = "none";
+		m_submitButton.style.display = "none";
+		m_submitButton.disabled = true;
+		m_resetButton.style.display = "none";
+		m_resetButton.disabled = true;
+		m_promptLoading.style.display = "";
 	}
 
 } )();
