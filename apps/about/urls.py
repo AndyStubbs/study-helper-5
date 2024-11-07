@@ -1,4 +1,4 @@
-# about/urls.py
+# apps/about/urls.py
 
 from django.urls import path
 from . import views

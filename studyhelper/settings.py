@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 	"apps.users",
 	"apps.topics",
 	"apps.about",
+	"apps.quiz",
 ]
 
 MIDDLEWARE = [
