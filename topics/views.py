@@ -8,12 +8,12 @@ from services.ai_services import evaluate_topic, summarize_topic
 
 # Create your views here.
 
-@restrict_to_view( "topics:prompt" )
-def prompt( request ):
+@restrict_to_view( "topics:generate" )
+def generate( request ):
 	context = {
 		"prompt_message": "What topic would you like to study?"
 	}
-	return render( request, "topics/prompt.html", context )
+	return render( request, "topics/generate.html", context )
 
 @csrf_exempt
 def process( request ):
