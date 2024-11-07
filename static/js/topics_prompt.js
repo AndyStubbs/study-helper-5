@@ -36,7 +36,7 @@
 		try {
 			loadingOverlay.style.visibility = "visible";
 			const data = await main.handleRequest( "/topics/summarize/", { topic } );
-			descriptionArea.value = data.description;
+			descriptionArea.value = data.summary;
 		} catch ( error ) {
 			console.error( "Error:", error );
 		} finally {
@@ -54,22 +54,17 @@
 			li.textContent = suggestion;
 			li.addEventListener( "click", () => {
 				topicInput.value = suggestion;
-				processTopic( suggestion );
+				suggestionsList.querySelectorAll( ".selected" ). forEach( selected_li => {
+					selected_li.classList.remove( "selected" );
+				} );
+				li.classList.add( "selected" );
+				summarizeTopic( suggestion );
 			} );
 			suggestionsList.appendChild( li );
 		} );
 
 		descriptionArea.removeAttribute( "readonly" );
 		submitBtn.textContent = "Update";
-		document.getElementById( "final-submit-btn" ).style.display = "block";
 	}
-
-	topicInput.addEventListener( "keypress", ( event ) => {
-		if( event.key === "Enter" ) {
-			if( resultArea.style.display === "block" ) {
-				summarizeTopic( topicInput.value );
-			}
-		}
-	} );
 
 } )();
