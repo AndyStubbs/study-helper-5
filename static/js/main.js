@@ -61,4 +61,20 @@ document.addEventListener( "DOMContentLoaded", function () {
 			.catch( error => console.error( `Error loading ${viewName}:`, error ) );
 	} );
 
+	// Handle tabs
+	const tabs = document.querySelectorAll( ".tab" );
+	const tabContents = document.querySelectorAll( ".tab-content" );
+
+	tabs.forEach( tab => {
+		tab.addEventListener( "click", () => {
+			const tabId = tab.getAttribute( "data-tab" );
+			
+			tabs.forEach( t => t.classList.remove( "active" ) );
+			tabContents.forEach( content => content.style.display = "none" );
+			
+			tab.classList.add( "active" );
+			document.getElementById( `${tabId}-content` ).style.display = "block";
+		} );
+	} );
+
 } );

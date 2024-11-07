@@ -5,16 +5,34 @@ body {
 	padding: 20px;
 	background-color: #f4f4f4;
 }
-.container {
+.outer-container {
 	max-width: 800px;
 	margin: 0 auto;
 	background-color: #fff;
-	padding: 20px;
 	border-radius: 5px;
 	box-shadow: 0 0 10px rgba(0,0,0,0.1);
+	overflow: hidden;
+}
+.tab-container {
+	display: flex;
+	background-color: #f0f0f0;
+}
+.tab {
+	padding: 10px 20px;
+	cursor: pointer;
+	border: none;
+	background-color: transparent;
+	font-size: 16px;
+}
+.tab.active {
+	background-color: #fff;
+	border-top: 2px solid #4CAF50;
+}
+.content-container {
+	padding: 20px;
 	position: relative;
 }
-h1 {
+h2 {
 	text-align: center;
 	color: #333;
 }
