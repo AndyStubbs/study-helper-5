@@ -4,6 +4,8 @@
 ( function () {
 	/* global main */
 
+	const m_promptMessage = document.querySelector( "#prompt-message" ).innerHTML;
+
 	// Setup input
 	const m_input = document.querySelector( "#input-topic" );
 	m_input.addEventListener( "keydown", function ( event ) {
@@ -15,8 +17,8 @@
 	m_input.focus();
 
 	// Setup reset button
-	const resetButton = document.querySelector( "#reset-btn" );
-	resetButton.addEventListener( "click", resetPrompt );
+	const m_resetButton = document.querySelector( "#reset-btn" );
+	m_resetButton.addEventListener( "click", resetPrompt );
 
 	// Setup continue button
 	let m_topicName = "";
@@ -28,13 +30,7 @@
 		const topic = m_input.value.trim();
 		if( topic ) {
 			m_input.disabled = true;
-			const promptMessage = document.querySelector( "#prompt-message" );
-			const promptLoading = document.querySelector( "#prompt-loading" );
-			const promptResponse = document.querySelector( "#prompt-response" );
-			const promptError = document.querySelector( "#prompt-error" );
-			promptMessage.style.display = "none";
-			promptLoading.style.display = "";
-			promptResponse.style.display = "none";
+			showLoadingBars();
 			fetch( "/topics/process/", {
 				"method": "POST",
 				"headers": {
@@ -55,10 +51,10 @@
 				m_topicDescription = data.summary;
 
 				// Hide error message
-				promptError.style.display = "none";
+				document.querySelector( "#prompt-error" ).style.display = "none";
 
 				// Hide the loading bar
-				promptLoading.style.display = "none";
+				document.querySelector( "#prompt-loading" ).style.display = "none";
 
 				// Update the topic name
 				const topicName = document.querySelector( "#topic-name" );
@@ -92,15 +88,19 @@
 				}
 
 				// Unhide prompt response
-				promptResponse.style.display = "";
+				document.querySelector( "#prompt-response" ).style.display = "";
 
 				// Hide input
 				m_input.style.display = "none";
+
+				// Show reset button
+				m_resetButton.style.display = "";
 			} )
 			.catch( error => {
 				console.error( "Error processing topic:", error );
 
 				// Show Error Message
+				const promptError = document.querySelector( "#prompt-error" );
 				promptError.innerHTML = "Something went wrong.";
 				promptError.style.display = "";
 
@@ -110,25 +110,31 @@
 	}
 
 	function resetPrompt() {
-		const input = document.querySelector( "#topic-prompt input[name='topic']" );
-		const promptMessage = document.querySelector( "#prompt-message" );
-		const promptLoading = document.querySelector( "#prompt-loading" );
-		const promptResponse = document.querySelector( "#prompt-response" );
 
 		// Hide prompt response
-		promptResponse.style.display = "none";
+		document.querySelector( "#prompt-response" ).style.display = "none";
 
 		// Hide loading bars
-		promptLoading.style.display = "none";
+		document.querySelector( "#prompt-loading" ).style.display = "none";
 
 		// Show Prompt message
+		const promptMessage = document.querySelector( "#prompt-message" );
+		promptMessage.innerHTML = m_promptMessage;
 		promptMessage.style.display = "";
 
-		
 		// Reset the input prompt
-		input.style.display = "";
-		input.disabled = false;
-		input.focus();
+		m_input.style.display = "";
+		m_input.disabled = false;
+		m_input.focus();
+
+		// Hide reset button
+		m_resetButton.style.display = "none";
+
+		// Hide submit button
+		document.querySelector( "#submit-btn" ).style.display = "none";
+
+		// Hide Description
+		document.querySelector( "#txt-description-container" ).style.display = "none";
 	}
 
 	function selectTopic() {
@@ -138,24 +144,14 @@
 		promptMessage.style.display = "none";
 		promptMessage.innerHTML = m_topicName;
 
-		// Get textarea description container
-		const txtDescContainer = document.querySelector( "#txt-description-container" );
-		
-		// Get textarea description
-		const txtDescription = document.querySelector( "#txt-description" );
-
 		// Hide prompt response
-		const promptResponse = document.querySelector( "#prompt-response" );
-		promptResponse.style.display = "none";
-
-		// Get the loading bar
-		const promptLoading = document.querySelector( "#prompt-loading" );
+		document.querySelector( "#prompt-response" ).style.display = "none";
 
 		// Load the topic description textarea
 		if( m_topicDescription === "" ) {
 
 			// Show the prompt loading bars
-			promptLoading.style.display = "";
+			showLoadingBars();
 
 			// Fetch the topic description
 			fetch( "/topics/summarize/", {
@@ -174,18 +170,9 @@
 			} )
 			.then( data => {
 				
-				// Hide loading bar
-				promptLoading.style.display = "none";
-
 				// Update the description
 				m_topicDescription = data.summary;
-
-				// Show the prompt message
-				promptMessage.style.display = "";
-
-				// Update the text area
-				txtDescription.innerHTML = m_topicDescription;
-				txtDescContainer.style.display = "";
+				showDescription();
 
 			} ).catch( error => {
 				console.error( "Error processing description:", error );
@@ -198,11 +185,36 @@
 				resetPrompt();
 			} );
 		} else {
-			promptLoading.style.display = "none";
-			promptMessage.style.display = "";
-			txtDescription.innerHTML = m_topicDescription;
-			txtDescContainer.style.display = "";
+			showDescription();
 		}
+	}
+
+	function showDescription() {
+
+		// Hide loading bar
+		document.querySelector( "#prompt-loading" ).style.display = "none";
+
+		// Show the prompt message
+		document.querySelector( "#prompt-message" ).style.display = "";
+
+		// Update the text area
+		document.querySelector( "#txt-description" ).innerHTML = m_topicDescription;
+		document.querySelector( "#txt-description-container" ).style.display = "";
+
+		// Show reset button
+		m_resetButton.style.display = "";
+
+		// Show submit button
+		document.querySelector( "#submit-btn" ).style.display = "";
+	}
+
+	function showLoadingBars() {
+		document.querySelector( "#prompt-message" ).style.display = "none";
+		document.querySelector( "#prompt-response" ).style.display = "none";
+		document.querySelector( "#prompt-error" ).style.display = "none";
+		document.querySelector( "#submit-btn" ).style.display = "none";
+		document.querySelector( "#reset-btn" ).style.display = "none";
+		document.querySelector( "#prompt-loading" ).style.display = "";
 	}
 
 } )();

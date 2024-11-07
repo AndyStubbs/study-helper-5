@@ -18,9 +18,6 @@
 		</div>
 		<div>Suggestions:</div>
 		<ul id="topic-suggestions"></ul>
-		<div class="reset-btn-container">
-			<button id="reset-btn">Reset</button>
-		</div>
 	</div>
 	{% csrf_token %}
 	<div id="prompt-error" style="display: none"></div>
@@ -28,9 +25,10 @@
 	<div id="txt-description-container" style="display: none">
 		<label for="txt-description">Topic Description:</label>
 		<textarea id="txt-description" maxlength="1000"></textarea>
-		<div class="submit-btn-container">
-			<button id="submit-btn">Submit</button>
-		</div>
+	</div>
+	<div class="control-btn-containers">
+		<button id="submit-btn" style="display: none">Submit</button>
+		<button id="reset-btn" style="display: none">Reset</button>
 	</div>
 </div>
 

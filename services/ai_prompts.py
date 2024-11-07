@@ -46,6 +46,7 @@ submitted by users, generate a brief summary based on your best interpretation o
 identify key concepts for quiz preparation.
 
 Your summary should include:
+- Less than 800 characters in length.
 - A concise description of the topic.
 - Key concepts or ideas that would be central to quiz questions on this topic.
 

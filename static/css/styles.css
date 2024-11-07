@@ -140,31 +140,34 @@ button {
 }
 
 .continue-btn-container button,
-.submit-btn-container button {
+#submit-btn {
 	width: 100px;
 	background-color: #252;
 	margin-bottom: 16px;
 }
 
 .continue-btn-container button:hover,
-.submit-btn-container button:hover {
+#submit-btn:hover {
 	background-color: #262;
 }
 
-.reset-btn-container {
+.control-btn-containers {
 	text-align: left;
 }
 
-.reset-btn-container button {
+.control-btn-containers button {
+	margin-right: 8px;
+}
+
+#reset-btn {
 	width: 100px;
 	background-color: #522;
 	margin-bottom: 16px;
 }
 
-.reset-btn-container button:hover {
+#reset-btn:hover {
 	background-color: #622;
 }
-
 
 #topic-suggestions {
 	list-style-type: none;
@@ -245,4 +248,3 @@ button {
 	margin-bottom: 12px;
 	resize: none;
 }
-
