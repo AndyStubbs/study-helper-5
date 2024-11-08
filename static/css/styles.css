@@ -50,7 +50,7 @@ h2 {
 #submit-btn {
 	padding: 10px 20px;
 	font-size: 16px;
-	background-color: #4CAF50;
+	background-color: #383;
 	color: white;
 	border: none;
 	border-radius: 4px;
@@ -58,7 +58,7 @@ h2 {
 	margin-left: 10px;
 }
 #submit-btn:hover {
-	background-color: #45a049;
+	background-color: #363;
 }
 #result-area {
 	display: none;
@@ -122,7 +122,7 @@ h2 {
 	width: 100px;
 	padding: 10px;
 	font-size: 16px;
-	background-color: #4CAF50;
+	background-color: #383;
 	color: white;
 	border: none;
 	border-radius: 4px;
@@ -150,4 +150,41 @@ h2 {
 }
 .loading-overlay img {
 	width: 60px;
+}
+
+#topics-content ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+#topics-content li {
+	border: 1px solid #999;
+	padding: 15px;
+	margin-bottom: 15px;
+	background-color: #eee;
+	border-radius: 8px;
+}
+
+#topics-content button {
+	width: 70px;
+	height: 30px;
+	margin-right: 10px;
+	padding: 5px 10px;
+	background-color: #383;
+	color: #e0e0e0;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+#topics-content button:hover {
+	background-color: #363;
+}
+
+#topics-content input[type="text"] {
+	margin-bottom: 15px;
+	padding: 8px;
+	width: calc(100% - 20px);
+	border: 1px solid #333;
+	border-radius: 5px;
 }

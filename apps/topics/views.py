@@ -2,6 +2,7 @@
 import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from utils.decorators import restrict_to_view
 from services.ai_services import evaluate_topic, summarize_topic
@@ -10,13 +11,24 @@ from apps.topics.models import Topic
 # Create your views here.
 
 @restrict_to_view( "topics:generate" )
+@login_required
 def generate( request ):
 	context = {
 		"prompt_message": "What topic would you like to study?"
 	}
 	return render( request, "topics/generate.html", context )
 
+@restrict_to_view( "topics:topics" )
+@login_required
+def topics( request ):
+	topics = Topic.objects.filter( user=request.user )
+	context = {
+		"topics": topics
+	}
+	return render( request, "topics/topics.html", context )
+
 @csrf_exempt
+@login_required
 def process( request ):
 	if request.method == "POST":
 		data = json.loads( request.body )
@@ -31,6 +43,7 @@ def process( request ):
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @csrf_exempt
+@login_required
 def summarize( request ):
 	if request.method == "POST":
 		data = json.loads( request.body )
@@ -45,6 +58,7 @@ def summarize( request ):
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @csrf_exempt
+@login_required
 def save( request ):
 	if request.method == "POST":
 		try:
@@ -87,3 +101,4 @@ def save( request ):
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
+

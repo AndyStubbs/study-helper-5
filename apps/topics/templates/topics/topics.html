@@ -1,0 +1,18 @@
+<!-- topics/templates/topics/topics.html -->
+{% load static %}
+
+{% block content %}
+<h2>Your Topics</h2>
+<input type="text" id="search-box" placeholder="Search topics...">
+<ul id="topics-list">
+	{% for topic in topics %}
+	<li class="topic-item">
+		<h3>{{ topic.name }}</h3>
+		<p>{{ topic.description|truncatewords:30 }}</p>
+		<button onclick="location.href='/topics/edit/{{ topic.id }}/'">Edit</button>
+		<button onclick="location.href='/topics/quiz/{{ topic.id }}/'">Quiz</button>
+	</li>
+	{% endfor %}
+</ul>
+{% endblock %}
+<script src="{% static 'js/topics_filter.js' %}"></script>
