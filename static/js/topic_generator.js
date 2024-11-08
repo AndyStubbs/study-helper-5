@@ -9,10 +9,16 @@
 	const resultArea = document.getElementById( "result-area" );
 	const descriptionArea = document.getElementById( "description" );
 	const suggestionsList = document.getElementById( "suggestions" );
+	const saveTopicBtn = document.getElementById( "save-topic-btn" );
 
 	form.addEventListener( "submit", async ( e ) => {
 		e.preventDefault();
 		await processTopic( topicInput.value );
+	} );
+
+	saveTopicBtn.addEventListener( "click", async ( e ) => {
+		e.preventDefault();
+		await saveTopic( topicInput.value, descriptionArea.value );
 	} );
 
 	async function processTopic( topic ) {
@@ -62,6 +68,18 @@
 
 		descriptionArea.removeAttribute( "readonly" );
 		submitBtn.textContent = "Update";
+	}
+
+	async function saveTopic( topic, description ) {
+		const loadingOverlay = document.getElementById( "loading-overlay" );
+		try {
+			const data = await main.handleRequest( "/topics/save/", { topic, description } );
+			alert( data );
+		} catch ( error ) {
+			console.error( "Error:", error );
+		} finally {
+			loadingOverlay.style.visibility = "hidden";
+		}
 	}
 
 } )();
