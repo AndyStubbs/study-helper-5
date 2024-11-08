@@ -1,6 +1,8 @@
 // static/js/topics_filter.js
 
-( function () {
+/* global window.main */
+
+window.main.onReady( () => {
 	const searchBox = document.getElementById( "search-box" );
 	const topicsList = document.getElementById( "topics-list" );
 
@@ -31,4 +33,4 @@
 			}
 		}
 	} );
-} )();
+} );

@@ -1,14 +1,11 @@
 // static/js/main.js
 
-const JS_VER = new Date().getTime();
+const g_readyItems = [];
 
 // App wide helper functions
 window.main = {
-	"loadScript": ( src ) => {
-		const script = document.createElement( "script" );
-		script.src = `${src}?v=${JS_VER}`;
-		script.defer = true;
-		document.head.appendChild( script );
+	"onReady": ( callback ) => {
+		g_readyItems.push( callback );
 	},
 	"getCSRFToken": () => {
 		const cookieName = "csrftoken";
@@ -42,6 +39,8 @@ document.addEventListener( "DOMContentLoaded", function () {
 	// Select all placeholders with a data-view attribute
 	const placeholders = document.querySelectorAll( "[data-view]" );
 
+	let totalItems = 0;
+	let loadedCount = 0;
 	placeholders.forEach( placeholder => {
 		const viewName = placeholder.getAttribute( "data-view" );
 		const parts = viewName.split( ":" );
@@ -53,16 +52,24 @@ document.addEventListener( "DOMContentLoaded", function () {
 			url = `/${parts[ 0 ]}`;
 		}
 
+		// Increase the count of total items
+		totalItems += 1;
+
 		// Fetch the HTML content from the specified view
 		fetch( url, { "headers": { "X-Requested-View": viewName } } )
 			.then( response => response.text() )
 			.then( html => {
 				placeholder.innerHTML = html;
-				placeholder.querySelectorAll( "script" ).forEach( script => {
-					main.loadScript( script.src );
-				} );
 			} )
-			.catch( error => console.error( `Error loading ${viewName}:`, error ) );
+			.catch( error => {
+				console.error( `Error loading ${viewName}:`, error );
+			} )
+			.finally( () => {
+				loadedCount += 1;
+				if( loadedCount >= totalItems ) {
+					g_readyItems.forEach( callback => callback() );
+				}
+			} );
 	} );
 
 	// Handle tabs

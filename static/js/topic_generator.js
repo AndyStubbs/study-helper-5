@@ -1,7 +1,8 @@
 // static/js/topic_generator.js
 
-( function () {
-	/* global main */
+/* global window.main */
+
+window.main.onReady( () => {
 
 	const form = document.getElementById( "topic-form" );
 	const topicInput = document.getElementById( "topic-input" );
@@ -106,4 +107,4 @@
 		}
 	}
 
-} )();
+} );
