@@ -155,6 +155,8 @@ h2 {
 #topics-content ul {
 	list-style-type: none;
 	padding: 0;
+	max-height: calc(100vh - 400px);
+	overflow-y: auto;
 }
 
 #topics-content li {
@@ -165,13 +167,22 @@ h2 {
 	border-radius: 8px;
 }
 
+#topics-content li p.short {
+	cursor: pointer;
+}
+
+#topics-content li p.short:hover {
+	background-color: #eee;
+	box-shadow: 0px 0px 10px #888;
+}
+
 #topics-content button {
 	width: 70px;
 	height: 30px;
 	margin-right: 10px;
 	padding: 5px 10px;
 	background-color: #383;
-	color: #e0e0e0;
+	color: white;
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;

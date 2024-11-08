@@ -25,6 +25,12 @@ def topics( request ):
 	context = {
 		"topics": topics
 	}
+	for topic in topics:
+		topic.truncated = " ".join( topic.description.split()[ :30 ] ).strip()
+		topic.is_truncated = False
+		if len( topic.truncated ) < len( topic.description ):
+			topic.truncated += "..."
+			topic.is_truncated = True
 	return render( request, "topics/topics.html", context )
 
 @csrf_exempt

@@ -6,9 +6,17 @@
 <input type="text" id="search-box" placeholder="Search topics...">
 <ul id="topics-list">
 	{% for topic in topics %}
-	<li class="topic-item">
+	<li class="topic-item" data-topic-id="{{ topic.id }}">
 		<h3>{{ topic.name }}</h3>
-		<p>{{ topic.description|truncatewords:30 }}</p>
+		<div>
+			{% if topic.is_truncated %}
+				<p class="short">{{ topic.truncated }} ▼</p>
+				<p class="full" style="display: none;">{{ topic.description }}</p>
+			{% else %}
+				<p class="short" style="display: none;">{{ topic.truncated }} ▼</p>
+				<p class="full">{{ topic.description }}</p>
+			{% endif %}
+		</div>
 		<button onclick="location.href='/topics/edit/{{ topic.id }}/'">Edit</button>
 		<button onclick="location.href='/topics/quiz/{{ topic.id }}/'">Quiz</button>
 	</li>

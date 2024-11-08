@@ -2,12 +2,13 @@
 
 ( function () {
 	const searchBox = document.getElementById( "search-box" );
-	const topicsList = document.querySelectorAll( ".topic-item" );
+	const topicsList = document.getElementById( "topics-list" );
 
+	// Handle searches
 	searchBox.addEventListener( "input", () => {
 		const filter = searchBox.value.toLowerCase();
-
-		topicsList.forEach( topic => {
+		const topicsListItems = topicsList.querySelectorAll( "li" );
+		topicsListItems.forEach( topic => {
 			const topicName = topic.querySelector( "h3" ).textContent.toLowerCase();
 			const topicDescription = topic.querySelector( "p" ).textContent.toLowerCase();
 
@@ -17,5 +18,17 @@
 				topic.style.display = "none";
 			}
 		} );
+	} );
+
+	// Handle expand short content
+	topicsList.addEventListener( "click", ( e ) => {
+		if( e.target && e.target.classList.contains( "short" ) ) {
+			const shortParagraph = e.target;
+			const fullParagraph = shortParagraph.parentElement.querySelector( ".full" );
+			if( fullParagraph ) {
+				fullParagraph.style.display = "";
+				shortParagraph.style.display = "none";
+			}
+		}
 	} );
 } )();

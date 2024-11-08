@@ -74,7 +74,31 @@
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		try {
 			const data = await main.handleRequest( "/topics/save/", { topic, description } );
-			alert( data );
+			let topicLi = document.querySelector( `[data-topic-id='${data.topic_id}']` );
+			let truncated = description.split( " " ).slice( 0, 30 ).join( " " ) + "... ▼";
+			let shortStyle = "style='display: none;'";
+			let fullStyle = "";
+			if( truncated.length < description.length ) {
+				shortStyle = "";
+				fullStyle = "style='display: none;'";
+			}
+			if( topicLi ) {
+				topicLi.querySelector( ".short" ).innerHTML = truncated;
+				topicLi.querySelector( ".full" ).innerHTML = description;
+			} else {
+				topicLi = document.createElement( "li" );
+				topicLi.dataset.topicId = data.topic_id;
+				topicLi.innerHTML = `
+					<h3>${ topic }</h3>
+					<div>
+						<p class="short" ${ shortStyle }>${ truncated }</p>
+						<p class="full" ${ fullStyle }>${ description }</p>
+					</div>
+					<button onclick="location.href='/topics/edit/${ data.topic_id }/'">Edit</button>
+					<button onclick="location.href='/topics/quiz/${ data.topic_id }/'">Quiz</button>
+				`;
+				document.querySelector( "#topics-list" ).appendChild( topicLi );
+			}
 		} catch ( error ) {
 			console.error( "Error:", error );
 		} finally {
