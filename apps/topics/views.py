@@ -30,7 +30,7 @@ def topics( request ):
 		"topics": topics
 	}
 	for topic in topics:
-		topic.truncated = " ".join( topic.description.split()[ :30 ] ).strip()
+		topic.truncated = " ".join( topic.description.split()[ :60 ] ).strip()
 		topic.is_truncated = False
 		if len( topic.truncated ) < len( topic.description ):
 			topic.truncated += "..."
