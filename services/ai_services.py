@@ -7,6 +7,8 @@ from .ai_prompts import (
 	topic_evaluator_user_prompt,
 	topic_summary_system_prompt,
 	topic_summary_user_prompt,
+	question_generator_user_prompt,
+	question_generator_system_prompt,
 	json_validator_system_prompt,
 	json_validator_user_prompt
 )
@@ -39,7 +41,6 @@ def validate_topic_response( ai_response ):
 	):
 		raise ValueError( "The 'suggestions' field must be a list of strings." )
 
-
 def summarize_topic( topic ):
 	"""Summarize topic"""
 	return run_chat_json(
@@ -56,6 +57,39 @@ def summarize_topic( topic ):
 		],
 		validator=lambda ai_response: validate_summary_response( ai_response )
 	)
+
+def create_question( topic_name, topic_description ):
+	return run_chat_json(
+		model="gpt-4o-mini",
+		messages=[
+			{
+				"role": "system",
+				"content": question_generator_system_prompt()
+			},
+			{
+				"role": "user",
+				"content": question_generator_user_prompt( topic_name, topic_description )
+			}
+		],
+		validator=lambda ai_response: validate_question_generator_response( ai_response )
+	)
+
+def validate_question_generator_response( ai_response ):
+	"""Validates the structure of the AI response."""
+	if not isinstance( ai_response.get( "text" ), str ):
+		raise ValueError( "The 'text' field must be a string." )
+	if (
+		not isinstance( ai_response.get( "concepts" ), list ) or
+		not all( isinstance( item, str ) for item in ai_response[ "concepts" ] )
+	):
+		raise ValueError( "The 'concepts' field must be a list of strings." )
+	if (
+		not isinstance( ai_response.get( "answers" ), list ) or
+		not all( isinstance( item, str ) for item in ai_response[ "answers" ] )
+	):
+		raise ValueError( "The 'answers' field must be a list of strings." )
+	if not isinstance( ai_response.get( "correct" ), str ):
+		raise ValueError( "The 'correct' field must be a string." )
 
 def validate_summary_response( ai_response ):
 	"""Validates the structure of the AI response."""

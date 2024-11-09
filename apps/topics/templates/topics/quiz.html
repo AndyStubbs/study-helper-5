@@ -1,0 +1,23 @@
+<!-- topics/templates/topics/quiz.html -->
+
+{% load static %}
+
+<div class="modal">
+	<div class="modal-content">
+		<span class="close">&times;</span>
+		<h2 id="quiz-question">Loading question...</h2>
+		<div id="quiz-answers">
+			<button class="quiz-answer-button">Answer 1</button>
+			<button class="quiz-answer-button">Answer 2</button>
+			<button class="quiz-answer-button">Answer 3</button>
+			<button class="quiz-answer-button">Answer 4</button>
+		</div>
+		<button id="skip-button">Skip</button>
+	</div>
+	<div class="loading-overlay">
+		<img
+			src="{% static 'svg/bars-scale-middle.svg' %}"
+			alt="Loading..."
+		>
+	</div>
+</div>

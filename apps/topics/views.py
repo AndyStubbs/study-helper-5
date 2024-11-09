@@ -5,7 +5,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from utils.decorators import restrict_to_view
-from services.ai_services import evaluate_topic, summarize_topic
+from services.ai_services import (
+	evaluate_topic,
+	summarize_topic,
+	create_question
+)
 from apps.topics.models import Topic
 
 # Create your views here.
@@ -32,6 +36,34 @@ def topics( request ):
 			topic.truncated += "..."
 			topic.is_truncated = True
 	return render( request, "topics/topics.html", context )
+
+@restrict_to_view( "topics:quiz" )
+@login_required
+def quiz( request ):
+	return render( request, "topics/quiz.html" )
+
+@csrf_exempt
+@login_required
+def question( request ):
+	if request.method == "POST":
+		data = json.loads( request.body )
+		topic_id = data.get( "topic_id", "" )
+		if topic_id == "" or not topic_id.isdigit():
+			return JsonResponse( { "error": "Invalid request" }, status=400 )
+		topic_id = int( topic_id )
+		topic = Topic.objects.filter( id=topic_id ).first()
+		question_data = create_question( topic.name, topic.description )
+		if question_data[ "status" ] == "error":
+			return JsonResponse( { "error": "Internal Server Error" }, status=500 )
+		return JsonResponse( question_data )
+"""
+{
+	"text": "What is 1 + 2?",
+	"concepts": [ "addition" ],
+	"answers": [ "1", "2", "3", "4" ],
+	"correct": "3"
+}
+"""
 
 @csrf_exempt
 @login_required

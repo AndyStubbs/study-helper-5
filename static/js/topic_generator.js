@@ -95,8 +95,8 @@ window.main.onReady( () => {
 						<p class="short" ${ shortStyle }>${ truncated }</p>
 						<p class="full" ${ fullStyle }>${ description }</p>
 					</div>
-					<button onclick="location.href='/topics/edit/${ data.topic_id }/'">Edit</button>
-					<button onclick="location.href='/topics/quiz/${ data.topic_id }/'">Quiz</button>
+					<button onclick="window.main.editTopic('${ data.topic_id }')">Edit</button>
+					<button onclick="window.main.quizTopic('${ data.topic_id }')">Quiz</button>
 				`;
 				document.querySelector( "#topics-list" ).appendChild( topicLi );
 			}

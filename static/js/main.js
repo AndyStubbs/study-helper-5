@@ -7,6 +7,8 @@ window.main = {
 	"onReady": ( callback ) => {
 		g_readyItems.push( callback );
 	},
+	"editTopic": () => { alert( "Not Implemented" ); },
+	"quizTopic": () => { alert( "Not Implemented" ); },
 	"getCSRFToken": () => {
 		const cookieName = "csrftoken";
 		const cookies = document.cookie.split( "; " );
@@ -31,6 +33,11 @@ window.main = {
 		}
 
 		return await response.json();;
+	},
+	"alert": ( msg ) => {
+		const alertModal = document.getElementById( "modal-alert" );
+		alertModal.style.display = "block";
+		alertModal.querySelector( ".alert_message" ).innerHTML = msg;
 	}
 };
 
@@ -88,4 +95,10 @@ document.addEventListener( "DOMContentLoaded", function () {
 		} );
 	} );
 
+	// Update modal-alert
+	const alertModal = document.getElementById( "modal-alert" );
+	alertModal.querySelector( ".ok-button" ).addEventListener( "click", () => {
+		alertModal.style.display = "none";
+	} );
+	
 } );

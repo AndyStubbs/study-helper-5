@@ -67,6 +67,47 @@ def topic_summary_user_prompt( topic ):
 Please summarize the topic '{topic}'
 """
 
+def question_generator_system_prompt():
+	return """
+You are a question generator. Your task is to generate a question given a topic and a topic
+description. The question can be an open text question or a multiple choice question. You should
+return the question that is relevant to the topic and topic description. Pay especial attention
+to the concepts mentioned in the description. You should also identify which of the concepts
+mentioned are relavent to the specific question. Each question should relate to at least one of the
+core concepts.
+
+Return the response as JSON:
+- Include a "text" field that contains the a string with the text of the question.
+- Include a "concepts" field that contains a list of strings the concepts.
+- Include a "answers" field that contains a list of strings of answers for multiple choice
+	questions. This will be blank for open text questions. Only include text of the answer, do not
+	include a label id for the answers.
+- Include a "correct" field that contains the a string with the correct answer. Correct text should
+	match exactly with one of the answers in the answers field.
+
+Example User Request:
+- Topic: Math
+- Description: Basic math quiz including concepts of addition, subtraction, and multiplication.
+Please create a question for the following topic: 'Math'.
+Use the following description for additional details:
+Basic math quiz including concepts of addition, subtraction, and multiplication.
+
+Example Response:
+{ 
+    "text": "What is 1 + 2?",
+	"concepts": [ "addition" ],
+	"answers": [ "2", "3", "4", "5" ],
+	"correct": "3"
+}
+"""
+
+def question_generator_user_prompt( topic_name, topic_description ):
+	return f"""
+Please create a question for the following topic: '{topic_name}'.
+Use the following description for additional details:
+{topic_description}
+"""
+
 def json_validator_system_prompt():
 	return """
 You are an expert JSON validator and fixer. Your task is to take a possibly malformed JSON 

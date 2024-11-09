@@ -17,8 +17,8 @@
 				<p class="full">{{ topic.description }}</p>
 			{% endif %}
 		</div>
-		<button onclick="location.href='/topics/edit/{{ topic.id }}/'">Edit</button>
-		<button onclick="location.href='/topics/quiz/{{ topic.id }}/'">Quiz</button>
+		<button onclick="window.main.editTopic('{{ topic.id }}')">Edit</button>
+		<button onclick="window.main.quizTopic('{{ topic.id }}')">Quiz</button>
 	</li>
 	{% endfor %}
 </ul>
