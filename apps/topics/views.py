@@ -7,16 +7,17 @@ from django.shortcuts import render
 from utils.decorators import restrict_to_view
 from services.ai_services import (
 	evaluate_topic,
-	summarize_topic,
-	create_question
+	summarize_topic
 )
 from apps.topics.models import Topic
+from apps.topics.services import get_next_question
 
 # Create your views here.
 
 @restrict_to_view( "topics:generate" )
 @login_required
 def generate( request ):
+	"""Render the HTML for the Topic Generator tab"""
 	context = {
 		"prompt_message": "What topic would you like to study?"
 	}
@@ -25,6 +26,7 @@ def generate( request ):
 @restrict_to_view( "topics:topics" )
 @login_required
 def topics( request ):
+	"""Render the HTML for the Topics tab"""
 	topics = Topic.objects.filter( user=request.user )
 	context = {
 		"topics": topics
@@ -51,19 +53,10 @@ def question( request ):
 		if topic_id == "" or not topic_id.isdigit():
 			return JsonResponse( { "error": "Invalid request" }, status=400 )
 		topic_id = int( topic_id )
-		topic = Topic.objects.filter( id=topic_id ).first()
-		question_data = create_question( topic.name, topic.description )
+		question_data = get_next_question( topic_id )
 		if question_data[ "status" ] == "error":
 			return JsonResponse( { "error": "Internal Server Error" }, status=500 )
 		return JsonResponse( question_data )
-"""
-{
-	"text": "What is 1 + 2?",
-	"concepts": [ "addition" ],
-	"answers": [ "1", "2", "3", "4" ],
-	"correct": "3"
-}
-"""
 
 @csrf_exempt
 @login_required

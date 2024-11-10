@@ -1,5 +1,5 @@
 # services/ai_services.py
-
+from pydantic import BaseModel
 import json
 from openai import OpenAI
 from .ai_prompts import (
@@ -12,6 +12,16 @@ from .ai_prompts import (
 	json_validator_system_prompt,
 	json_validator_user_prompt
 )
+
+
+class AI_Question( BaseModel ):
+	text: str
+	concepts: list[ str ]
+	answers: list[ str ]
+	correct: str
+
+class AI_GenQuestions( BaseModel ):
+	questions: list[ AI_Question ]
 
 
 def evaluate_topic( topic ):
@@ -33,7 +43,7 @@ def evaluate_topic( topic ):
 
 def validate_topic_response( ai_response ):
 	"""Validates the structure of the AI response."""
-	if not isinstance( ai_response.get("summary"), str ):
+	if not isinstance( ai_response.get( "summary" ), str ):
 		raise ValueError( "The 'summary' field must be a string." )
 	if (
 		not isinstance( ai_response.get( "suggestions" ), list ) or
@@ -58,7 +68,8 @@ def summarize_topic( topic ):
 		validator=lambda ai_response: validate_summary_response( ai_response )
 	)
 
-def create_question( topic_name, topic_description ):
+def create_questions( topic_name, topic_description ):
+	print( f"Creating question for topic: {topic_name} - {topic_description}" )
 	return run_chat_json(
 		model="gpt-4o-mini",
 		messages=[
@@ -71,40 +82,42 @@ def create_question( topic_name, topic_description ):
 				"content": question_generator_user_prompt( topic_name, topic_description )
 			}
 		],
-		validator=lambda ai_response: validate_question_generator_response( ai_response )
+		validator=lambda ai_response: validate_question_generator_response( ai_response ),
+		response_format=AI_GenQuestions
 	)
 
 def validate_question_generator_response( ai_response ):
 	"""Validates the structure of the AI response."""
-	if not isinstance( ai_response.get( "text" ), str ):
-		raise ValueError( "The 'text' field must be a string." )
-	if (
-		not isinstance( ai_response.get( "concepts" ), list ) or
-		not all( isinstance( item, str ) for item in ai_response[ "concepts" ] )
-	):
-		raise ValueError( "The 'concepts' field must be a list of strings." )
-	if (
-		not isinstance( ai_response.get( "answers" ), list ) or
-		not all( isinstance( item, str ) for item in ai_response[ "answers" ] )
-	):
-		raise ValueError( "The 'answers' field must be a list of strings." )
-	if not isinstance( ai_response.get( "correct" ), str ):
-		raise ValueError( "The 'correct' field must be a string." )
+	if not isinstance( ai_response, AI_GenQuestions ):
+		raise ValueError( "Invalid response for AI_GenQuestions" )
 
 def validate_summary_response( ai_response ):
 	"""Validates the structure of the AI response."""
 	if not isinstance( ai_response.get("summary"), str ):
 		raise ValueError( "The 'summary' field must be a string." )
 
-def run_chat_json( model, messages, validator, retry_json=True ):
+def run_chat_json( model, messages, validator, response_format=None, retry_json=True ):
 	try:
 		client = OpenAI()
-		completion = client.chat.completions.create(
-			model=model,
-			messages=messages
-		)
-		message = completion.choices[ 0 ].message.content
-		
+		if response_format is None:
+			completion = client.chat.completions.create(
+				model=model,
+				messages=messages,
+				#temperature=1.2
+			)
+			message = completion.choices[ 0 ].message.content
+		else:
+			completion = client.beta.chat.completions.parse(
+				model=model,
+				messages=messages,
+				response_format=response_format
+			)
+			message = completion.choices[ 0 ].message
+			print( "*****************************" )
+			if( message.refusal ):
+				raise ValueError( message.refusal )
+			else:
+				return message.parsed
 		try:
 			ai_response = json.loads( message )
 		except json.JSONDecodeError as e:

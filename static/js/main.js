@@ -31,8 +31,8 @@ window.main = {
 		if( !response.ok ) {
 			throw new Error( `HTTP error! status: ${response.status}` );
 		}
-
-		return await response.json();;
+		const responseObj = await response.json();
+		return responseObj.data;
 	},
 	"alert": ( msg ) => {
 		const alertModal = document.getElementById( "modal-alert" );

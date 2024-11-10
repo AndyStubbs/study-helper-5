@@ -58,7 +58,7 @@ Return the response as JSON:
 
 Example JSON format:
 { 
-    "summary": "A brief explanation of the topic with key concepts like X, Y, and Z."
+	"summary": "A brief explanation of the topic with key concepts like X, Y, and Z."
 }
 """
 
@@ -74,7 +74,7 @@ description. The question can be an open text question or a multiple choice ques
 return the question that is relevant to the topic and topic description. Pay especial attention
 to the concepts mentioned in the description. You should also identify which of the concepts
 mentioned are relavent to the specific question. Each question should relate to at least one of the
-core concepts.
+core concepts. Do not ask a question that has already been asked.
 
 Return the response as JSON:
 - Include a "text" field that contains the a string with the text of the question.
@@ -86,24 +86,24 @@ Return the response as JSON:
 	match exactly with one of the answers in the answers field.
 
 Example User Request:
-- Topic: Math
-- Description: Basic math quiz including concepts of addition, subtraction, and multiplication.
-Please create a question for the following topic: 'Math'.
+Please create 5 questions for the following topic: 'Math'.
 Use the following description for additional details:
 Basic math quiz including concepts of addition, subtraction, and multiplication.
 
 Example Response:
-{ 
-    "text": "What is 1 + 2?",
-	"concepts": [ "addition" ],
-	"answers": [ "2", "3", "4", "5" ],
-	"correct": "3"
-}
+[
+	{
+		"text": "What is 1 + 2?",
+		"concepts": [ "addition" ],
+		"answers": [ "2", "3", "4", "5" ],
+		"correct": "3"
+	}
+]
 """
 
 def question_generator_user_prompt( topic_name, topic_description ):
 	return f"""
-Please create a question for the following topic: '{topic_name}'.
+Please create 5 questions for the following topic: '{topic_name}'.
 Use the following description for additional details:
 {topic_description}
 """
