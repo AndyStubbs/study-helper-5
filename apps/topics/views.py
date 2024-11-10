@@ -1,16 +1,18 @@
 # topics/views.py
+
 import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from utils.decorators import restrict_to_view
-from services.ai_services import (
-	evaluate_topic,
-	summarize_topic
-)
 from apps.topics.models import Topic
-from apps.topics.services import get_next_question
+from apps.topics.services import (
+	get_next_question,
+	get_topic_evaluation,
+	save_topic,
+	get_topic_description
+)
 
 # Create your views here.
 
@@ -42,11 +44,13 @@ def topics( request ):
 @restrict_to_view( "topics:quiz" )
 @login_required
 def quiz( request ):
+	"""Render the HTML for the quiz modal popup"""
 	return render( request, "topics/quiz.html" )
 
 @csrf_exempt
 @login_required
 def question( request ):
+	"""Gets a question for the quiz modal popup"""
 	if request.method == "POST":
 		data = json.loads( request.body )
 		topic_id = data.get( "topic_id", "" )
@@ -60,71 +64,53 @@ def question( request ):
 
 @csrf_exempt
 @login_required
-def process( request ):
+def evaluate( request ):
+	"""Gets topic title suggestions and topic description"""
 	if request.method == "POST":
 		data = json.loads( request.body )
-		topic = data.get( "topic", "" )
-		if topic == "":
+		topic_name = data.get( "topic_name", "" )
+		if topic_name == "":
 			return JsonResponse( { "error": "Invalid request" }, status=400 )
-		ai_response = evaluate_topic( topic )
-		if ai_response[ "status" ] == "error":
+		response = get_topic_evaluation( topic_name )
+		if response[ "status" ] == "error":
 			return JsonResponse( { "error": "Internal Server Error" }, status=500 )
-		return JsonResponse( ai_response )
+		return JsonResponse( response )
 	else:
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @csrf_exempt
 @login_required
 def summarize( request ):
+	"""Get a topic description"""
 	if request.method == "POST":
 		data = json.loads( request.body )
-		topic = data.get( "topic", "" ).strip()
-		if topic == "":
+		topic_name = data.get( "topic", "" ).strip()
+		if topic_name == "":
 			return JsonResponse( { "error": "Invalid request" }, status=400 )
-		ai_response = summarize_topic( topic )
-		if ai_response[ "status" ] == "error":
+		response = get_topic_description( topic_name )
+		if response[ "status" ] == "error":
 			return JsonResponse( { "error": "Internal Server Error" }, status=500 )
-		return JsonResponse( ai_response )
+		return JsonResponse( response )
 	else:
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @csrf_exempt
 @login_required
 def save( request ):
+	"""Save a topic to the database"""
 	if request.method == "POST":
 		try:
+			print( "SAVING TOPIC" )
 			data = json.loads( request.body )
-			topic_name = data.get( "topic", "" ).strip()
-			description = data.get( "description", "" ).strip()
-
-			if not topic_name or not description:
+			topic_name = data.get( "name", "" ).strip()
+			topic_description = data.get( "description", "" ).strip()
+			if not topic_name or not topic_description:
 				return JsonResponse( {
 					"error": "Invalid request. Both topic and description are required."
 				}, status=400 )
 
-			# Check if the topic already exists
-			existing_topic = Topic.objects.filter( name=topic_name ).first()
-
-			if existing_topic:
-				existing_topic.description = description
-				existing_topic.save()
-				return JsonResponse( {
-					"status": "success",
-					"message": "Topic description updated successfully",
-					"topic_id": existing_topic.id
-				} )
-			else:
-				# If the topic does not exist, create a new topic
-				topic = Topic.objects.create(
-					name=topic_name,
-					description=description,
-					user=request.user if request.user.is_authenticated else None
-				)
-				return JsonResponse( {
-					"status": "success",
-					"message": "Topic saved successfully",
-					"topic_id": topic.id
-				} )
+			topic_response = save_topic( topic_name, topic_description, request.user )
+			return JsonResponse( topic_response )
 
 		except json.JSONDecodeError:
 			return JsonResponse( { "error": "Invalid JSON format" }, status=400 )

@@ -204,6 +204,22 @@ h2 {
 	border-radius: 5px;
 }
 
+.result-options {
+	display: flex;
+	align-items: baseline;
+	justify-content: flex-start;
+}
+.result-options button {
+	margin-right: 15px;
+}
+.result-success {
+	color:#383;
+	font-weight: bold;
+}
+.result-error {
+	color:#833;
+	font-weight: bold;
+}
 
 /* topics:quiz */
 

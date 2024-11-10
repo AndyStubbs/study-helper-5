@@ -14,7 +14,7 @@ window.main.onReady( () => {
 
 	form.addEventListener( "submit", async ( e ) => {
 		e.preventDefault();
-		await processTopic( topicInput.value );
+		await evaluateTopic( topicInput.value );
 	} );
 
 	saveTopicBtn.addEventListener( "click", async ( e ) => {
@@ -22,14 +22,19 @@ window.main.onReady( () => {
 		await saveTopic( topicInput.value, descriptionArea.value );
 	} );
 
-	async function processTopic( topic ) {
+	async function evaluateTopic( topic_name ) {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		try {
 			loadingOverlay.style.visibility = "visible";
-			const data = await main.handleRequest( "/topics/process/", { topic } );
+			const data = await main.handleRequest( "/topics/evaluate/", { topic_name } );
 			updateUI( data );
+			document.querySelector( ".result-message" ).textContent = "";
 		} catch ( error ) {
 			console.error( "Error:", error );
+			const resultMessage = document.querySelector( ".result-message" );
+			resultMessage.classList.remove( "result-success" );
+			resultMessage.classList.add( "result-error" );
+			resultMessage.textContent = error;
 		} finally {
 			loadingOverlay.style.visibility = "hidden";
 		}
@@ -40,9 +45,14 @@ window.main.onReady( () => {
 		try {
 			loadingOverlay.style.visibility = "visible";
 			const data = await main.handleRequest( "/topics/summarize/", { topic } );
-			descriptionArea.value = data.summary;
+			descriptionArea.value = data.description;
+			document.querySelector( ".result-message" ).textContent = "";
 		} catch ( error ) {
 			console.error( "Error:", error );
+			const resultMessage = document.querySelector( ".result-message" );
+			resultMessage.classList.remove( "result-success" );
+			resultMessage.classList.add( "result-error" );
+			resultMessage.textContent = error;
 		} finally {
 			loadingOverlay.style.visibility = "hidden";
 		}
@@ -50,7 +60,7 @@ window.main.onReady( () => {
 
 	function updateUI( data ) {
 		resultArea.style.display = "block";
-		descriptionArea.value = data.summary;
+		descriptionArea.value = data.description;
 		
 		suggestionsList.innerHTML = "";
 		data.suggestions.forEach( suggestion => {
@@ -71,12 +81,15 @@ window.main.onReady( () => {
 		submitBtn.textContent = "Update";
 	}
 
-	async function saveTopic( topic, description ) {
+	async function saveTopic( topicName, topicDescription ) {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		try {
-			const data = await main.handleRequest( "/topics/save/", { topic, description } );
-			let topicLi = document.querySelector( `[data-topic-id='${data.topic_id}']` );
-			let truncated = description.split( " " ).slice( 0, 30 ).join( " " ) + "... ▼";
+			const topic = await main.handleRequest( "/topics/save/", {
+				"name": topicName,
+				"description": topicDescription
+			} );
+			let topicLi = document.querySelector( `[data-topic-id='${topic.id}']` );
+			let truncated = topic.description.split( " " ).slice( 0, 30 ).join( " " ) + "... ▼";
 			let shortStyle = "style='display: none;'";
 			let fullStyle = "";
 			if( truncated.length < description.length ) {
@@ -85,23 +98,31 @@ window.main.onReady( () => {
 			}
 			if( topicLi ) {
 				topicLi.querySelector( ".short" ).innerHTML = truncated;
-				topicLi.querySelector( ".full" ).innerHTML = description;
+				topicLi.querySelector( ".full" ).innerHTML = topic.description;
 			} else {
 				topicLi = document.createElement( "li" );
-				topicLi.dataset.topicId = data.topic_id;
+				topicLi.dataset.topicId = topic.id;
 				topicLi.innerHTML = `
-					<h3>${ topic }</h3>
+					<h3>${ topic.name }</h3>
 					<div>
 						<p class="short" ${ shortStyle }>${ truncated }</p>
-						<p class="full" ${ fullStyle }>${ description }</p>
+						<p class="full" ${ fullStyle }>${ topic.description }</p>
 					</div>
-					<button onclick="window.main.editTopic('${ data.topic_id }')">Edit</button>
-					<button onclick="window.main.quizTopic('${ data.topic_id }')">Quiz</button>
+					<button onclick="window.main.editTopic('${ topic.id }')">Edit</button>
+					<button onclick="window.main.quizTopic('${ topic.id }')">Quiz</button>
 				`;
 				document.querySelector( "#topics-list" ).appendChild( topicLi );
 			}
+			const resultMessage = document.querySelector( ".result-message" );
+			resultMessage.classList.remove( "result-error" );
+			resultMessage.classList.add( "result-success" );
+			resultMessage.textContent = "Topic saved successfully!";
 		} catch ( error ) {
 			console.error( "Error:", error );
+			const resultMessage = document.querySelector( ".result-message" );
+			resultMessage.classList.remove( "result-success" );
+			resultMessage.classList.add( "result-error" );
+			resultMessage.textContent = error;
 		} finally {
 			loadingOverlay.style.visibility = "hidden";
 		}

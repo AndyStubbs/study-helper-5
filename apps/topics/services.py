@@ -1,9 +1,15 @@
+#topics/services
+
 import random
 import json
 from datetime import datetime
 from django.db.models import F, ExpressionWrapper, fields
 from apps.topics.models import Topic, Question
-from services.ai_services import create_questions
+from services.ai_services import (
+	create_questions,
+	evaluate_topic,
+	summarize_topic
+)
 
 def get_next_question( topic_id ):
 	topic = Topic.objects.get( id=topic_id )
@@ -60,3 +66,63 @@ def get_next_question( topic_id ):
 			"status": "success",
 			"data": question_response
 		}
+
+def get_topic_evaluation( topic_name ):
+	ai_response = evaluate_topic( topic_name )
+	response_data = {
+		"description": ai_response.summary,
+		"suggestions": ai_response.suggestions
+	}
+	return {
+		"status": "success",
+		"data": response_data
+	}
+
+def save_topic( topic_name, topic_description, user ):
+	
+	print( "SAVING TOPIC IN SERVICE" )
+	print( topic_name )
+	# Check if the topic already exists
+	existing_topic = Topic.objects.filter( name=topic_name ).first()
+
+	if existing_topic:
+		print( "UPDATING TOPIC" )
+		existing_topic.description = topic_description
+		existing_topic.save()
+		response_data = {
+			"id": existing_topic.id,
+			"name": existing_topic.name,
+			"description": existing_topic.description
+		}
+		return {
+			"status": "success",
+			"data": response_data
+		}
+	else:
+		print( "CREATING TOPIC" )
+		# If the topic does not exist, create a new topic
+		topic = Topic.objects.create(
+			name=topic_name,
+			description=topic_description,
+			user=user
+		)
+		response_data = {
+			"id": topic.id,
+			"name": topic.name,
+			"description": topic.description
+		}
+		return {
+			"status": "success",
+			"data": response_data
+		}
+
+
+def get_topic_description( topic_name ):
+	ai_response = summarize_topic( topic_name )
+	response_data = {
+		"description": ai_response.summary
+	}
+	return {
+		"status": "success",
+		"data": response_data
+	}

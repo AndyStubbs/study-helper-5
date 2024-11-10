@@ -23,6 +23,12 @@ class AI_Question( BaseModel ):
 class AI_GenQuestions( BaseModel ):
 	questions: list[ AI_Question ]
 
+class AI_TopicInfo( BaseModel ):
+	summary: str
+	suggestions: list[ str ]
+
+class AI_TopicSummary( BaseModel ):
+	summary: str
 
 def evaluate_topic( topic ):
 	"""Evaluates the topic and offer suggestions."""
@@ -38,18 +44,14 @@ def evaluate_topic( topic ):
 				"content": topic_evaluator_user_prompt( topic )
 			}
 		],
-		validator=lambda ai_response: validate_topic_response( ai_response )
+		validator=lambda ai_response: validate_topic_response( ai_response ),
+		response_format=AI_TopicInfo
 	)
 
 def validate_topic_response( ai_response ):
 	"""Validates the structure of the AI response."""
-	if not isinstance( ai_response.get( "summary" ), str ):
-		raise ValueError( "The 'summary' field must be a string." )
-	if (
-		not isinstance( ai_response.get( "suggestions" ), list ) or
-		not all( isinstance( item, str ) for item in ai_response[ "suggestions" ] )
-	):
-		raise ValueError( "The 'suggestions' field must be a list of strings." )
+	if not isinstance( ai_response, AI_TopicInfo ):
+		raise ValueError( "Invalid response for AI_TopicInfo" )
 
 def summarize_topic( topic ):
 	"""Summarize topic"""
@@ -65,8 +67,14 @@ def summarize_topic( topic ):
 				"content": topic_summary_user_prompt( topic )
 			}
 		],
-		validator=lambda ai_response: validate_summary_response( ai_response )
+		validator=lambda ai_response: validate_summary_response( ai_response ),
+		response_format=AI_TopicSummary
 	)
+
+def validate_summary_response( ai_response ):
+	"""Validates the structure of the AI response."""
+	if not isinstance( ai_response, AI_TopicSummary ):
+		raise ValueError( "Invalid response for AI_TopicSummary" )
 
 def create_questions( topic_name, topic_description ):
 	print( f"Creating question for topic: {topic_name} - {topic_description}" )
@@ -90,11 +98,6 @@ def validate_question_generator_response( ai_response ):
 	"""Validates the structure of the AI response."""
 	if not isinstance( ai_response, AI_GenQuestions ):
 		raise ValueError( "Invalid response for AI_GenQuestions" )
-
-def validate_summary_response( ai_response ):
-	"""Validates the structure of the AI response."""
-	if not isinstance( ai_response.get("summary"), str ):
-		raise ValueError( "The 'summary' field must be a string." )
 
 def run_chat_json( model, messages, validator, response_format=None, retry_json=True ):
 	try:
@@ -159,5 +162,5 @@ def run_chat_json( model, messages, validator, response_format=None, retry_json=
 		print( f"Error evaluating topic: {e}" )
 		return {
 			"status": "error",
-			"message": "An error occurred while processing the topic."
+			"message": "An error occurred while processing the message."
 		}
