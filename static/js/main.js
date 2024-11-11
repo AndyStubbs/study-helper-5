@@ -7,7 +7,20 @@ window.main = {
 	"onReady": ( callback ) => {
 		g_readyItems.push( callback );
 	},
-	"editTopic": () => { alert( "Not Implemented" ); },
+	"editTopic": ( topicId ) => {
+
+		// Update Topic name and description
+		const topicLi = document.querySelector( `[data-topic-id="${topicId}"]` );
+		const topicName = topicLi.querySelector( "h3" ).textContent;
+		const topicDescription = topicLi.querySelector( ".full" ).textContent;
+		document.getElementById( "topic-input" ).value = topicName;
+		document.getElementById( "description" ).value = topicDescription;
+
+		// Select the generator tab
+		main.selectTab( "generator" );
+		document.getElementById( "result-area" ).style.display = "block";
+		document.getElementById( "suggestions" ).innerHTML = "";
+	},
 	"quizTopic": () => { alert( "Not Implemented" ); },
 	"getCSRFToken": () => {
 		const cookieName = "csrftoken";
@@ -86,12 +99,7 @@ document.addEventListener( "DOMContentLoaded", function () {
 	tabs.forEach( tab => {
 		tab.addEventListener( "click", () => {
 			const tabId = tab.getAttribute( "data-tab" );
-			
-			tabs.forEach( t => t.classList.remove( "active" ) );
-			tabContents.forEach( content => content.style.display = "none" );
-			
-			tab.classList.add( "active" );
-			document.getElementById( `${tabId}-content` ).style.display = "block";
+			main.selectTab( tabId );
 		} );
 	} );
 
@@ -100,5 +108,13 @@ document.addEventListener( "DOMContentLoaded", function () {
 	alertModal.querySelector( ".ok-button" ).addEventListener( "click", () => {
 		alertModal.style.display = "none";
 	} );
+
+	window.main.selectTab = function selectTab( tabId ) {
+		const tab = document.querySelector( `[data-tab="${tabId}"]` );
+		tabs.forEach( t => t.classList.remove( "active" ) );
+		tabContents.forEach( content => content.style.display = "none" );
+		tab.classList.add( "active" );
+		document.getElementById( `${tabId}-content` ).style.display = "block";
+	}
 	
 } );
