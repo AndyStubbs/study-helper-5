@@ -11,7 +11,8 @@ from apps.topics.services import (
 	get_next_question,
 	get_topic_evaluation,
 	save_topic,
-	get_topic_description
+	get_topic_description,
+	set_answer
 )
 
 # Create your views here.
@@ -59,10 +60,27 @@ def question( request ):
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			topic_id = int( topic_id )
 			question_data = get_next_question( topic_id )
-			if question_data[ "status" ] == "error":
-				print( f"Error generating question topic" )
-				return JsonResponse( { "error": "Internal Server Error" }, status=500 )
 			return JsonResponse( question_data )
+		except Exception as e:
+			print( f"Error generating question topic: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error generating question: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
+@csrf_exempt
+@login_required
+def answer( request ):
+	"""Submit an answer from from the user"""
+	if request.method == "POST":
+		try:
+			data = json.loads( request.body )
+			question_id = data.get( "question_id", -1 )
+			answer = data.get( "answer", "" )
+			if( question_id == -1 ):
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			answer_response = set_answer( request.user, question_id, answer )
+			return JsonResponse( answer_response )
 		except Exception as e:
 			print( f"Error generating question topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -81,8 +99,6 @@ def evaluate( request ):
 			if topic_name == "":
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			response = get_topic_evaluation( topic_name )
-			if response[ "status" ] == "error":
-				return JsonResponse( { "error": "Internal Server Error" }, status=500 )
 			return JsonResponse( response )
 		except Exception as e:
 			print( f"Error evaluating topic: {e}" )
@@ -102,8 +118,6 @@ def summarize( request ):
 			if topic_name == "":
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			response = get_topic_description( topic_name )
-			if response[ "status" ] == "error":
-				return JsonResponse( { "error": "Internal Server Error" }, status=500 )
 			return JsonResponse( response )
 		except Exception as e:
 			print( f"Error summarizing topic: {e}" )
@@ -126,13 +140,8 @@ def save( request ):
 				return JsonResponse( {
 					"error": "Invalid request. Both topic and description are required."
 				}, status=400 )
-
 			topic_response = save_topic( topic_name, topic_description, request.user )
 			return JsonResponse( topic_response )
-		
-		except json.JSONDecodeError as e:
-			print( f"Error saving topic: {e}" )
-			return JsonResponse( { "error": "Invalid JSON format" }, status=400 )
 		except Exception as e:
 			print( f"Error saving topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )

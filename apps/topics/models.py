@@ -6,10 +6,6 @@ from apps.users.models import CustomUser
 from django.utils import timezone
 
 
-# TODO: Need to track stats on Concepts not on questions, because analytics will be on concepts,
-# And questions will need to be frequently cleaned because a lot of questions get generated to
-# prevent duplicates
-
 class Topic( models.Model ):
 	name = models.CharField( max_length=100 )
 	description = models.TextField( max_length=1000, blank=True, null=True )
@@ -93,3 +89,43 @@ class Question( models.Model ):
 
 	def __str__( self ):
 		return f"{self.text} - Topic: {self.topic.name}"
+
+
+class UserKnowledge(models.Model):
+	user = models.ForeignKey(
+		CustomUser,
+		on_delete=models.CASCADE,
+		related_name="knowledge_records"
+	)
+	topic = models.ForeignKey(
+		Topic,
+		on_delete=models.CASCADE,
+		related_name="knowledge_records"
+	)
+	concept = models.ForeignKey(
+		Concept,
+		on_delete=models.CASCADE,
+		related_name="knowledge_records"
+	)
+	correct_points = models.PositiveIntegerField(
+		default=0,
+		help_text="Points awarded for correct answers"
+	)
+	wrong_points = models.PositiveIntegerField(
+		default=0,
+		help_text="Points deducted for wrong answers"
+	)
+
+	class Meta:
+		constraints = [
+			models.UniqueConstraint(
+				fields=[ "user", "topic", "concept" ],
+				name="unique_user_topic_concept"
+			)
+		]
+
+	def __str__( self ):
+		return (
+			f"{self.user} - {self.topic} - {self.concept} "
+			f"(Correct Points: {self.correct_points}, Wrong Points: {self.wrong_points})"
+		)

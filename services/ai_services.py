@@ -12,7 +12,9 @@ from .ai_prompts import (
 	question_generator_user_prompt,
 	question_generator_system_prompt,
 	json_validator_system_prompt,
-	json_validator_user_prompt
+	json_validator_user_prompt,
+	concept_filter_system_prompt,
+	concept_filter_user_prompt
 )
 
 class AI_TopicInfo( BaseModel ):
@@ -27,12 +29,14 @@ class AI_Concepts( BaseModel ):
 
 class AI_Question( BaseModel ):
 	text: str
-	concepts: list[ str ]
 	answers: list[ str ]
 	correct: str
 
 class AI_GenQuestions( BaseModel ):
 	questions: list[ AI_Question ]
+
+class AI_QuestionsConcepts( BaseModel ):
+	questions_concepts: list[ list[ str ] ]
 
 def evaluate_topic( topic ):
 	"""Evaluates the topic and offer suggestions."""
@@ -130,6 +134,24 @@ def validate_question_generator_response( ai_response ):
 	"""Validates the structure of the AI response."""
 	if not isinstance( ai_response, AI_GenQuestions ):
 		raise ValueError( "Invalid response for AI_GenQuestions" )
+
+def generate_question_concepts( concepts, questions ):
+	print( f"Creating concepts for questions" )
+	return run_chat_json(
+		model="gpt-4o-mini",
+		messages=[
+			{
+				"role": "system",
+				"content": concept_filter_system_prompt()
+			},
+			{
+				"role": "user",
+				"content": concept_filter_user_prompt( concepts, questions )
+			}
+		],
+		validator=lambda ai_response: validate_topic_generator_response( ai_response ),
+		response_format=AI_QuestionsConcepts
+	)
 
 def run_chat_json( model, messages, validator, response_format=None, retry_json=True ):
 	try:

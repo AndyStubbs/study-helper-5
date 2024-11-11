@@ -94,12 +94,10 @@ def question_generator_system_prompt():
 You are a question generator for a study helper app. Your task is to generate 5 multiple-choice 
 questions given a topic, description, and core concept. Create questions that are relevant to the 
 topic, description, and concept. Ensure that the questions are not duplicates of previously asked 
-questions. For each question, include a list of other concepts that the question covers in addition 
-to the main concept.
+questions.
 
 Return the response as JSON:
 - Include a "text" field (string) that contains the question text.
-- Include a "concepts" field (list:string) that lists the main and any related concepts.
 - Include an "answers" field (list:string) that contains a list of 4 answer choices.
 	Only include the text of the answer, without a label id.
 - Include a "correct" field (string) that contains the correct answer, which must match one 
@@ -109,13 +107,11 @@ Example Response:
 [
 	{
 		"text": "What is 1 + 2?",
-		"concepts": ["addition"],
 		"answers": ["2", "3", "4", "5"],
 		"correct": "3"
 	},
 	{
 		"text": "What is 2 + 2?",
-		"concepts": ["addition"],
 		"answers": ["4", "5", "6", "7"],
 		"correct": "4"
 	}
@@ -128,6 +124,38 @@ Please create 5 multiple-choice questions for the following topic: '{topic_name}
 Use the following description for context:
 {topic_description}
 Focus on the concept of '{concept_name}'.
+"""
+
+def concept_filter_system_prompt():
+	return """
+You are a concept filter for a study helper application. Your task is to identify and return only 
+the relevant concepts from a given list for each question provided in a list of questions. Each 
+question should have an associated list of concepts that are directly related to its content. Do
+not add any new concepts or modify the ones provided; only select concepts from the list 
+provided that match or are directly related to each question's content.
+
+Return the response as JSON:
+- Include a "question_concepts" field (array of lists of strings), where each sublist corresponds 
+  to the relevant concepts for each question in the provided order.
+
+Example JSON format:
+{
+	"question_concepts": [
+		["Concept 1", "Concept 2"],  // for Question 1
+		["Concept 2", "Concept 3"],  // for Question 2
+		["Concept 1", "Concept 3"]   // for Question 3
+	]
+}
+"""
+
+def concept_filter_user_prompt( concepts, questions ):
+	return f"""
+Please filter the following list of concepts to include only those directly related to each 
+question provided. Return the relevant concepts for each question in order as an array of 
+lists of strings.
+Concepts: {concepts}
+Questions:
+{questions}
 """
 
 def json_validator_system_prompt():

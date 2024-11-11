@@ -13,6 +13,8 @@ window.main.onReady( function () {
 	const skipButton = document.getElementById( "skip-button" );
 
 	let m_topicId = -1;
+	let m_questionId = -1;
+	let m_firstGuess = "";
 
 	// Close modal event
 	closeModal.addEventListener( "click", () => {
@@ -28,6 +30,8 @@ window.main.onReady( function () {
 
 	// Function to load the next quiz question from the server
 	async function loadNextQuestion() {
+
+		// Reset to empty question
 		quizModal.querySelector( ".loading-overlay" ).style.visibility = "visible";
 		questionElement.textContent = "Loading question...";
 		answerButtons.forEach( button => {
@@ -37,9 +41,12 @@ window.main.onReady( function () {
 			button.style.fontWeight = "bold";
 			button.classList.remove( "long" );
 		} );
+		m_questionId = -1;
 
 		try {
 			const data = await main.handleRequest( "/topics/question/", { "topic_id": m_topicId } );
+			m_firstGuess = "";
+			m_questionId = data.id;
 			questionElement.textContent = data.text;
 			let maxLength = 0;
 			answerButtons.forEach( ( button, index ) => {
@@ -52,8 +59,12 @@ window.main.onReady( function () {
 					maxLength = len;
 				}
 				button.onclick = () => {
+					if( m_firstGuess === "" ) {
+						m_firstGuess = button.textContent;
+					}
 					if( button.textContent === data.correct ) {
 						main.alert( "Correct" );
+						submitAnswer();
 						loadNextQuestion();
 					} else {
 						main.alert( "Incorrect" );
@@ -77,8 +88,18 @@ window.main.onReady( function () {
 		}
 	}
 
+	// Submit answer
+	function submitAnswer() {
+		if( m_questionId !== -1 ) {
+			main.handleRequest(
+				"/topics/answer/", { "question_id": m_questionId, "answer": m_firstGuess }
+			);
+		}
+	}
+
 	// Skip button logic
 	skipButton.addEventListener( "click", () => {
+		submitAnswer();
 		loadNextQuestion();
 	} );
 } );
