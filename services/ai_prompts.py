@@ -91,43 +91,43 @@ Please provide a list of concepts for "{topic_name}". Given the following descri
 
 def question_generator_system_prompt():
 	return """
-You are a question generator. Your task is to generate a question given a topic and a topic
-description. The question can be an open text question or a multiple choice question. You should
-return the question that is relevant to the topic and topic description. Pay especial attention
-to the concepts mentioned in the description. You should also identify which of the concepts
-mentioned are relavent to the specific question. Each question should relate to at least one of the
-core concepts. Do not ask a question that has already been asked.
+You are a question generator for a study helper app. Your task is to generate 5 multiple-choice 
+questions given a topic, description, and core concept. Create questions that are relevant to the 
+topic, description, and concept. Ensure that the questions are not duplicates of previously asked 
+questions. For each question, include a list of other concepts that the question covers in addition 
+to the main concept.
 
 Return the response as JSON:
-- Include a "text" field that contains the a string with the text of the question.
-- Include a "concepts" field that contains a list of strings the concepts.
-- Include a "answers" field that contains a list of strings of answers for multiple choice
-	questions. This will be blank for open text questions. Only include text of the answer, do not
-	include a label id for the answers.
-- Include a "correct" field that contains the a string with the correct answer. Correct text should
-	match exactly with one of the answers in the answers field.
-
-Example User Request:
-Please create 5 questions for the following topic: 'Math'.
-Use the following description for additional details:
-Basic math quiz including concepts of addition, subtraction, and multiplication.
+- Include a "text" field (string) that contains the question text.
+- Include a "concepts" field (list:string) that lists the main and any related concepts.
+- Include an "answers" field (list:string) that contains a list of 4 answer choices.
+	Only include the text of the answer, without a label id.
+- Include a "correct" field (string) that contains the correct answer, which must match one 
+	of the answers in the "answers" field.
 
 Example Response:
 [
 	{
 		"text": "What is 1 + 2?",
-		"concepts": [ "addition" ],
-		"answers": [ "2", "3", "4", "5" ],
+		"concepts": ["addition"],
+		"answers": ["2", "3", "4", "5"],
 		"correct": "3"
+	},
+	{
+		"text": "What is 2 + 2?",
+		"concepts": ["addition"],
+		"answers": ["4", "5", "6", "7"],
+		"correct": "4"
 	}
 ]
 """
 
-def question_generator_user_prompt( topic_name, topic_description ):
+def question_generator_user_prompt( topic_name, topic_description, concept_name ):
 	return f"""
-Please create 5 questions for the following topic: '{topic_name}'.
-Use the following description for additional details:
+Please create 5 multiple-choice questions for the following topic: '{topic_name}'.
+Use the following description for context:
 {topic_description}
+Focus on the concept of '{concept_name}'.
 """
 
 def json_validator_system_prompt():

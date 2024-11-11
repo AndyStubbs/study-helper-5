@@ -60,6 +60,7 @@ def question( request ):
 			topic_id = int( topic_id )
 			question_data = get_next_question( topic_id )
 			if question_data[ "status" ] == "error":
+				print( f"Error generating question topic" )
 				return JsonResponse( { "error": "Internal Server Error" }, status=500 )
 			return JsonResponse( question_data )
 		except Exception as e:

@@ -103,20 +103,25 @@ def validate_topic_generator_response( ai_response ):
 	if not isinstance( ai_response, AI_Concepts ):
 		raise ValueError( "Invalid response for AI_Concepts" )
 
-def create_questions( topic_name, topic_description ):
-	print( f"Creating question for topic: {topic_name} - {topic_description}" )
+def create_questions( topic_name, topic_description, concept_name, previous_questions ):
+	print( f"Creating question for topic: {topic_name}" )
+	messages = []
+	messages.append( {
+		"role": "system",
+		"content": question_generator_system_prompt()
+	} )
+	for question in previous_questions:
+		messages.append( {
+			"role": "assistant",
+			"content": f"Previously generated question: {question}"
+		} )
+	messages.append( {
+		"role": "user",
+		"content": question_generator_user_prompt( topic_name, topic_description, concept_name )
+	} )
 	return run_chat_json(
 		model="gpt-4o-mini",
-		messages=[
-			{
-				"role": "system",
-				"content": question_generator_system_prompt()
-			},
-			{
-				"role": "user",
-				"content": question_generator_user_prompt( topic_name, topic_description )
-			}
-		],
+		messages=messages,
 		validator=lambda ai_response: validate_question_generator_response( ai_response ),
 		response_format=AI_GenQuestions
 	)
