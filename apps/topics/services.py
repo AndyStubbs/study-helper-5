@@ -16,27 +16,41 @@ def get_next_question( topic_id ):
 	topic = Topic.objects.get( id=topic_id )
 	question_count = topic.questions.count()
 	generate_new_chance = max( 1, 100 - question_count )
+
 	if random.randint( 0, 100 ) <= generate_new_chance:
-		#print( "GENERATING NEW QUESTIONS" )
+		print( "GENERATING NEW QUESTIONS" )
 		questions_data = create_questions( topic.name, topic.description )
+
 		# Save all the generated questions
-		for question in questions_data.questions:
-			#print( question )
-			Question.objects.create(
+		for question_data in questions_data.questions:
+			print( question_data )
+
+			# Create or get concept instances and associate them with the question
+			concept_instances = []
+			for concept_name in question_data.concepts:
+				normalized_name = normalize_concept_name( concept_name )
+				concept, created = Concept.objects.get_or_create(
+					normalized_name=normalized_name,
+					defaults={"name": concept_name}
+				)
+				concept_instances.append( concept )
+
+			# Create the question
+			question = Question.objects.create(
 				topic=topic,
-				text=question.text,
-				answers=question.answers,
-				correct=question.correct,
-				concepts=question.concepts
+				text=question_data.text,
+				answers=question_data.answers,
+				correct=question_data.correct
 			)
-		
+			question.concepts.set( concept_instances )
+
 		# Return a random question from new questions
-		question = questions_data.questions[ random.randint( 0, len( questions_data.questions ) ) ]
+		question_data = questions_data.questions[ random.randint( 0, len( questions_data.questions ) ) ]
 		question_response = {
-			"text": question.text,
-			"answers": question.answers,
-			"correct": question.correct,
-			"concepts": question.concepts
+			"text": question_data.text,
+			"answers": question_data.answers,
+			"correct": question_data.correct,
+			"concepts": question_data.concepts
 		}
 		return {
 			"status": "success",
@@ -45,23 +59,23 @@ def get_next_question( topic_id ):
 	
 	# Return a random question from the database
 	else:
-		#print( "LOADING RANDOM QUESITON FROM DB" )
+		print( "LOADING RANDOM QUESITON FROM DB" )
 		questions = list( Question.objects.filter( topic=topic ) )
 		questions.sort( key=lambda q: q.question_rank() )
 		choices = []
-		for question in questions:
-			rank = question.question_rank()
-			#print( question.text, rank )
+		for question_data in questions:
+			rank = question_data.question_rank()
+			print( question_data.text, rank )
 			num_copies = max( round( rank / 100 ), 1 )
 			for _ in range( num_copies ):
-				choices.append( question )
+				choices.append( question_data )
 		#print( "CHOICES", len( choices ) )
-		question = choices[ random.randint( 0, len( choices ) ) ]
+		question_data = choices[ random.randint( 0, len( choices ) ) ]
 		question_response = {
-			"text": question.text,
-			"answers": question.answers,
-			"correct": question.correct,
-			"concepts": question.concepts
+			"text": question_data.text,
+			"answers": question_data.answers,
+			"correct": question_data.correct,
+			"concepts": question_data.concepts
 		}
 		return {
 			"status": "success",
@@ -167,10 +181,8 @@ def generate_topic_concepts( topic_id ):
 			f"Concept '{concept_name}' {'created' if created else 'found'} and added to the topic."
 		)
 
-
 def normalize_concept_name( name ):
 	return re.sub( r"[^a-zA-Z]", "", name ).lower()
-
 
 def get_topic_description( topic_name ):
 	ai_response = summarize_topic( topic_name )

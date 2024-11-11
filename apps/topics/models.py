@@ -9,11 +9,13 @@ from django.utils import timezone
 class Topic( models.Model ):
 	name = models.CharField( max_length=100 )
 	description = models.TextField( max_length=1000, blank=True, null=True )
+	# User is linked to the topic because if we were to share topics amonts users than another
+	# user could potentially change the description
 	user = models.ForeignKey( CustomUser, on_delete=models.SET_NULL, null=True, blank=True )
 	concepts = models.ManyToManyField( "Concept", related_name="topics", blank=True )
 	last_studied = models.DateTimeField( null=True, blank=True )
 
-	def __str__(self):
+	def __str__( self ):
 		return self.name
 
 class Concept( models.Model ):
@@ -28,7 +30,7 @@ class Concept( models.Model ):
 	def normalize_concept_name( name ):
 		return re.sub( r"[^a-zA-Z]", "", name ).lower()
 	
-	def __str__(self):
+	def __str__( self ):
 		return self.name
 
 class Question( models.Model ):
