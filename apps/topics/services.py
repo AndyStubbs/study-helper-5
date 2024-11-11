@@ -66,7 +66,8 @@ def get_next_question( topic_id ):
 				topic=topic,
 				text=question_data.text,
 				answers=question_data.answers,
-				correct=question_data.correct
+				correct=question_data.correct,
+				main_concept=selected_concept
 			)
 			question.concepts.set( concept_instances )
 

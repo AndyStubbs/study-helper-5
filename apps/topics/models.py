@@ -6,6 +6,10 @@ from apps.users.models import CustomUser
 from django.utils import timezone
 
 
+# TODO: Need to track stats on Concepts not on questions, because analytics will be on concepts,
+# And questions will need to be frequently cleaned because a lot of questions get generated to
+# prevent duplicates
+
 class Topic( models.Model ):
 	name = models.CharField( max_length=100 )
 	description = models.TextField( max_length=1000, blank=True, null=True )
@@ -39,6 +43,14 @@ class Question( models.Model ):
 	answers = models.JSONField( help_text="Store answers as a JSON array" )
 	correct = models.CharField( max_length=100, help_text="Text of the correct answer" )
 	concepts = models.ManyToManyField( "Concept", related_name="questions", blank=True )
+	main_concept = models.ForeignKey(
+		"Concept",
+		on_delete=models.SET_NULL,
+		null=True,
+		blank=True,
+		related_name="main_concept_questions",
+		help_text="The main concept on which this question was generated"
+	)
 	correct_count = models.PositiveIntegerField(
 		default=0,
 		help_text="Number of times the user has correctly answered this question"
