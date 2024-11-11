@@ -7,12 +7,23 @@ from .ai_prompts import (
 	topic_evaluator_user_prompt,
 	topic_summary_system_prompt,
 	topic_summary_user_prompt,
+	topic_concepts_system_prompt,
+	topic_concepts_user_prompt,
 	question_generator_user_prompt,
 	question_generator_system_prompt,
 	json_validator_system_prompt,
 	json_validator_user_prompt
 )
 
+class AI_TopicInfo( BaseModel ):
+	summary: str
+	suggestions: list[ str ]
+
+class AI_TopicSummary( BaseModel ):
+	summary: str
+
+class AI_Concepts( BaseModel ):
+	concepts: list[ str ]
 
 class AI_Question( BaseModel ):
 	text: str
@@ -22,13 +33,6 @@ class AI_Question( BaseModel ):
 
 class AI_GenQuestions( BaseModel ):
 	questions: list[ AI_Question ]
-
-class AI_TopicInfo( BaseModel ):
-	summary: str
-	suggestions: list[ str ]
-
-class AI_TopicSummary( BaseModel ):
-	summary: str
 
 def evaluate_topic( topic ):
 	"""Evaluates the topic and offer suggestions."""
@@ -75,6 +79,29 @@ def validate_summary_response( ai_response ):
 	"""Validates the structure of the AI response."""
 	if not isinstance( ai_response, AI_TopicSummary ):
 		raise ValueError( "Invalid response for AI_TopicSummary" )
+
+def generate_concepts( topic_name, topic_description ):
+	print( f"Creating concepts for topic: {topic_name} - {topic_description}" )
+	return run_chat_json(
+		model="gpt-4o-mini",
+		messages=[
+			{
+				"role": "system",
+				"content": topic_concepts_system_prompt()
+			},
+			{
+				"role": "user",
+				"content": topic_concepts_user_prompt( topic_name, topic_description )
+			}
+		],
+		validator=lambda ai_response: validate_topic_generator_response( ai_response ),
+		response_format=AI_Concepts
+	)
+
+def validate_topic_generator_response( ai_response ):
+	"""Validates the structure of the AI response."""
+	if not isinstance( ai_response, AI_Concepts ):
+		raise ValueError( "Invalid response for AI_Concepts" )
 
 def create_questions( topic_name, topic_description ):
 	print( f"Creating question for topic: {topic_name} - {topic_description}" )

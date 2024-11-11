@@ -84,6 +84,7 @@ window.main.onReady( () => {
 	async function saveTopic( topicName, topicDescription ) {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		try {
+			loadingOverlay.style.visibility = "visible";
 			const topic = await main.handleRequest( "/topics/save/", {
 				"name": topicName,
 				"description": topicDescription

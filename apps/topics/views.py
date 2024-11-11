@@ -52,30 +52,42 @@ def quiz( request ):
 def question( request ):
 	"""Gets a question for the quiz modal popup"""
 	if request.method == "POST":
-		data = json.loads( request.body )
-		topic_id = data.get( "topic_id", "" )
-		if topic_id == "" or not topic_id.isdigit():
-			return JsonResponse( { "error": "Invalid request" }, status=400 )
-		topic_id = int( topic_id )
-		question_data = get_next_question( topic_id )
-		if question_data[ "status" ] == "error":
-			return JsonResponse( { "error": "Internal Server Error" }, status=500 )
-		return JsonResponse( question_data )
+		try:
+			data = json.loads( request.body )
+			topic_id = data.get( "topic_id", "" )
+			if topic_id == "" or not topic_id.isdigit():
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			topic_id = int( topic_id )
+			question_data = get_next_question( topic_id )
+			if question_data[ "status" ] == "error":
+				return JsonResponse( { "error": "Internal Server Error" }, status=500 )
+			return JsonResponse( question_data )
+		except Exception as e:
+			print( f"Error generating question topic: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error generating question: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @csrf_exempt
 @login_required
 def evaluate( request ):
 	"""Gets topic title suggestions and topic description"""
 	if request.method == "POST":
-		data = json.loads( request.body )
-		topic_name = data.get( "topic_name", "" )
-		if topic_name == "":
-			return JsonResponse( { "error": "Invalid request" }, status=400 )
-		response = get_topic_evaluation( topic_name )
-		if response[ "status" ] == "error":
-			return JsonResponse( { "error": "Internal Server Error" }, status=500 )
-		return JsonResponse( response )
+		try:
+			data = json.loads( request.body )
+			topic_name = data.get( "topic_name", "" )
+			if topic_name == "":
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			response = get_topic_evaluation( topic_name )
+			if response[ "status" ] == "error":
+				return JsonResponse( { "error": "Internal Server Error" }, status=500 )
+			return JsonResponse( response )
+		except Exception as e:
+			print( f"Error evaluating topic: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
+		print( f"Error evaluating topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @csrf_exempt
@@ -83,15 +95,20 @@ def evaluate( request ):
 def summarize( request ):
 	"""Get a topic description"""
 	if request.method == "POST":
-		data = json.loads( request.body )
-		topic_name = data.get( "topic", "" ).strip()
-		if topic_name == "":
-			return JsonResponse( { "error": "Invalid request" }, status=400 )
-		response = get_topic_description( topic_name )
-		if response[ "status" ] == "error":
-			return JsonResponse( { "error": "Internal Server Error" }, status=500 )
-		return JsonResponse( response )
+		try:
+			data = json.loads( request.body )
+			topic_name = data.get( "topic", "" ).strip()
+			if topic_name == "":
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			response = get_topic_description( topic_name )
+			if response[ "status" ] == "error":
+				return JsonResponse( { "error": "Internal Server Error" }, status=500 )
+			return JsonResponse( response )
+		except Exception as e:
+			print( f"Error summarizing topic: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
+		print( f"Error summarizing topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @csrf_exempt
@@ -111,11 +128,14 @@ def save( request ):
 
 			topic_response = save_topic( topic_name, topic_description, request.user )
 			return JsonResponse( topic_response )
-
-		except json.JSONDecodeError:
+		
+		except json.JSONDecodeError as e:
+			print( f"Error saving topic: {e}" )
 			return JsonResponse( { "error": "Invalid JSON format" }, status=400 )
 		except Exception as e:
+			print( f"Error saving topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
+		print( f"Error saving topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 

@@ -29,8 +29,8 @@ Return the response as JSON:
 
 Example JSON format:
 { 
-    "summary": "A brief explanation of the topic with key concepts like X, Y, and Z.",
-    "suggestions": ["Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5", "Alt 6" ]
+	"summary": "A brief explanation of the topic with key concepts like X, Y, and Z.",
+	"suggestions": ["Alt 1", "Alt 2", "Alt 3", "Alt 4", "Alt 5", "Alt 6" ]
 }
 """
 
@@ -65,6 +65,28 @@ Example JSON format:
 def topic_summary_user_prompt( topic ):
 	return f"""
 Please summarize the topic '{topic}'
+"""
+
+def topic_concepts_system_prompt():
+	return """
+You are a topic concepts generator for a study helper app. Given a topic name and description
+generate a list of concepts that help the user understand and learn the topic. Add any concept
+mentioned in the description as well as other concepts that would be relavent for the topic of
+study.
+
+Return the response as JSON:
+- Include a "concepts" field that contains a list of strings with the name of the concept.
+
+Example JSON format:
+{ 
+	"concepts": [ "Concept 1", "Concept 2", "Concept 3" ]
+}
+"""
+
+def topic_concepts_user_prompt( topic_name, topic_description ):
+	return f"""
+Please provide a list of concepts for "{topic_name}". Given the following description:
+{topic_description}
 """
 
 def question_generator_system_prompt():

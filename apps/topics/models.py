@@ -1,15 +1,33 @@
 # topics/models.py
 
+import re
 from django.db import models
 from apps.users.models import CustomUser
 from django.utils import timezone
+
 
 class Topic( models.Model ):
 	name = models.CharField( max_length=100 )
 	description = models.TextField( max_length=1000, blank=True, null=True )
 	user = models.ForeignKey( CustomUser, on_delete=models.SET_NULL, null=True, blank=True )
+	concepts = models.ManyToManyField( "Concept", related_name="topics", blank=True )
 	last_studied = models.DateTimeField( null=True, blank=True )
 
+	def __str__(self):
+		return self.name
+
+class Concept( models.Model ):
+	name = models.CharField( max_length=300 )
+	normalized_name = models.CharField( max_length=300, editable=False )
+
+	def save( self, *args, **kwargs ):
+		self.normalized_name = self.normalize_concept_name( self.name )
+		super().save( *args, **kwargs )
+	
+	@staticmethod
+	def normalize_concept_name( name ):
+		return re.sub( r"[^a-zA-Z]", "", name ).lower()
+	
 	def __str__(self):
 		return self.name
 
@@ -18,10 +36,7 @@ class Question( models.Model ):
 	text = models.CharField( max_length=500 )
 	answers = models.JSONField( help_text="Store answers as a JSON array" )
 	correct = models.CharField( max_length=100, help_text="Text of the correct answer" )
-	concepts = models.CharField(
-		max_length=300,
-		help_text="Comma-separated list of core concepts related to the question"
-	)
+	concepts = models.ManyToManyField( "Concept", related_name="questions", blank=True )
 	correct_count = models.PositiveIntegerField(
 		default=0,
 		help_text="Number of times the user has correctly answered this question"
