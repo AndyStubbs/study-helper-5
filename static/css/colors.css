@@ -37,6 +37,11 @@
 	--button-tertiary-hover-border-color: #55e;
 	--button-tertiary-hover-bg-color: #eee;
 
+	/* Button 4 */
+	--button-4-bg-color: #833;
+	--button-4-text-color: #fff;
+	--button-4-hover-bg-color: #633;
+	
 	/* Status Colors */
 	--status-success-color: #383;
 	--status-error-color: #833;
@@ -168,6 +173,15 @@ h2 {
 .btn-c3:hover {
 	background-color: var(--button-tertiary-hover-bg-color);
 	border-color: var(--button-tertiary-hover-border-color);
+}
+
+.btn-c4 {
+	background-color: var(--button-4-bg-color);
+	color: var(--button-4-text-color);
+}
+
+.btn-c4:hover {
+	background-color: var(--button-4-hover-bg-color);
 }
 
 .border {

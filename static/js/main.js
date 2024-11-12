@@ -1,4 +1,5 @@
 // static/js/main.js
+"use strict";
 
 const g_readyItems = [];
 
@@ -7,21 +8,7 @@ window.main = {
 	"onReady": ( callback ) => {
 		g_readyItems.push( callback );
 	},
-	"editTopic": ( topicId ) => {
-
-		// Update Topic name and description
-		const topicLi = document.querySelector( `[data-topic-id="${topicId}"]` );
-		const topicName = topicLi.querySelector( "h3" ).textContent;
-		const topicDescription = topicLi.querySelector( ".full" ).textContent;
-		document.getElementById( "topic-input" ).value = topicName;
-		document.getElementById( "description" ).value = topicDescription;
-
-		// Select the generator tab
-		main.selectTab( "generator" );
-		document.getElementById( "result-area" ).style.display = "block";
-		document.getElementById( "suggestions" ).innerHTML = "";
-		document.querySelector( ".sug-btn" ).style.display = "";
-	},
+	"editTopic": () => { alert( "Not Implemented" ); },
 	"quizTopic": () => { alert( "Not Implemented" ); },
 	"getCSRFToken": () => {
 		const cookieName = "csrftoken";

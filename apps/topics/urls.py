@@ -15,4 +15,5 @@ urlpatterns = [
 	path( "summarize/", views.summarize, name="summarize" ),
 	path( "suggest/", views.suggest, name="suggest" ),
 	path( "save/", views.save, name="save" ),
+	path( "delete/", views.delete, name="delete" ),
 ]

@@ -1,4 +1,5 @@
 // static/js/topics_filter.js
+"use strict";
 
 /* global window.main */
 

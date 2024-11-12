@@ -1,4 +1,5 @@
 // static/js/topics_quiz.js
+"use strict";
 
 /* global window.main */
 

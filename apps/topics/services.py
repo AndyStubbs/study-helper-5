@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 from django.db.models import Func, Q, F
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from apps.topics.models import Topic, Question, Concept, UserKnowledge
 from services.ai_services import (
 	create_questions,
@@ -203,8 +203,30 @@ def save_topic( topic_name, topic_description, user ):
 				"data": response_data
 			}
 
+def delete_topic( topic_id, user ):
+	# Retrieve the topic
+	topic = Topic.objects.get( id=topic_id )
+
+	# Check if the topic belongs to the user
+	if topic.user != user:
+		raise PermissionDenied( "You do not have permission to delete this topic." )
+	
+	# Delete all associated questions for the topic
+	topic.questions.all().delete()
+	
+	# Delete all user knowledge records associated with the topic
+	UserKnowledge.objects.filter( topic=topic ).delete()
+	
+	# Finally, delete the topic itself
+	topic.delete()
+	
+	return {
+		"status": "success",
+		"message": f"Topic '{topic.name}' and its related data have been deleted."
+	}
+
 def generate_topic_concepts( topic_id ):
-	print("GENERATING CONCEPTS")
+	print( "GENERATING CONCEPTS" )
 	topic = Topic.objects.get( id=topic_id )
 
 	# Clear any existing concepts associated with this topic
@@ -263,6 +285,10 @@ def set_answer( user, question_id, answer ):
 	except ObjectDoesNotExist:
 		raise ValueError( f"Question id: {question_id} not found." )
 	
+	# Check if the topic belongs to the user
+	if question.topic.user != user:
+		raise PermissionDenied( "You do not have permission to answer this question." )
+
 	# User skipped question
 	if answer == "":
 		question.skip_count += 1

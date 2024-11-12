@@ -13,10 +13,9 @@ from apps.topics.services import (
 	save_topic,
 	get_topic_description,
 	set_answer,
-	get_topic_suggestions
+	get_topic_suggestions,
+	delete_topic
 )
-
-# Create your views here.
 
 @restrict_to_view( "topics:generate" )
 @login_required
@@ -169,4 +168,26 @@ def save( request ):
 	else:
 		print( f"Error saving topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
+@csrf_exempt
+@login_required
+def delete( request ):
+	"""Delete a topic to the database"""
+	if request.method == "POST":
+		try:
+			print( "DELETING TOPIC" )
+			data = json.loads( request.body )
+			topic_id = data.get( "topic_id", "" )
+			if topic_id == "" or not topic_id.isdigit():
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			topic_id = int( topic_id )
+			topic_response = delete_topic( topic_id, request.user )
+			return JsonResponse( topic_response )
+		except Exception as e:
+			print( f"Error saving topic: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error saving topic: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
 

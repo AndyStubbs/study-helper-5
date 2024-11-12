@@ -1,4 +1,5 @@
 // static/js/topic_generator.js
+"use strict";
 
 /* global window.main */
 
@@ -11,6 +12,7 @@ window.main.onReady( () => {
 	const descriptionArea = document.getElementById( "description" );
 	const suggestionsList = document.getElementById( "suggestions" );
 	const saveTopicBtn = document.getElementById( "save-topic-btn" );
+	let m_topicId = -1;
 
 	form.addEventListener( "submit", async ( e ) => {
 		e.preventDefault();
@@ -27,7 +29,7 @@ window.main.onReady( () => {
 		try {
 			loadingOverlay.style.visibility = "visible";
 			const data = await main.handleRequest( "/topics/evaluate/", { topic_name } );
-			updateUI( data );
+			updateTopicDetails( data );
 			document.querySelector( ".result-message" ).textContent = "";
 		} catch ( error ) {
 			console.error( "Error:", error );
@@ -45,6 +47,7 @@ window.main.onReady( () => {
 		try {
 			loadingOverlay.style.visibility = "visible";
 			const data = await main.handleRequest( "/topics/summarize/", { topic } );
+			setTopicId( -1 );
 			descriptionArea.value = data.description;
 			document.querySelector( ".result-message" ).textContent = "";
 		} catch ( error ) {
@@ -58,28 +61,67 @@ window.main.onReady( () => {
 		}
 	}
 
-	function updateUI( data ) {
+	function updateTopicDetails( data ) {
+
+		// Show the results
 		resultArea.style.display = "block";
+		submitBtn.textContent = "Update";
+
+		// Update description
 		if( data.description ) {
 			descriptionArea.value = data.description;
 		}
+
+		// Update delete button
+		if( data.topic_id ) {
+			setTopicId( data.topic_id );
+		} else {
+			setTopicId( -1 );
+		}
+
+		// Update topic name
+		if( data.topic_name ) {
+			document.getElementById( "topic-input" ).value = data.topic_name;
+		}
 		
-		document.querySelector( ".sug-btn" ).style.display = "none";
+		// Update the suggestions
+		const getSuggestionsBtn = document.querySelector( ".sug-btn" );
 		suggestionsList.innerHTML = "";
-		data.suggestions.forEach( suggestion => {
-			const li = document.createElement( "li" );
-			li.textContent = suggestion;
-			li.addEventListener( "click", () => {
-				topicInput.value = suggestion;
-				suggestionsList.querySelectorAll( ".selected" ). forEach( selected_li => {
-					selected_li.classList.remove( "selected" );
+		if( data.suggestions && data.suggestions.length > 0 ) {
+			getSuggestionsBtn.style.display = "none";
+			getSuggestionsBtn.disabled = true;
+
+			// Loop through the suggestions
+			data.suggestions.forEach( suggestion => {
+				const li = document.createElement( "li" );
+				li.textContent = suggestion;
+
+				// On suggestion clicked
+				li.addEventListener( "click", () => {
+					topicInput.value = suggestion;
+					suggestionsList.querySelectorAll( ".selected" ). forEach( selected_li => {
+						selected_li.classList.remove( "selected" );
+					} );
+					li.classList.add( "selected" );
+					summarizeTopic( suggestion );
 				} );
-				li.classList.add( "selected" );
-				summarizeTopic( suggestion );
+				suggestionsList.appendChild( li );
 			} );
-			suggestionsList.appendChild( li );
-		} );
-		submitBtn.textContent = "Update";
+		} else {
+			getSuggestionsBtn.style.display = "";
+			getSuggestionsBtn.disabled = false;
+		}
+	}
+
+	function setTopicId( topicId ) {
+		const deleteButton = document.getElementById( "delete-topic-btn" );
+		if( topicId !== -1 ) {
+			m_topicId = topicId;
+			deleteButton.style.display = "";
+		} else {
+			m_topicId = -1;
+			deleteButton.style.display = "none";
+		}
 	}
 
 	async function saveTopic( topicName, topicDescription ) {
@@ -130,13 +172,52 @@ window.main.onReady( () => {
 		}
 	}
 
+	// Edit topic function
+	window.main.editTopic = ( topicId ) => {
+
+		m_topicId = topicId;
+
+		const topicLi = document.querySelector( `[data-topic-id="${m_topicId}"]` );
+		const topicName = topicLi.querySelector( "h3" ).textContent;
+		const topicDescription = topicLi.querySelector( ".full" ).textContent;
+
+		// Select the generator tab
+		main.selectTab( "generator" );
+
+		// Update the results
+		updateTopicDetails( {
+			"topic_id": m_topicId,
+			"topic_name": topicName,
+			"description": topicDescription,
+		} );
+	}
+
 	document.getElementById( "generate-suggestions" ).addEventListener( "click", async () => {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		const topic_name = document.getElementById( "topic-input" ).value;
 		loadingOverlay.style.visibility = "visible";
 		const data = await main.handleRequest( "/topics/suggest/", { topic_name } );
 		loadingOverlay.style.visibility = "hidden";
-		updateUI( data );
+		data.topic_id = m_topicId;
+		updateTopicDetails( data );
+	} );
+
+	document.getElementById( "delete-topic-btn" ).addEventListener( "click", async () => {
+		const loadingOverlay = document.getElementById( "loading-overlay" );
+		const topic_id = m_topicId;
+		if( topic_id === -1 ) {
+			throw "Topic id is not valid!";
+		}
+		loadingOverlay.style.visibility = "visible";
+		await main.handleRequest( "/topics/delete/", { topic_id } );
+		loadingOverlay.style.visibility = "hidden";
+		resultArea.style.display = "none";
+
+		const topicLi = document.querySelector( `[data-topic-id="${m_topicId}"]` );
+		topicLi.remove();
+
+		document.getElementById( "topic-input" ).value = "";
+		document.getElementById( "description" ).value = "";
 	} );
 
 } );
