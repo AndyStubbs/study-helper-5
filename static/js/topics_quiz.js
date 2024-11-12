@@ -51,16 +51,26 @@ window.main.onReady( function () {
 
 		try {
 			const data = await main.handleRequest( "/topics/question/", { "topic_id": m_topicId } );
+			
+			// Shuffle the answers
+			const answers = [];
+			while( data.answers.length > 0 ) {
+				const i = Math.floor( Math.random() * data.answers.length );
+				const answer = data.answers[ i ];
+				data.answers.splice( i, 1 );
+				answers.push( answer );
+			}
 			m_firstGuess = "";
 			m_questionId = data.id;
 			questionElement.textContent = data.text;
 			let maxLength = 0;
+
 			answerButtons.forEach( ( button, index ) => {
 				button.style.fontSize = "";
 				button.style.fontWeight = "";
-				button.textContent = data.answers[ index ] || "";
+				button.textContent = answers[ index ] || "";
 				button.classList.remove( "long" );
-				let len = data.answers[ index ].length;
+				let len = answers[ index ].length;
 				if( len > maxLength ) {
 					maxLength = len;
 				}
