@@ -42,11 +42,11 @@ window.main.onReady( () => {
 		}
 	}
 
-	async function summarizeTopic( topic ) {
+	async function summarizeTopic( topic_name ) {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		try {
 			loadingOverlay.style.visibility = "visible";
-			const data = await main.handleRequest( "/topics/summarize/", { topic } );
+			const data = await main.handleRequest( "/topics/summarize/", { topic_name } );
 			setTopicId( -1 );
 			descriptionArea.value = data.description;
 			document.querySelector( ".result-message" ).textContent = "";
@@ -115,6 +115,9 @@ window.main.onReady( () => {
 
 	function setTopicId( topicId ) {
 		const deleteButton = document.getElementById( "delete-topic-btn" );
+		if( typeof topicId === "string" ) {
+			topicId = parseInt( topicId );
+		}
 		if( topicId !== -1 ) {
 			m_topicId = topicId;
 			deleteButton.style.display = "";
@@ -129,9 +132,10 @@ window.main.onReady( () => {
 		try {
 			loadingOverlay.style.visibility = "visible";
 			const topic = await main.handleRequest( "/topics/save/", {
-				"name": topicName,
-				"description": topicDescription
+				"topic_name": topicName,
+				"topic_description": topicDescription
 			} );
+			setTopicId( topic.id );
 			let topicLi = document.querySelector( `[data-topic-id='${topic.id}']` );
 			let truncated = topic.description.split( " " ).slice( 0, 30 ).join( " " ) + "... ▼";
 			let shortStyle = "style='display: none;'";
@@ -196,10 +200,19 @@ window.main.onReady( () => {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		const topic_name = document.getElementById( "topic-input" ).value;
 		loadingOverlay.style.visibility = "visible";
-		const data = await main.handleRequest( "/topics/suggest/", { topic_name } );
-		loadingOverlay.style.visibility = "hidden";
-		data.topic_id = m_topicId;
-		updateTopicDetails( data );
+		try {
+			const data = await main.handleRequest( "/topics/suggest/", { topic_name } );
+			data.topic_id = m_topicId;
+			updateTopicDetails( data );
+		} catch( error ) {
+			console.error( "Error:", error );
+			const resultMessage = document.querySelector( ".result-message" );
+			resultMessage.classList.remove( "result-success" );
+			resultMessage.classList.add( "result-error" );
+			resultMessage.textContent = error;
+		} finally {
+			loadingOverlay.style.visibility = "hidden";
+		}
 	} );
 
 	document.getElementById( "delete-topic-btn" ).addEventListener( "click", async () => {
@@ -209,15 +222,22 @@ window.main.onReady( () => {
 			throw "Topic id is not valid!";
 		}
 		loadingOverlay.style.visibility = "visible";
-		await main.handleRequest( "/topics/delete/", { topic_id } );
-		loadingOverlay.style.visibility = "hidden";
-		resultArea.style.display = "none";
-
-		const topicLi = document.querySelector( `[data-topic-id="${m_topicId}"]` );
-		topicLi.remove();
-
-		document.getElementById( "topic-input" ).value = "";
-		document.getElementById( "description" ).value = "";
+		try {
+			await main.handleRequest( "/topics/delete/", { topic_id } );
+			resultArea.style.display = "none";
+			const topicLi = document.querySelector( `[data-topic-id="${m_topicId}"]` );
+			topicLi.remove();
+			document.getElementById( "topic-input" ).value = "";
+			document.getElementById( "description" ).value = "";
+		} catch( error ) {
+			console.error( "Error:", error );
+			const resultMessage = document.querySelector( ".result-message" );
+			resultMessage.classList.remove( "result-success" );
+			resultMessage.classList.add( "result-error" );
+			resultMessage.textContent = error;
+		} finally {
+			loadingOverlay.style.visibility = "hidden";
+		}
 	} );
 
 } );

@@ -55,8 +55,8 @@ def question( request ):
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
-			topic_id = data.get( "topic_id", "" )
-			if topic_id == "" or not topic_id.isdigit():
+			topic_id = data.get( "topic_id", -1 )
+			if not isinstance( topic_id, int ) or topic_id == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			topic_id = int( topic_id )
 			question_data = get_next_question( topic_id )
@@ -114,7 +114,7 @@ def summarize( request ):
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
-			topic_name = data.get( "topic", "" ).strip()
+			topic_name = data.get( "topic_name", "" ).strip()
 			if topic_name == "":
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			response = get_topic_description( topic_name )
@@ -154,8 +154,8 @@ def save( request ):
 		try:
 			print( "SAVING TOPIC" )
 			data = json.loads( request.body )
-			topic_name = data.get( "name", "" ).strip()
-			topic_description = data.get( "description", "" ).strip()
+			topic_name = data.get( "topic_name", "" ).strip()
+			topic_description = data.get( "topic_description", "" ).strip()
 			if not topic_name or not topic_description:
 				return JsonResponse( {
 					"error": "Invalid request. Both topic and description are required."
@@ -177,10 +177,9 @@ def delete( request ):
 		try:
 			print( "DELETING TOPIC" )
 			data = json.loads( request.body )
-			topic_id = data.get( "topic_id", "" )
-			if topic_id == "" or not topic_id.isdigit():
+			topic_id = data.get( "topic_id", -1 )
+			if not isinstance( topic_id, int ) or topic_id == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			topic_id = int( topic_id )
 			topic_response = delete_topic( topic_id, request.user )
 			return JsonResponse( topic_response )
 		except Exception as e:

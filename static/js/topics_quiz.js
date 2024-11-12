@@ -30,7 +30,7 @@ window.main.onReady( function () {
 
 	// Function to open the quiz modal and load the next question
 	function openQuizModal( topicId ) {
-		m_topicId = topicId;
+		m_topicId = parseInt( topicId );
 		quizModal.style.display = "block";
 		loadNextQuestion();
 	}
