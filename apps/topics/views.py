@@ -12,7 +12,8 @@ from apps.topics.services import (
 	get_topic_evaluation,
 	save_topic,
 	get_topic_description,
-	set_answer
+	set_answer,
+	get_topic_suggestions
 )
 
 # Create your views here.
@@ -124,6 +125,26 @@ def summarize( request ):
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
 		print( f"Error summarizing topic: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
+
+@csrf_exempt
+@login_required
+def suggest( request ):
+	"""Get a topic suggestions"""
+	if request.method == "POST":
+		try:
+			data = json.loads( request.body )
+			topic_name = data.get( "topic_name", "" ).strip()
+			if topic_name == "":
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			response = get_topic_suggestions( topic_name )
+			return JsonResponse( response )
+		except Exception as e:
+			print( f"Error suggesting topics: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error suggesting topics: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @csrf_exempt

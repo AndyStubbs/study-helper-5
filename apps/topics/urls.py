@@ -13,5 +13,6 @@ urlpatterns = [
 	path( "answer/", views.answer, name="answer" ),
 	path( "evaluate/", views.evaluate, name="evaluate" ),
 	path( "summarize/", views.summarize, name="summarize" ),
+	path( "suggest/", views.suggest, name="suggest" ),
 	path( "save/", views.save, name="save" ),
 ]

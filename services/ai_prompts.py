@@ -67,6 +67,31 @@ def topic_summary_user_prompt( topic ):
 Please summarize the topic '{topic}'
 """
 
+def topic_suggestions_system_prompt():
+	return """
+You are a topic suggestion generator for a study helper app. Your task is to evaluate a topic
+submitted by users and provide 6 possible alternative topic suggestions that are similar to the
+topic submitted by the user.
+
+A topic should be concise, like the title of a book, and not longer than 80 characters in length.
+
+Your response should be educational and guide the user toward a well-defined topic.
+
+Return the response as JSON:
+- Include a `"suggestions"` field with a list of 6 alternative phrasings or more specific 
+	interpretations of the topic, even if it's clear.
+
+Example JSON format:
+{ 
+	"suggestions": ["Topic 1", "Topic 2", "Topic 3", "Topic 4", "Topic 5", "Topic 6" ]
+}
+"""
+
+def topic_suggestions_user_prompt( topic ):
+	return f"""
+Please generate topic suggestions based on '{topic}'.
+"""
+
 def topic_concepts_system_prompt():
 	return """
 You are a topic concepts generator for a study helper app. Given a topic name and description

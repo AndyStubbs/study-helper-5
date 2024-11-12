@@ -60,7 +60,9 @@ window.main.onReady( () => {
 
 	function updateUI( data ) {
 		resultArea.style.display = "block";
-		descriptionArea.value = data.description;
+		if( data.description ) {
+			descriptionArea.value = data.description;
+		}
 		
 		document.querySelector( ".sug-btn" ).style.display = "none";
 		suggestionsList.innerHTML = "";
@@ -127,5 +129,14 @@ window.main.onReady( () => {
 			loadingOverlay.style.visibility = "hidden";
 		}
 	}
+
+	document.getElementById( "generate-suggestions" ).addEventListener( "click", async () => {
+		const loadingOverlay = document.getElementById( "loading-overlay" );
+		const topic_name = document.getElementById( "topic-input" ).value;
+		loadingOverlay.style.visibility = "visible";
+		const data = await main.handleRequest( "/topics/suggest/", { topic_name } );
+		loadingOverlay.style.visibility = "hidden";
+		updateUI( data );
+	} );
 
 } );

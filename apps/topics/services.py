@@ -13,7 +13,8 @@ from services.ai_services import (
 	evaluate_topic,
 	summarize_topic,
 	generate_concepts,
-	generate_question_concepts
+	generate_question_concepts,
+	suggest_topics
 )
 
 def get_next_question( topic_id ):
@@ -137,6 +138,16 @@ def get_topic_evaluation( topic_name ):
 	ai_response = evaluate_topic( topic_name )
 	response_data = {
 		"description": ai_response.summary,
+		"suggestions": ai_response.suggestions
+	}
+	return {
+		"status": "success",
+		"data": response_data
+	}
+
+def get_topic_suggestions( topic_name ):
+	ai_response = suggest_topics( topic_name )
+	response_data = {
 		"suggestions": ai_response.suggestions
 	}
 	return {

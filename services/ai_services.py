@@ -14,7 +14,9 @@ from .ai_prompts import (
 	json_validator_system_prompt,
 	json_validator_user_prompt,
 	concept_filter_system_prompt,
-	concept_filter_user_prompt
+	concept_filter_user_prompt,
+	topic_suggestions_system_prompt,
+	topic_suggestions_user_prompt
 )
 
 class AI_TopicInfo( BaseModel ):
@@ -23,6 +25,9 @@ class AI_TopicInfo( BaseModel ):
 
 class AI_TopicSummary( BaseModel ):
 	summary: str
+
+class AI_TopicSuggestions( BaseModel ):
+	suggestions: list[ str ]
 
 class AI_Concepts( BaseModel ):
 	concepts: list[ str ]
@@ -40,7 +45,7 @@ class AI_QuestionsConcepts( BaseModel ):
 
 def evaluate_topic( topic ):
 	"""Evaluates the topic and offer suggestions."""
-	return run_chat_json(
+	return run_chat(
 		model="gpt-4o-mini",
 		messages=[
 			{
@@ -52,18 +57,12 @@ def evaluate_topic( topic ):
 				"content": topic_evaluator_user_prompt( topic )
 			}
 		],
-		validator=lambda ai_response: validate_topic_response( ai_response ),
 		response_format=AI_TopicInfo
 	)
 
-def validate_topic_response( ai_response ):
-	"""Validates the structure of the AI response."""
-	if not isinstance( ai_response, AI_TopicInfo ):
-		raise ValueError( "Invalid response for AI_TopicInfo" )
-
 def summarize_topic( topic ):
 	"""Summarize topic"""
-	return run_chat_json(
+	return run_chat(
 		model="gpt-4o-mini",
 		messages=[
 			{
@@ -75,18 +74,29 @@ def summarize_topic( topic ):
 				"content": topic_summary_user_prompt( topic )
 			}
 		],
-		validator=lambda ai_response: validate_summary_response( ai_response ),
 		response_format=AI_TopicSummary
 	)
 
-def validate_summary_response( ai_response ):
-	"""Validates the structure of the AI response."""
-	if not isinstance( ai_response, AI_TopicSummary ):
-		raise ValueError( "Invalid response for AI_TopicSummary" )
+def suggest_topics( topic_name ):
+	"""Offer suggestions based on topic name."""
+	return run_chat(
+		model="gpt-4o-mini",
+		messages=[
+			{
+				"role": "system",
+				"content": topic_suggestions_system_prompt()
+			},
+			{
+				"role": "user",
+				"content": topic_suggestions_user_prompt( topic_name )
+			}
+		],
+		response_format=AI_TopicSuggestions
+	)
 
 def generate_concepts( topic_name, topic_description ):
 	print( f"Creating concepts for topic: {topic_name} - {topic_description}" )
-	return run_chat_json(
+	return run_chat(
 		model="gpt-4o-mini",
 		messages=[
 			{
@@ -98,14 +108,8 @@ def generate_concepts( topic_name, topic_description ):
 				"content": topic_concepts_user_prompt( topic_name, topic_description )
 			}
 		],
-		validator=lambda ai_response: validate_topic_generator_response( ai_response ),
 		response_format=AI_Concepts
 	)
-
-def validate_topic_generator_response( ai_response ):
-	"""Validates the structure of the AI response."""
-	if not isinstance( ai_response, AI_Concepts ):
-		raise ValueError( "Invalid response for AI_Concepts" )
 
 def create_questions( topic_name, topic_description, concept_name, previous_questions ):
 	print( f"Creating question for topic: {topic_name}" )
@@ -123,21 +127,15 @@ def create_questions( topic_name, topic_description, concept_name, previous_ques
 		"role": "user",
 		"content": question_generator_user_prompt( topic_name, topic_description, concept_name )
 	} )
-	return run_chat_json(
+	return run_chat(
 		model="gpt-4o-mini",
 		messages=messages,
-		validator=lambda ai_response: validate_question_generator_response( ai_response ),
 		response_format=AI_GenQuestions
 	)
 
-def validate_question_generator_response( ai_response ):
-	"""Validates the structure of the AI response."""
-	if not isinstance( ai_response, AI_GenQuestions ):
-		raise ValueError( "Invalid response for AI_GenQuestions" )
-
 def generate_question_concepts( concepts, questions ):
 	print( f"Creating concepts for questions" )
-	return run_chat_json(
+	return run_chat(
 		model="gpt-4o-mini",
 		messages=[
 			{
@@ -149,69 +147,23 @@ def generate_question_concepts( concepts, questions ):
 				"content": concept_filter_user_prompt( concepts, questions )
 			}
 		],
-		validator=lambda ai_response: validate_topic_generator_response( ai_response ),
 		response_format=AI_QuestionsConcepts
 	)
 
-def run_chat_json( model, messages, validator, response_format=None, retry_json=True ):
+def run_chat( model, messages, response_format ):
 	try:
 		client = OpenAI()
-		if response_format is None:
-			completion = client.chat.completions.create(
-				model=model,
-				messages=messages,
-				#temperature=1.2
-			)
-			message = completion.choices[ 0 ].message.content
+		completion = client.beta.chat.completions.parse(
+			model=model,
+			messages=messages,
+			response_format=response_format
+		)
+		message = completion.choices[ 0 ].message
+		print( "*****************************" )
+		if( message.refusal ):
+			raise ValueError( message.refusal )
 		else:
-			completion = client.beta.chat.completions.parse(
-				model=model,
-				messages=messages,
-				response_format=response_format
-			)
-			message = completion.choices[ 0 ].message
-			print( "*****************************" )
-			if( message.refusal ):
-				raise ValueError( message.refusal )
-			else:
-				return message.parsed
-		try:
-			ai_response = json.loads( message )
-		except json.JSONDecodeError as e:
-			print( "****** JSON ERROR ********" )
-			print( "Model:", model )
-			print( "Messages:", messages )
-			print( "Raw AI response:", message )
-			if retry_json:
-				corrected_response = run_chat_json(
-					model="gpt-4o",
-					messages=[
-						{
-							"role": "system",
-							"content": json_validator_system_prompt()
-						},
-						{
-							"role": "user",
-							"content": json_validator_user_prompt( message )
-						}
-					],
-					validator=validator,
-					retry_json=False
-				)
-				return corrected_response
-			raise ValueError( "The AI response is not valid JSON: " + str( e ) )
-		
-		validator( ai_response )
-		ai_response[ "status" ] = "success"
-		
-		return ai_response
-
-	except ( json.JSONDecodeError, ValueError ) as e:
-		print( f"Error: {e}" )
-		return {
-			"status": "error",
-			"message": str( e )
-		}
+			return message.parsed
 	except Exception as e:
 		print( f"Error evaluating topic: {e}" )
 		return {
