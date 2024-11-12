@@ -20,6 +20,7 @@ window.main = {
 		main.selectTab( "generator" );
 		document.getElementById( "result-area" ).style.display = "block";
 		document.getElementById( "suggestions" ).innerHTML = "";
+		document.querySelector( ".sug-btn" ).style.display = "";
 	},
 	"quizTopic": () => { alert( "Not Implemented" ); },
 	"getCSRFToken": () => {
@@ -117,4 +118,12 @@ document.addEventListener( "DOMContentLoaded", function () {
 		document.getElementById( `${tabId}-content` ).style.display = "block";
 	}
 	
+	// Darkmode toggle
+	document.getElementById( "theme-toggle" ).addEventListener( "click", () => {
+		if( document.body.dataset.theme === "dark" ) {
+			document.body.dataset.theme = "light";
+		} else {
+			document.body.dataset.theme = "dark";
+		}
+	} );
 } );

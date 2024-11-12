@@ -17,8 +17,8 @@
 				<p class="full">{{ topic.description }}</p>
 			{% endif %}
 		</div>
-		<button onclick="window.main.editTopic('{{ topic.id }}')">Edit</button>
-		<button onclick="window.main.quizTopic('{{ topic.id }}')">Quiz</button>
+		<button onclick="window.main.editTopic('{{ topic.id }}')" class="btn-sm btn-c2">Edit</button>
+		<button onclick="window.main.quizTopic('{{ topic.id }}')" class="btn-sm btn-c1">Quiz</button>
 	</li>
 	{% endfor %}
 </ul>

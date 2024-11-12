@@ -62,6 +62,7 @@ window.main.onReady( () => {
 		resultArea.style.display = "block";
 		descriptionArea.value = data.description;
 		
+		document.querySelector( ".sug-btn" ).style.display = "none";
 		suggestionsList.innerHTML = "";
 		data.suggestions.forEach( suggestion => {
 			const li = document.createElement( "li" );
@@ -109,8 +110,8 @@ window.main.onReady( () => {
 						<p class="short" ${ shortStyle }>${ truncated }</p>
 						<p class="full" ${ fullStyle }>${ topic.description }</p>
 					</div>
-					<button onclick="window.main.editTopic('${ topic.id }')">Edit</button>
-					<button onclick="window.main.quizTopic('${ topic.id }')">Quiz</button>
+					<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">Edit</button>
+					<button onclick="window.main.quizTopic('${ topic.id }')" class="btn-sm btn-c1">Quiz</button>
 				`;
 				document.querySelector( "#topics-list" ).appendChild( topicLi );
 			}

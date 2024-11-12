@@ -9,7 +9,7 @@ window.main.onReady( function () {
 	const quizModal = document.getElementById( "quiz-modal" );
 	const closeModal = document.querySelector( ".close" );
 	const questionElement = document.getElementById("quiz-question" );
-	const answerButtons = document.querySelectorAll( ".quiz-answer-button" );
+	const answerButtons = document.querySelectorAll( "#quiz-answers button" );
 	const skipButton = document.getElementById( "skip-button" );
 
 	let m_topicId = -1;

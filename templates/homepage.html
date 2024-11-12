@@ -5,11 +5,23 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Study Helper</title>
+	<link rel="stylesheet" href="{% static 'css/colors.css' %}">
 	<link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
 	<header id="main-header">
 		<h1>Study Helper</h1>
+		<button id="theme-toggle">
+			<img class="icon-dark"
+				src="{% static 'svg/darkmode-btn.svg' %}"
+				alt="Dark mode icon"
+			>
+			<img
+				class="icon-light"
+				src="{% static 'svg/lightmode-btn.svg' %}"
+				alt="Light mode icon"
+			>
+		</button>
 	</header>
 	<div id="page-wrap">
 		<main>
