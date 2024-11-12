@@ -21,6 +21,12 @@ window.main.onReady( function () {
 		quizModal.style.display = "none";
 	} );
 
+	quizModal.addEventListener( "click", ( e ) => {
+		if( e.target === e.currentTarget ) {
+			quizModal.style.display = "none";
+		}
+	} );
+
 	// Function to open the quiz modal and load the next question
 	function openQuizModal( topicId ) {
 		m_topicId = topicId;

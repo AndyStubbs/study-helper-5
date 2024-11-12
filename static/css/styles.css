@@ -172,6 +172,7 @@ h2 {
 #topics-content li {
 	padding: 15px;
 	margin-bottom: 15px;
+	margin-right: 10px;
 	border-radius: 8px;
 	transition-duration: 0.25s;
 }
@@ -274,4 +275,26 @@ h2 {
 #modal-alert .alert_message {
 	margin: 15px;
 	padding: 5px;
+}
+
+
+::-webkit-scrollbar {
+	width: 16px;
+}
+
+::-webkit-scrollbar-track {
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-track:horizontal {
+	height: 16px;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+	height: 12px;
+	border-radius: 10px;
 }

@@ -5,7 +5,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<path
-		fill="currentColor"
+		fill="#333"
 		d="
 		M 23, 5
 		A 12 12 0 1 0 23, 25

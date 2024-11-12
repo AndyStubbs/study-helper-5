@@ -77,8 +77,6 @@ window.main.onReady( () => {
 			} );
 			suggestionsList.appendChild( li );
 		} );
-
-		descriptionArea.removeAttribute( "readonly" );
 		submitBtn.textContent = "Update";
 	}
 

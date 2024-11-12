@@ -110,6 +110,12 @@ document.addEventListener( "DOMContentLoaded", function () {
 		alertModal.style.display = "none";
 	} );
 
+	alertModal.addEventListener( "click", ( e ) => {
+		if( e.target === e.currentTarget ) {
+			alertModal.style.display = "none";
+		}
+	} );
+
 	window.main.selectTab = function selectTab( tabId ) {
 		const tab = document.querySelector( `[data-tab="${tabId}"]` );
 		tabs.forEach( t => t.classList.remove( "active" ) );
