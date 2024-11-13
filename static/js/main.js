@@ -36,9 +36,57 @@ window.main = {
 		return responseObj.data;
 	},
 	"alert": ( msg ) => {
-		const alertModal = document.getElementById( "modal-alert" );
-		alertModal.style.display = "block";
-		alertModal.querySelector( ".alert_message" ).innerHTML = msg;
+		return new Promise( ( resolve ) => {
+			const alertModal = document.getElementById( "modal-alert" );
+			alertModal.style.display = "block";
+			alertModal.querySelector( ".alert-message" ).innerHTML = msg;
+	
+			const okButton = alertModal.querySelector( ".ok-button" );
+	
+			// Event listener for "Ok" button
+			okButton.onclick = () => {
+				alertModal.style.display = "none";
+				resolve();
+			};
+	
+			// Close modal if the background is clicked
+			alertModal.addEventListener( "click", (e) => {
+				if (e.target === alertModal) {
+					alertModal.style.display = "none";
+					resolve();
+				}
+			} );
+		} );
+	},
+	"confirm": async ( msg ) => {
+		return new Promise( ( resolve ) => {
+			const confirmModal = document.getElementById( "modal-confirm" );
+			confirmModal.style.display = "block";
+			confirmModal.querySelector( ".alert-message" ).innerHTML = msg;
+	
+			const yesButton = document.getElementById( "modal-confirm-yes" );
+			const noButton = document.getElementById( "modal-confirm-no" );
+	
+			// Event listener for "Yes" button
+			yesButton.onclick = () => {
+				confirmModal.style.display = "none";
+				resolve( true );
+			};
+	
+			// Event listener for "No" button
+			noButton.onclick = () => {
+				confirmModal.style.display = "none";
+				resolve( false );
+			};
+	
+			// Close modal if the background is clicked
+			confirmModal.addEventListener( "click", ( e ) => {
+				if( e.target === confirmModal ) {
+					confirmModal.style.display = "none";
+					resolve( false );
+				}
+			} );
+		} );
 	}
 };
 
@@ -80,7 +128,7 @@ document.addEventListener( "DOMContentLoaded", function () {
 			} );
 	} );
 
-	// Handle tabs
+	// Configure tabs
 	const tabs = document.querySelectorAll( ".tab" );
 	const tabContents = document.querySelectorAll( ".tab-content" );
 
@@ -91,18 +139,7 @@ document.addEventListener( "DOMContentLoaded", function () {
 		} );
 	} );
 
-	// Update modal-alert
-	const alertModal = document.getElementById( "modal-alert" );
-	alertModal.querySelector( ".ok-button" ).addEventListener( "click", () => {
-		alertModal.style.display = "none";
-	} );
-
-	alertModal.addEventListener( "click", ( e ) => {
-		if( e.target === e.currentTarget ) {
-			alertModal.style.display = "none";
-		}
-	} );
-
+	// Tab selector method
 	window.main.selectTab = function selectTab( tabId ) {
 		const tab = document.querySelector( `[data-tab="${tabId}"]` );
 		tabs.forEach( t => t.classList.remove( "active" ) );

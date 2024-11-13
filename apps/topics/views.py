@@ -31,7 +31,7 @@ def generate( request ):
 @login_required
 def topics( request ):
 	"""Render the HTML for the Topics tab"""
-	topics = Topic.objects.filter( user=request.user )
+	topics = Topic.objects.filter( user=request.user ).order_by( "name" )
 	context = {
 		"topics": topics
 	}
@@ -133,7 +133,6 @@ def summarize( request ):
 	else:
 		print( f"Error summarizing topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
-
 
 @csrf_exempt
 @login_required

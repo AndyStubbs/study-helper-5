@@ -7,8 +7,7 @@ window.main.onReady( () => {
 	const searchBox = document.getElementById( "search-box" );
 	const topicsList = document.getElementById( "topics-list" );
 
-	// Handle searches
-	searchBox.addEventListener( "input", () => {
+	window.main.filter = () => {
 		const filter = searchBox.value.toLowerCase();
 		const topicsListItems = topicsList.querySelectorAll( "li" );
 		topicsListItems.forEach( topic => {
@@ -21,7 +20,10 @@ window.main.onReady( () => {
 				topic.style.display = "none";
 			}
 		} );
-	} );
+	};
+
+	// Handle searches
+	searchBox.addEventListener( "input", window.main.filter );
 
 	// Handle expand short content
 	topicsList.addEventListener( "click", ( e ) => {

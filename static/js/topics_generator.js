@@ -72,7 +72,7 @@ window.main.onReady( () => {
 			descriptionArea.value = data.description;
 		}
 
-		// Update delete button
+		// Set the topic id
 		if( data.topic_id ) {
 			setTopicId( data.topic_id );
 		} else {
@@ -115,15 +115,22 @@ window.main.onReady( () => {
 
 	function setTopicId( topicId ) {
 		const deleteButton = document.getElementById( "delete-topic-btn" );
+		const viewButton = document.getElementById( "view-topic-btn" );
 		if( typeof topicId === "string" ) {
 			topicId = parseInt( topicId );
 		}
 		if( topicId !== -1 ) {
 			m_topicId = topicId;
 			deleteButton.style.display = "";
+			deleteButton.disabled = false;
+			viewButton.style.display = "";
+			viewButton.disabled = false;
 		} else {
 			m_topicId = -1;
 			deleteButton.style.display = "none";
+			deleteButton.disabled = true;
+			viewButton.style.display = "none";
+			viewButton.disabled = true;
 		}
 	}
 
@@ -194,8 +201,9 @@ window.main.onReady( () => {
 			"topic_name": topicName,
 			"description": topicDescription,
 		} );
-	}
+	};
 
+	// Generate Button
 	document.getElementById( "generate-suggestions" ).addEventListener( "click", async () => {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		const topic_name = document.getElementById( "topic-input" ).value;
@@ -215,7 +223,16 @@ window.main.onReady( () => {
 		}
 	} );
 
+	// Delete Button
 	document.getElementById( "delete-topic-btn" ).addEventListener( "click", async () => {
+
+		const isConfirmed = await window.main.confirm(
+			"Are you sure you wish to delete this topic?"
+		);
+
+		if( !isConfirmed ) {
+			return;
+		}
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		const topic_id = m_topicId;
 		if( topic_id === -1 ) {
@@ -240,4 +257,16 @@ window.main.onReady( () => {
 		}
 	} );
 
+	// View the topic
+	document.getElementById( "view-topic-btn" ).addEventListener( "click", async () => {
+		main.selectTab( "topics" );
+		const topicLi = document.querySelector( `[data-topic-id="${m_topicId}"]` );
+		if( topicLi.style.display === "none" ) {
+			document.getElementById( "search-box" ).value = "";
+			window.main.filter();
+		}
+		window.requestAnimationFrame( () => {
+			topicLi.scrollIntoView( { "behavior": "smooth", "block": "center" } );
+		} );
+	} );
 } );
