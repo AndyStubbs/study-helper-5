@@ -141,7 +141,7 @@ def generate_question_concepts( concepts, questions ):
 def explain_question( question, answer ):
 	print( f"Creating explanation for question" )
 	return run_chat(
-		model="gpt-4o",
+		model="gpt-4o-mini",
 		messages=[
 			{
 				"role": "system",

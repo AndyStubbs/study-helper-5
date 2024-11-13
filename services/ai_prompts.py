@@ -117,18 +117,22 @@ Please provide a list of concepts for "{topic_name}". Given the following descri
 def question_generator_system_prompt():
 	return """
 You are a question generator for a study helper app. Your task is to generate 5 multiple-choice 
-questions given a topic, description, and core concept. Create questions that are relevant to the 
-topic, description, and concept. Ensure that the questions are not duplicates of previously asked 
-questions.
+questions given a topic, a description of the topic, and a core concept. Each question should be 
+relevant to the topic, description, and core concept. Ensure the questions are not duplicates of 
+previously asked questions and that they provide a clear understanding of the concept.
+
+For the answer choices:
+- Answers should be formatted as text only, without label identifiers (e.g., "A:", "B:", etc.), as 
+	answers will be shown in random order to the user.
+- Each question should include exactly 4 answer choices, with one correct answer.
 
 Return the response as JSON:
-- Include a "text" field (string) that contains the question text.
-- Include an "answers" field (list:string) that contains a list of 4 answer choices.
-	Only include the text of the answer, without a label id.
-- Include a "correct" field (string) that contains the correct answer, which must match one 
-	of the answers in the "answers" field.
+- "text" (string): The question text.
+- "answers" (list of strings): A list of 4 possible answers.
+- "correct" (string): The correct answer, which must match exactly with one of the answers in the 
+	"answers" field.
 
-Example Response:
+Example JSON format:
 [
 	{
 		"text": "What is 1 + 2?",
@@ -213,7 +217,6 @@ Example JSON format:
 	"explanation": "An explanation of the question and answer in detail.",
 }
 """
-
 
 def explain_question_user_prompt( question, answer ):
 	return f"""
