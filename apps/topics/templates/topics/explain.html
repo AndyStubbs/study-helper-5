@@ -1,0 +1,19 @@
+<!-- topics/templates/topics/explanation.html -->
+
+{% load static %}
+
+<div class="modal">
+	<div class="modal-content">
+		<span class="close">&times;</span>
+		<h2 id="explanation-question">Loading explanation...</h2>
+		<div id="explanation-answer"></div>
+		<h2>Explanation</h2>
+		<div id="explanation-content"></div>
+		<div class="explanation-buttons">
+			<button id="close-explanation-button" class="btn btn-c2">Close</button>
+		</div>
+	</div>
+	<div class="loading-overlay">
+		<img src="{% static 'svg/bars-scale-middle.svg' %}" alt="Loading...">
+	</div>
+</div>

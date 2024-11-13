@@ -289,6 +289,40 @@ h2 {
 	text-align: left;
 }
 
+#explain-button {
+	margin-left: 12px;
+}
+
+/* Explanation modal */
+#explanation-modal .modal {
+	width: 100%;
+	max-width: 800px;
+	max-height: 90%;
+	overflow-y: auto;
+}
+#explanation-modal .modal-content {
+	padding: 20px;
+	text-align: left;
+}
+#explanation-modal h2 {
+	font-size: 20px;
+	margin-bottom: 20px;
+	text-align: left;
+}
+#explanation-content p {
+	margin: 20px 0;
+	font-size: 16px;
+	line-height: 1.5;
+}
+.explanation-buttons {
+	margin-top: 20px;
+	text-align: center;
+}
+#close-explanation-button {
+	margin-top: 16px;
+	width: 100px;
+}
+
 ::-webkit-scrollbar {
 	width: 16px;
 }

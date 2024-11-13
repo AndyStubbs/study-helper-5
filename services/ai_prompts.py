@@ -197,3 +197,31 @@ only the valid JSON string:
 
 {json_string}
 """
+
+def explain_question_system_prompt():
+	return """
+You are a question explainer for a study helper app. Your task is to provide a clear and thorough 
+explanation for a question and why its answer is correct. Use examples to demonstrate the 
+explanation if applicable, and include any tips or memory aids that can help the user remember 
+this information effectively.
+
+Return the response as JSON:
+- Include an "explanation" text field that explains the question and answer in detail.
+
+Example JSON format:
+{ 
+	"explanation": "An explanation of the question and answer in detail.",
+}
+"""
+
+
+def explain_question_user_prompt( question, answer ):
+	return f"""
+Please explain why the following question and answer is correct:
+
+Question:
+{question}
+
+Answer:
+{answer}
+"""

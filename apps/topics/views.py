@@ -14,7 +14,8 @@ from apps.topics.services import (
 	get_topic_description,
 	set_answer,
 	get_topic_suggestions,
-	delete_topic
+	delete_topic,
+	explain_topic
 )
 
 @restrict_to_view( "topics:generate" )
@@ -47,6 +48,13 @@ def topics( request ):
 def quiz( request ):
 	"""Render the HTML for the quiz modal popup"""
 	return render( request, "topics/quiz.html" )
+
+
+@restrict_to_view( "topics:explanation" )
+@login_required
+def explanation( request ):
+	"""Render the HTML for the explanation modal popup"""
+	return render( request, "topics/explain.html" )
 
 @csrf_exempt
 @login_required
@@ -183,10 +191,28 @@ def delete( request ):
 			topic_response = delete_topic( topic_id, request.user )
 			return JsonResponse( topic_response )
 		except Exception as e:
-			print( f"Error saving topic: {e}" )
+			print( f"Error deleting topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error saving topic: Wrong request method: {request.method}" )
+		print( f"Error deleting topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-
+@csrf_exempt
+@login_required
+def explain( request ):
+	"""Explain a topic"""
+	if request.method == "POST":
+		try:
+			print( "EXPLAIN TOPIC" )
+			data = json.loads( request.body )
+			question_id = data.get( "question_id", -1 )
+			if not isinstance( question_id, int ) or question_id == -1:
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			topic_response = explain_topic( question_id, request.user )
+			return JsonResponse( topic_response )
+		except Exception as e:
+			print( f"Error explaining topic: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error explaining topic: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )

@@ -1,4 +1,4 @@
-// static/js/topic_generator.js
+// static/js/topics_generator.js
 "use strict";
 
 /* global window.main */

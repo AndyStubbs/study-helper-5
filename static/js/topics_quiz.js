@@ -43,6 +43,11 @@ window.main.onReady( function () {
 		loadNextQuestion();
 	} );
 
+	// Explain button
+	m_explainButton.addEventListener( "click", () => {
+		window.main.explain( m_questionId );
+	} );
+
 	// Function to open the quiz modal and load the next question
 	function openQuizModal( topicId ) {
 		m_topicId = parseInt( topicId );

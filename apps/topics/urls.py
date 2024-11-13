@@ -16,4 +16,6 @@ urlpatterns = [
 	path( "suggest/", views.suggest, name="suggest" ),
 	path( "save/", views.save, name="save" ),
 	path( "delete/", views.delete, name="delete" ),
+	path( "explain/", views.explain, name="explain" ),
+	path( "explanation/", views.explanation, name="explanation" ),
 ]

@@ -8,14 +8,7 @@ from django.db.models import Func, Q, F
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from apps.topics.models import Topic, Question, Concept, UserKnowledge
-from services.ai_services import (
-	create_questions,
-	evaluate_topic,
-	summarize_topic,
-	generate_concepts,
-	generate_question_concepts,
-	suggest_topics
-)
+from services import ai_services
 
 def get_next_question( topic_id ):
 	topic = Topic.objects.get( id=topic_id )
@@ -45,7 +38,7 @@ def get_next_question( topic_id ):
 		)
 
 		# Generate the new questions
-		questions_data = create_questions(
+		questions_data = ai_services.create_questions(
 			topic.name,
 			topic.description,
 			selected_concept.name,
@@ -63,7 +56,7 @@ def get_next_question( topic_id ):
 		questions_str = "\n".join( [ q.text for q in questions_data.questions ] )
 		
 		# Generate filtered question concepts
-		gen_questions_concepts = generate_question_concepts( concepts_str, questions_str )
+		gen_questions_concepts = ai_services.generate_question_concepts( concepts_str, questions_str )
 		questions_concepts = gen_questions_concepts.questions_concepts
 		
 		# Save all the generated questions
@@ -133,7 +126,7 @@ def get_next_question( topic_id ):
 		}
 
 def get_topic_evaluation( topic_name ):
-	ai_response = evaluate_topic( topic_name )
+	ai_response = ai_services.evaluate_topic( topic_name )
 	response_data = {
 		"description": ai_response.summary,
 		"suggestions": ai_response.suggestions
@@ -144,7 +137,7 @@ def get_topic_evaluation( topic_name ):
 	}
 
 def get_topic_suggestions( topic_name ):
-	ai_response = suggest_topics( topic_name )
+	ai_response = ai_services.suggest_topics( topic_name )
 	response_data = {
 		"suggestions": ai_response.suggestions
 	}
@@ -233,7 +226,7 @@ def generate_topic_concepts( topic_id ):
 	topic.concepts.clear()
 
 	# Generate new concepts using AI
-	ai_response = generate_concepts( topic.name, topic.description )
+	ai_response = ai_services.generate_concepts( topic.name, topic.description )
 
 	for concept_name in ai_response.concepts:
 
@@ -267,7 +260,7 @@ def normalize_concept_name( name ):
 	return re.sub( r"[^a-zA-Z]", "", name ).lower()
 
 def get_topic_description( topic_name ):
-	ai_response = summarize_topic( topic_name )
+	ai_response = ai_services.summarize_topic( topic_name )
 	response_data = {
 		"description": ai_response.summary
 	}
@@ -285,7 +278,9 @@ def set_answer( user, question_id, answer ):
 	
 	# Check if the topic belongs to the user
 	if question.topic.user != user:
-		raise PermissionDenied( "You do not have permission to answer this question." )
+		raise PermissionDenied(
+			f"User '{user.id}', attempted to access other question '{question_id}'."
+		)
 
 	# User skipped question
 	if answer == "":
@@ -338,3 +333,26 @@ def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):
 
 	# Save the updated record
 	user_knowledge.save()
+
+def explain_topic( question_id, user ):
+	try:
+		question = Question.objects.select_related( "topic" ).get( id=question_id )
+	except ObjectDoesNotExist:
+		raise ValueError( f"Question id: {question_id} not found." )
+	
+	# Check if the question belongs to the user
+	if question.topic.user != user:
+		raise PermissionDenied(
+			f"User '{user.id}', attempted to access other question '{question_id}'."
+		)
+	
+	ai_response = ai_services.explain_question( question.text, question.correct )
+	response_data = {
+		"question": question.text,
+		"answer": question.correct,
+		"explanation": ai_response.explanation
+	}
+	return {
+		"status": "success",
+		"data": response_data
+	}

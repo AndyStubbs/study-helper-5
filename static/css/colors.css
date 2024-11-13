@@ -85,14 +85,14 @@
 	/* Button 3 */
 	--button-tertiary-text-color: #eaeaea;
 	--button-tertiary-bg-color: #111;
-	--button-tertiary-border-color: #55e;
-	--button-tertiary-hover-border-color: #9797ce;
+	--button-tertiary-border-color: #9797ce;
+	--button-tertiary-hover-border-color: #55e;
 	--button-tertiary-hover-bg-color: #181818;
 	--button-tertiary-disabled-border-color: #999;
 
 	/* Status Colors */
-	--status-success-color: #383;
-	--status-error-color: #833;
+	--status-success-color: #3a3;
+	--status-error-color: #e33;
 
 	.icon-light {
 		display: block;
@@ -285,4 +285,14 @@ h2 {
 
 ::-webkit-scrollbar-thumb:horizontal {
 	border: 3px solid var(--thumb-horizontal-bg-color);
+}
+
+/* Explanation modal */
+
+#explanation-modal h2 {
+	color: var(--text-color-primary);
+}
+
+#explanation-content p {
+	color: var(--text-color-primary);
 }
