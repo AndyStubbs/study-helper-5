@@ -12,21 +12,18 @@ window.main.onReady( function () {
 	const m_explanationAnswer = document.getElementById( "explanation-answer" );
 	const m_explanationContent = document.getElementById( "explanation-content" );
 	const m_loadingOverlay = m_explanationModal.querySelector( ".loading-overlay" );
-	const m_explanationSectionH2 = document.getElementById( "explanation-section-h2" );
 
 	// Show explanation modal and load explanation content
 	function updateExplanation( question, answer, explanation ) {
-		m_explanationSectionH2.style.display = "";
 		m_explanationQuestion.style.textAlign = "left";
 		m_explanationQuestion.textContent = question;
-		m_explanationAnswer.textContent = answer;
+		m_explanationAnswer.innerHTML = "<strong>Answer: </strong>" + answer;
 		m_explanationContent.innerHTML = window.marked.parse( explanation );
 	}
 
 	// Hide the explanation modal
 	function hideExplanation() {
 		m_explanationModal.style.display = "none";
-		m_explanationSectionH2.style.display = "none";
 		m_explanationQuestion.textContent = "Loading explanation...";
 		m_explanationAnswer.textContent = "";
 		m_explanationContent.textContent = "";
@@ -39,13 +36,6 @@ window.main.onReady( function () {
 		}
 	} );
 
-	// Close modal when clicking off modal
-	m_explanationModal.addEventListener( "click", ( e ) => {
-		if( e.target === e.currentTarget ) {
-			m_explanationModal.style.display = "none";
-		}
-	} );
-	
 	// Attach event listener to "Explain" button in the quiz modal
 	window.main.explain = async function( question_id ) {
 		m_explanationQuestion.style.textAlign = "center";
@@ -69,4 +59,9 @@ window.main.onReady( function () {
 	// Close the modal when the close button is clicked
 	m_closeExplanationButton.addEventListener( "click", hideExplanation );
 	m_explanationModal.querySelector( ".close" ).addEventListener( "click", hideExplanation );
+	m_explanationModal.addEventListener( "click", ( e ) => {
+		if( e.target === e.currentTarget ) {
+			hideExplanation();
+		}
+	} );
 } );

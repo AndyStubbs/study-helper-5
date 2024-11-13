@@ -7,22 +7,25 @@ from datetime import datetime
 from django.db.models import Func, Q, F
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from apps.topics.models import Topic, Question, Concept, UserKnowledge
+from apps.topics import models
 from services import ai_services
 
 def get_next_question( topic_id ):
-	topic = Topic.objects.get( id=topic_id )
+	topic = models.Topic.objects.get( id=topic_id )
 
 	# Pick a random concept associated with the topic
 	concept_ids = topic.concepts.values_list( "id", flat=True )
 	if not concept_ids:
 		raise ValueError( "No concepts found for the topic." )
 	selected_concept_id  = random.choice( concept_ids )
-	selected_concept = Concept.objects.get( id=selected_concept_id )
+	selected_concept = models.Concept.objects.get( id=selected_concept_id )
 	print( f"Selected concept: {selected_concept.name}" )
 
 	 # Count the number of questions linked to the selected concept
-	question_count = Question.objects.filter( topic=topic, concepts=selected_concept ).count()
+	question_count = models.Question.objects.filter(
+		topic=topic,
+		concepts=selected_concept
+	).count()
 	
 	# Either generate new question or use question from database based on random chance
 	q_scale = 20
@@ -32,7 +35,7 @@ def get_next_question( topic_id ):
 
 		# Get previously asked questions text
 		previously_asked_questions = list(
-			Question.objects.filter( topic=topic, concepts=selected_concept ).values_list(
+			models.Question.objects.filter( topic=topic, concepts=selected_concept ).values_list(
 				"text", flat=True
 			)
 		)
@@ -56,7 +59,7 @@ def get_next_question( topic_id ):
 		questions_str = "\n".join( [ q.text for q in questions_data.questions ] )
 		
 		# Generate filtered question concepts
-		gen_questions_concepts = ai_services.generate_question_concepts( concepts_str, questions_str )
+		gen_questions_concepts = ai_services.filter_question_concepts( concepts_str, questions_str )
 		questions_concepts = gen_questions_concepts.questions_concepts
 		
 		# Save all the generated questions
@@ -69,7 +72,7 @@ def get_next_question( topic_id ):
 			concept_instances = []
 			for concept_name in question_concepts:
 				normalized_name = normalize_concept_name( concept_name )
-				concept = Concept.objects.filter( normalized_name=normalized_name ).first()
+				concept = models.Concept.objects.filter( normalized_name=normalized_name ).first()
 				concept_instances.append( concept )
 				if concept:
 					concept_instances.append( concept )
@@ -77,7 +80,7 @@ def get_next_question( topic_id ):
 					print( f"Warning: Concept '{concept_name}' not found." )
 
 			# Create the question in the database
-			question = Question.objects.create(
+			question = models.Question.objects.create(
 				topic=topic,
 				text=question_data.text,
 				answers=question_data.answers,
@@ -105,7 +108,7 @@ def get_next_question( topic_id ):
 	# Return a random question from the database
 	else:
 		print( "LOADING RANDOM QUESITON FROM DB" )
-		questions = list( Question.objects.filter( topic=topic ) )
+		questions = list( models.Question.objects.filter( topic=topic ) )
 		questions.sort( key=lambda q: q.question_rank() )
 		choices = []
 		for question in questions:
@@ -151,7 +154,7 @@ def save_topic( topic_name, topic_description, user ):
 		print( topic_name )
 
 		# Check if the topic already exists
-		existing_topic = Topic.objects.filter( name=topic_name ).first()
+		existing_topic = models.Topic.objects.filter( name=topic_name ).first()
 
 		if existing_topic:
 			print( "UPDATING TOPIC" )
@@ -174,7 +177,7 @@ def save_topic( topic_name, topic_description, user ):
 		else:
 			print( "CREATING TOPIC" )
 			# If the topic does not exist, create a new topic
-			topic = Topic.objects.create(
+			topic = models.Topic.objects.create(
 				name=topic_name,
 				description=topic_description,
 				user=user
@@ -196,7 +199,7 @@ def save_topic( topic_name, topic_description, user ):
 
 def delete_topic( topic_id, user ):
 	# Retrieve the topic
-	topic = Topic.objects.get( id=topic_id )
+	topic = models.Topic.objects.get( id=topic_id )
 
 	# Check if the topic belongs to the user
 	if topic.user != user:
@@ -206,7 +209,7 @@ def delete_topic( topic_id, user ):
 	topic.questions.all().delete()
 	
 	# Delete all user knowledge records associated with the topic
-	UserKnowledge.objects.filter( topic=topic ).delete()
+	models.UserKnowledge.objects.filter( topic=topic ).delete()
 	
 	# Finally, delete the topic itself
 	topic.delete()
@@ -218,7 +221,7 @@ def delete_topic( topic_id, user ):
 
 def generate_topic_concepts( topic_id ):
 	print( "GENERATING CONCEPTS" )
-	topic = Topic.objects.get( id=topic_id )
+	topic = models.Topic.objects.get( id=topic_id )
 
 	# Clear any existing concepts associated with this topic
 	# This is necessary because the description could be changed which may make some concepts
@@ -236,7 +239,7 @@ def generate_topic_concepts( topic_id ):
 		print( f"Normalized name: {normalized_name}" )
 
 		# Find a similar concept name
-		similar_concept = Concept.objects.filter(
+		similar_concept = models.Concept.objects.filter(
 			normalized_name=normalized_name
 		).first()
 
@@ -245,7 +248,10 @@ def generate_topic_concepts( topic_id ):
 			concept = similar_concept
 			created = False
 		else:
-			concept = Concept.objects.create( name=concept_name, normalized_name=normalized_name )
+			concept = models.Concept.objects.create(
+				name=concept_name,
+				normalized_name=normalized_name
+			)
 			created = True
 
 		# Add the concept to the topic's concepts if it's not already linked
@@ -272,7 +278,7 @@ def get_topic_description( topic_name ):
 def set_answer( user, question_id, answer ):
 	
 	try:
-		question = Question.objects.select_related( "topic" ).get( id=question_id )
+		question = models.Question.objects.select_related( "topic" ).get( id=question_id )
 	except ObjectDoesNotExist:
 		raise ValueError( f"Question id: {question_id} not found." )
 	
@@ -316,7 +322,7 @@ def set_answer( user, question_id, answer ):
 def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):
 
 	# Get or create the UserKnowledge instance for this combination
-	user_knowledge, _ = UserKnowledge.objects.get_or_create(
+	user_knowledge, _ = models.UserKnowledge.objects.get_or_create(
 		user=user, topic=topic, concept=concept
 	)
 	
@@ -336,7 +342,7 @@ def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):
 
 def explain_topic( question_id, user ):
 	try:
-		question = Question.objects.select_related( "topic" ).get( id=question_id )
+		question = models.Question.objects.select_related( "topic" ).get( id=question_id )
 	except ObjectDoesNotExist:
 		raise ValueError( f"Question id: {question_id} not found." )
 	
@@ -346,12 +352,33 @@ def explain_topic( question_id, user ):
 			f"User '{user.id}', attempted to access other question '{question_id}'."
 		)
 	
-	ai_response = ai_services.explain_question( question.text, question.correct )
-	response_data = {
-		"question": question.text,
-		"answer": question.correct,
-		"explanation": ai_response.explanation
-	}
+	print( "LOADING FROM DATABASE" )
+	# Load or create a new explanation instance
+	explanation, created = models.Explanation.objects.get_or_create(
+		question=question,
+		defaults={"text": ""}
+	)
+	print( "LOADED" )
+
+	# Create a new explanation for question
+	if created:
+		print( "CREATING NEW EXPLANATION" )
+		ai_response = ai_services.explain_question( question.text, question.correct )
+		explanation.text = ai_response.explanation
+		explanation.save()
+		response_data = {
+			"question": question.text,
+			"answer": question.correct,
+			"explanation": ai_response.explanation
+		}
+	else:
+		print( "LOADED EXPLANATION" )
+		response_data = {
+			"question": question.text,
+			"answer": question.correct,
+			"explanation": explanation.text
+		}
+	
 	return {
 		"status": "success",
 		"data": response_data

@@ -300,10 +300,11 @@ h2 {
 	margin-bottom: 20px;
 	text-align: left;
 }
-#explanation-content p {
+#explanation-content {
 	margin: 20px 0;
 	font-size: 16px;
 	line-height: 1.5;
+	min-height: 80px;
 }
 .explanation-buttons {
 	margin-top: 20px;

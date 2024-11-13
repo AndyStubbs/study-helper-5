@@ -121,8 +121,8 @@ def create_questions( topic_name, topic_description, concept_name, previous_ques
 		response_format=AI_GenQuestions
 	)
 
-def generate_question_concepts( concepts, questions ):
-	print( f"Creating concepts for questions" )
+def filter_question_concepts( concepts, questions ):
+	print( f"Filtering concepts for questions" )
 	return run_chat(
 		model="gpt-4o-mini",
 		messages=[

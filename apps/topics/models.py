@@ -90,8 +90,19 @@ class Question( models.Model ):
 	def __str__( self ):
 		return f"{self.text} - Topic: {self.topic.name}"
 
+class Explanation( models.Model ):
+	question = models.OneToOneField(
+		Question,
+		on_delete=models.CASCADE,
+		related_name="explanation",
+		help_text="The question that this explanation is linked to."
+	)
+	text = models.TextField( help_text="Detailed explanation for the question." )
 
-class UserKnowledge(models.Model):
+	def __str__(self):
+		return f"Explanation for Question ID: {self.question.id}"
+
+class UserKnowledge( models.Model ):
 	user = models.ForeignKey(
 		CustomUser,
 		on_delete=models.CASCADE,
