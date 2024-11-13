@@ -94,8 +94,7 @@ h2 {
 	border-style: solid;
 	border-width: 3px;
 }
-#save-topic-btn,
-#skip-button {
+#save-topic-btn {
 	margin-top: 20px;
 }
 #result-area {
@@ -240,18 +239,6 @@ h2 {
 	font-weight: bold;
 }
 
-#quiz-answers {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 10px;
-	margin-top: 20px;
-}
-
-#quiz-answers h2 {
-	text-align: center;
-	font-size: 20px;
-}
-
 .btn-lg {
 	min-height: 50px;
 	border-radius: 5px;
@@ -279,6 +266,28 @@ h2 {
 	padding: 5px;
 }
 
+#quiz-answers {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+	margin-top: 20px;
+	overflow: auto;
+}
+
+#quiz-answers h2 {
+	text-align: center;
+	font-size: 20px;
+}
+
+#quiz-result {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	text-align: left;
+}
+
+.quiz-buttons {
+	text-align: left;
+}
 
 ::-webkit-scrollbar {
 	width: 16px;

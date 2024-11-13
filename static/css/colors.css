@@ -36,6 +36,7 @@
 	--button-tertiary-border-color: #9797ce;
 	--button-tertiary-hover-border-color: #55e;
 	--button-tertiary-hover-bg-color: #eee;
+	--button-tertiary-disabled-border-color: #999;
 
 	/* Button 4 */
 	--button-4-bg-color: #833;
@@ -87,6 +88,7 @@
 	--button-tertiary-border-color: #55e;
 	--button-tertiary-hover-border-color: #9797ce;
 	--button-tertiary-hover-bg-color: #181818;
+	--button-tertiary-disabled-border-color: #999;
 
 	/* Status Colors */
 	--status-success-color: #383;
@@ -169,10 +171,21 @@ h2 {
 	color: var(--button-tertiary-text-color);
 	border-color: var(--button-tertiary-border-color);
 }
-
 .btn-c3:hover {
-	background-color: var(--button-tertiary-hover-bg-color);
+	background-color: var(--button-tertiary-bg-color);
 	border-color: var(--button-tertiary-hover-border-color);
+}
+.btn-c3:disabled {
+	border-color: var(--button-tertiary-disabled-border-color);
+	background-color: var(--button-tertiary-hover-bg-color);
+	cursor: default;
+}
+
+.btn-c3.correct {
+	border-color: var(--status-success-color);
+}
+.btn-c3.wrong {
+	border-color: var(--status-error-color);
 }
 
 .btn-c4 {

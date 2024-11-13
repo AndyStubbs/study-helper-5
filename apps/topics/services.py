@@ -102,7 +102,6 @@ def get_next_question( topic_id ):
 			"id": question.id,
 			"text": question.text,
 			"answers": question.answers,
-			"correct": question.correct,
 			"concepts": [ concept.name for concept in question.concepts.all() ]
 		}
 		return {
@@ -126,7 +125,6 @@ def get_next_question( topic_id ):
 			"id": question.id,
 			"text": question.text,
 			"answers": question.answers,
-			"correct": question.correct,
 			"concepts": [ concept.name for concept in question.concepts.all() ]
 		}
 		return {
@@ -296,7 +294,7 @@ def set_answer( user, question_id, answer ):
 		question.save()
 		return {
 			"status": "success",
-			"data": "Question skipped"
+			"data": { "answer": question.correct }
 		}
 
 	# Set question answered correct
@@ -318,7 +316,7 @@ def set_answer( user, question_id, answer ):
 	for concept in question.concepts.exclude( id=question.main_concept.id ):
 		update_user_knowledge( user, question.topic, concept, is_correct, False )
 	
-	return { "status": "success", "data": "Answer recorded" }
+	return { "status": "success", "data": { "answer": question.correct } }
 
 def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):
 
