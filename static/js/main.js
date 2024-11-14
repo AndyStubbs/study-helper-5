@@ -160,5 +160,12 @@ document.addEventListener( "DOMContentLoaded", function () {
 		} else {
 			document.body.dataset.theme = "dark";
 		}
+		localStorage.setItem( "theme", document.body.dataset.theme );
 	} );
+
+	// Load theme
+	const theme = localStorage.getItem( "theme" );
+	if( theme ) {
+		document.body.dataset.theme = theme;
+	}
 } );
