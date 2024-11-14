@@ -128,6 +128,8 @@ window.main.onReady( function () {
 
 			m_skipButton.textContent = "Next";
 			m_explainButton.style.display = "";
+
+			window.main.loadHistory();
 		}
 	}
 

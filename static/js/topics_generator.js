@@ -172,6 +172,7 @@ window.main.onReady( () => {
 			resultMessage.classList.remove( "result-error" );
 			resultMessage.classList.add( "result-success" );
 			resultMessage.textContent = "Topic saved successfully!";
+			window.main.loadHistory();
 		} catch ( error ) {
 			console.error( "Error:", error );
 			const resultMessage = document.querySelector( ".result-message" );
@@ -246,6 +247,7 @@ window.main.onReady( () => {
 			topicLi.remove();
 			document.getElementById( "topic-input" ).value = "";
 			document.getElementById( "description" ).value = "";
+			window.main.loadHistory();
 		} catch( error ) {
 			console.error( "Error:", error );
 			const resultMessage = document.querySelector( ".result-message" );

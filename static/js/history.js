@@ -6,6 +6,8 @@
 
 window.main.onReady( () => {
 
+	window.main.loadHistory = loadHistoryData;
+
 	const m_historyBody = document.querySelector( ".history-body" );
 	const m_searchInput = document.getElementById( "search-input" );
 	const m_topicFilter = document.getElementById( "topic-filter" );
@@ -13,16 +15,16 @@ window.main.onReady( () => {
 
 	// Load and render data
 	async function loadHistoryData() {
-
 		const data = await window.main.handleRequest( "/topics/history/" );
 		m_questionsData = data;
-
 		populateTopicsFilter();
 		renderTable();
 	}
 
 	// Populate the topic filter dropdown
 	function populateTopicsFilter() {
+		const selectedTopic = m_topicFilter.value;
+		m_topicFilter.innerHTML = "";
 		const topics = [ ...new Set( m_questionsData.map( question => question.topic ) ) ];
 		topics.forEach( topic => {
 			const option = document.createElement( "option" );
@@ -30,6 +32,7 @@ window.main.onReady( () => {
 			option.textContent = topic;
 			m_topicFilter.appendChild( option );
 		} );
+		m_topicFilter.value = selectedTopic;
 	}
 
 	// Render the table rows based on data
