@@ -422,11 +422,14 @@ h2 {
 }
 
 .info-concepts {
-	margin-top: 8px;
+	margin-top: 0;
 	margin-bottom: 16px;
 }
 .info-concepts ul {
 	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-evenly;
 }
 .info-concepts svg {
 	position: relative;

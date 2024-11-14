@@ -38,7 +38,10 @@ window.main.onReady( () => {
 		const selectedTopic = m_topicFilter.value;
 		
 		const filteredData = m_questionsData.filter( question => {
-			const matchesSearch = question.text.toLowerCase().includes( searchText );
+			const matchesSearch = (
+				question.text.toLowerCase().includes( searchText ) ||
+				question.topic.toLowerCase().includes( searchText )
+			);
 			const matchesTopic = selectedTopic ? question.topic === selectedTopic : true;
 			return matchesSearch && matchesTopic;
 		} );

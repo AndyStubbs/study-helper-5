@@ -120,10 +120,15 @@ body {
 }
 
 input,
-textarea {
+textarea,
+select {
 	border: 1px solid var(--text-color-primary);
 	background-color: var(--input-bg-color);
 	color: var(--text-color-primary);
+}
+
+select {
+	cursor: pointer;
 }
 
 .outer-container {
@@ -258,6 +263,8 @@ h2 {
 	background-color: var(--container-bg-color);
 	box-shadow: 0 4px 8px var(--shadow-color-dark);
 }
+
+
 
 #quiz-answers h2 {
 	color: var(--text-color-primary);
