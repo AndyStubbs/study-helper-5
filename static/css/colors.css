@@ -56,8 +56,8 @@
 [data-theme="dark"] {
 	/* Dark mode colors */
 	--background-color: #1c1c1c;
-	--text-color-primary: #eaeaea;
-	--text-color-secondary: #999;
+	--text-color-primary: #aaa;
+	--text-color-secondary: #888;
 	--container-bg-color: #222;
 	--input-bg-color: #1e1e1e;
 	--shadow-color-light: rgba(255, 255, 255, 0.1);
