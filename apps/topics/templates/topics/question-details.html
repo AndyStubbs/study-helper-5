@@ -1,0 +1,74 @@
+<div class="modal">
+	<div class="modal-content question-details">
+		<h3 id="qd-text">${question.text}</h3>
+		<div class="question-items">
+			<div class="info-group">
+				<svg
+					xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round"
+					stroke-linejoin="round" class="feather feather-check-circle"
+				>
+					<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+					<polyline points="22 4 12 14.01 9 11.01"></polyline>
+				</svg>
+				<span class="info-label">Correct Count:</span>
+				<span id="qd-correct">${question.correct}</span>
+			</div>
+			<div class="info-group">
+				<svg
+					xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round"
+					stroke-linejoin="round" class="feather feather-bar-chart-2"
+				>
+					<line x1="18" y1="20" x2="18" y2="10"></line>
+					<line x1="12" y1="20" x2="12" y2="4"></line>
+					<line x1="6" y1="20" x2="6" y2="14"></line>
+				</svg>
+				<span class="info-label">Average Score:</span>
+				<span id="qd-average">${question.average * 100}%</span>
+			</div>
+			<div class="info-group">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round"
+					stroke-linejoin="round" class="feather feather-calendar"
+				>
+					<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+					<line x1="16" y1="2" x2="16" y2="6"></line>
+					<line x1="8" y1="2" x2="8" y2="6"></line>
+					<line x1="3" y1="10" x2="21" y2="10"></line>
+				</svg>
+				<span class="info-label">Last Asked:</span>
+				<span id="qd-last-asked" title="${question.last_asked}">${lastAskedShort}</span>
+			</div>
+			<div class="info-group">
+				<svg
+					xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round"
+					stroke-linejoin="round" class="feather feather-book"
+				>
+					<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+					<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+				</svg>
+				<span class="info-label">Main Concept:</span>
+				<span id="qd-main-concept">${question.main_concept}</span>
+			</div>
+		</div>
+		<div class="info-concepts">
+			<svg
+				xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+				stroke="currentColor" stroke-width="2" stroke-linecap="round"
+				stroke-linejoin="round" class="feather feather-book-open"
+			>
+				<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+				<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+			</svg>
+			<span class="info-label">Related Concepts:</span>
+			<ul id="qd-related-concepts" class="related-concepts">${conceptItems}</ul>
+		</div>
+		<div class="question-buttons">
+			<button id="qd-explain" class="btn btn-c1">Explain</button>
+			<button id="qd-try" class="btn btn-c1">Try</button>
+			<button id="qd-close" class="btn btn-c2">Close</button>
+		</div>
+	</div>
+</div>

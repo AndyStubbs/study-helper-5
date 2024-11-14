@@ -67,6 +67,11 @@ def historytab( request ):
 	"""Render the HTML for the history tab"""
 	return render( request, "topics/history.html" )
 
+@restrict_to_view( "topics:qd" )
+@login_required
+def qd( request ):
+	"""Render the HTML for the question-details modal popup"""
+	return render( request, "topics/question-details.html" )
 
 ##################
 # AJAX API'S

@@ -19,6 +19,14 @@ window.main.onReady( function () {
 		m_explanationQuestion.textContent = question;
 		m_explanationAnswer.innerHTML = "<strong>Answer: </strong>" + answer;
 		m_explanationContent.innerHTML = window.marked.parse( explanation );
+
+		// Toggle Highlight.js theme based on dark or light mode
+		const isDarkMode = document.body.dataset.theme === "dark";
+		document.getElementById( "hljs-light-theme" ).disabled = isDarkMode;
+		document.getElementById( "hljs-dark-theme" ).disabled = !isDarkMode;
+
+		// Apply syntax highlighting
+		hljs.highlightAll();
 	}
 
 	// Hide the explanation modal
