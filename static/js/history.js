@@ -183,18 +183,24 @@ window.main.onReady( () => {
 					</ul>
 				</div>
 				<div class="question-buttons">
-					<button class=" btn btn-c1" onclick="window.main.explainQuestion(${id})">
-						Explain
-					</button>
-					<button class="btn btn-c1" onclick="window.main.tryQuestion(${id})">\
-						Try
-					</button>
-					<button class="btn btn-c2" onclick="window.main.tryQuestion(${id})">\
-						Close
-					</button>
+					<button id="qd-explain" class="btn btn-c1">Explain</button>
+					<button id="qd-try" class="btn btn-c1">Try</button>
+					<button id="qd-close" class="btn btn-c2">Close</button>
 				</div>
 			</div>
 		`, true );
+		const modal = document.getElementById( "modal-alert" );
+		document.getElementById( "qd-explain" ).addEventListener( "click", () => {
+			window.main.explain( id );
+			modal.style.display = "none";
+		} );
+		document.getElementById( "qd-try" ).addEventListener( "click", () => {
+			window.main.quizQuestion( id );
+			modal.style.display = "none";
+		} );
+		document.getElementById( "qd-close" ).addEventListener( "click", () => {
+			modal.style.display = "none";
+		} );
 	}
 
 	m_searchInput.addEventListener( "input", renderTable );

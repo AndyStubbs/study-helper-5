@@ -6,6 +6,7 @@
 window.main.onReady( function () {
 
 	window.main.quizTopic = openQuizModal;
+	window.main.quizQuestion = openQuestionModal;
 
 	const m_quizModal = document.getElementById( "quiz-modal" );
 	const m_closeModal = document.querySelector( ".close" );
@@ -55,57 +56,37 @@ window.main.onReady( function () {
 		loadNextQuestion();
 	}
 
+	function openQuestionModal( questionId, topicId ) {
+		m_topicId = parseInt( topicId );
+		m_quizModal.style.display = "block";
+		loadQuestion( questionId );
+	}
+
+	async function loadQuestion( questionId ) {
+		resetQuestion();
+		try {
+			const data = await main.handleRequest(
+				"/topics/question2/",
+				{ "question_id": questionId }
+			);
+			updateQuestion( data );
+		} catch ( error ) {
+			console.error( "Error loading quiz:", error );
+			m_questionElement.textContent = "Error loading quiz.";
+			m_answerButtons.forEach( button => {
+				button.textContent = "N/A";
+			} );
+		} finally {
+			m_quizModal.querySelector( ".loading-overlay" ).style.visibility = "hidden";
+		}
+	}
+
 	// Function to load the next quiz question from the server
 	async function loadNextQuestion() {
-		// Reset to empty question
-		m_quizModal.querySelector( ".loading-overlay" ).style.visibility = "visible";
-		m_questionElement.textContent = "Loading question...";
-		document.getElementById( "quiz-result" ).innerHTML = "&nbsp;";
-		m_skipButton.textContent = "Skip";
-		m_explainButton.style.display = "none";
-		m_answerButtons.forEach( button => {
-			button.textContent = "...";
-			button.style.fontSize = "18px";
-			button.style.fontWeight = "bold";
-			button.classList.remove( "long" );
-			button.classList.remove( "correct" );
-			button.classList.remove( "wrong" );
-			button.disabled = true;
-		} );
-		m_questionId = -1;
-		m_correctAnswer = "";
-
+		resetQuestion();
 		try {
 			const data = await main.handleRequest( "/topics/question/", { "topic_id": m_topicId } );
-
-			// Shuffle the answers
-			const answers = [];
-			while( data.answers.length > 0 ) {
-				const i = Math.floor( Math.random() * data.answers.length );
-				const answer = data.answers[ i ];
-				data.answers.splice( i, 1 );
-				answers.push( answer );
-			}
-			m_questionId = data.id;
-			m_questionElement.textContent = data.text;
-			let maxLength = 0;
-
-			m_answerButtons.forEach( ( button, index ) => {
-				button.style.fontSize = "";
-				button.style.fontWeight = "";
-				button.textContent = answers[ index ] || "";
-				button.classList.remove( "long" );
-				let len = answers[ index ].length;
-				if( len > maxLength ) {
-					maxLength = len;
-				}
-				button.disabled = false;
-			} );
-			if( maxLength > 40 ) {
-				m_answerButtons.forEach( button => {
-					button.classList.add( "long" );
-				} );
-			}
+			updateQuestion( data );
 		} catch ( error ) {
 			console.error( "Error loading quiz:", error );
 			m_questionElement.textContent = "Error loading quiz.";
@@ -147,6 +128,56 @@ window.main.onReady( function () {
 
 			m_skipButton.textContent = "Next";
 			m_explainButton.style.display = "";
+		}
+	}
+
+	// Reset to empty question
+	function resetQuestion() {
+		m_quizModal.querySelector( ".loading-overlay" ).style.visibility = "visible";
+		m_questionElement.textContent = "Loading question...";
+		document.getElementById( "quiz-result" ).innerHTML = "&nbsp;";
+		m_skipButton.textContent = "Skip";
+		m_explainButton.style.display = "none";
+		m_answerButtons.forEach( button => {
+			button.textContent = "...";
+			button.style.fontSize = "18px";
+			button.style.fontWeight = "bold";
+			button.classList.remove( "long" );
+			button.classList.remove( "correct" );
+			button.classList.remove( "wrong" );
+			button.disabled = true;
+		} );
+		m_questionId = -1;
+		m_correctAnswer = "";
+	}
+
+	function updateQuestion( data ) {
+		// Shuffle the answers
+		const answers = [];
+		while( data.answers.length > 0 ) {
+			const i = Math.floor( Math.random() * data.answers.length );
+			const answer = data.answers[ i ];
+			data.answers.splice( i, 1 );
+			answers.push( answer );
+		}
+		m_questionId = data.id;
+		m_questionElement.textContent = data.text;
+		let maxLength = 0;
+		m_answerButtons.forEach( ( button, index ) => {
+			button.style.fontSize = "";
+			button.style.fontWeight = "";
+			button.textContent = answers[ index ] || "";
+			button.classList.remove( "long" );
+			let len = answers[ index ].length;
+			if( len > maxLength ) {
+				maxLength = len;
+			}
+			button.disabled = false;
+		} );
+		if( maxLength > 40 ) {
+			m_answerButtons.forEach( button => {
+				button.classList.add( "long" );
+			} );
 		}
 	}
 

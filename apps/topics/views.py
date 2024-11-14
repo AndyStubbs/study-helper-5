@@ -94,6 +94,35 @@ def question( request ):
 
 @csrf_exempt
 @login_required
+def question2( request ):
+	"""Gets a question for the quiz modal popup by questionId"""
+	if request.method == "POST":
+		try:
+			data = json.loads( request.body )
+			question_id = data.get( "question_id", -1 )
+			if not isinstance( question_id, int ) or question_id == -1:
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			question_id = int( question_id )
+			question = Question.objects.get( id=question_id )
+			question_response = {
+				"id": question.id,
+				"text": question.text,
+				"answers": question.answers,
+				"concepts": [ concept.name for concept in question.concepts.all() ]
+			}
+			return JsonResponse( {
+				"status": "success",
+				"data": question_response
+			} )
+		except Exception as e:
+			print( f"Error generating question topic: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error generating question: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
+@csrf_exempt
+@login_required
 def answer( request ):
 	"""Submit an answer from from the user"""
 	if request.method == "POST":

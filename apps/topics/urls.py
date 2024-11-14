@@ -10,6 +10,7 @@ urlpatterns = [
 	path( "topics/", views.topics, name="topics" ),
 	path( "quiz/", views.quiz, name="quiz" ),
 	path( "question/", views.question, name="question" ),
+	path( "question2/", views.question2, name="question2" ),
 	path( "answer/", views.answer, name="answer" ),
 	path( "evaluate/", views.evaluate, name="evaluate" ),
 	path( "summarize/", views.summarize, name="summarize" ),
