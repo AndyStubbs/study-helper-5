@@ -1,6 +1,7 @@
 # topics/views.py
 
 import json
+from django.db.models import F, Value
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -236,16 +237,39 @@ def explain( request ):
 def history( request ):
 	"""Fetch all questions answered by the user"""
 	user = request.user
-	questions = Question.objects.filter( topic__user=user, last_asked__isnull=False ).values(
-		"id", "topic__name", "text", "correct_count", "wrong_count"
+
+	# Fetch questions with selected fields
+	questions = (
+		Question.objects.filter( topic__user=user, last_asked__isnull=False )
+		.values(
+			"id",
+			"topic__name",
+			"text",
+			"correct_count",
+			"wrong_count",
+			"skip_count",
+			"last_asked",
+			"main_concept__name"
+		)
 	)
 	questions_data = []
 	for question in questions:
+
+		# Calculate average score
 		total = question[ "correct_count" ] + question[ "wrong_count" ]
 		if total > 0:
 			average_score = round( question[ "correct_count" ] / total, 2 )
 		else:
 			average_score = 0
+		
+		# Get related concepts for each question
+		concepts = list(
+			Question.objects.get( id=question[ "id" ] ).concepts.values_list( "name", flat=True )
+		)
+
+		# Set last asked date
+		if question[ "last_asked" ]:
+			last_asked = question[ "last_asked" ].strftime( "%Y-%m-%d %H:%M:%S" )
 		questions_data.append( {
 			"id": question[ "id" ],
 			"topic": question[ "topic__name" ],
@@ -253,5 +277,8 @@ def history( request ):
 			"correct": question[ "correct_count" ],
 			"wrong": question[ "wrong_count" ],
 			"average": average_score,
+			"concepts": concepts,
+			"main_concept": question[ "main_concept__name" ],
+			"last_asked": last_asked
 		} )
 	return JsonResponse( { "data": questions_data } )

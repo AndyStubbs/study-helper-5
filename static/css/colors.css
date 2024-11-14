@@ -8,6 +8,7 @@
 	--container-bg-color: #f4f4f4;
 	--input-bg-color: #fff;
 	--shadow-color-light: rgba(0, 0, 0, 0.1);
+	--shadow-color-dark: rgba(0, 0, 0, 0.5);
 	--border-color-light: #ddd;
 	--tab-active-color: #4CAF50;
 	--tab-bg-color: #ddd;
@@ -60,6 +61,7 @@
 	--container-bg-color: #222;
 	--input-bg-color: #1e1e1e;
 	--shadow-color-light: rgba(255, 255, 255, 0.1);
+	--shadow-color-dark: rgba(255, 255, 255, 0.25);
 	--border-color-light: #3f3f3f;
 	--tab-active-color: #4CAF50;
 	--tab-bg-color: #2f2f2f;
@@ -233,7 +235,7 @@ h2 {
 
 #topics-content li p.short:hover {
 	background-color: var(--button-tertiary-hover-bg-color);
-	box-shadow: 0px 0px 10px var(--shadow-color-light);
+	box-shadow: 0px 0px 10px var(--shadow-color-dark);
 }
 
 #topics-content input[type="text"] {
@@ -254,7 +256,7 @@ h2 {
 
 .modal {
 	background-color: var(--container-bg-color);
-	box-shadow: 0 4px 8px var(--shadow-color-light);
+	box-shadow: 0 4px 8px var(--shadow-color-dark);
 }
 
 #quiz-answers h2 {

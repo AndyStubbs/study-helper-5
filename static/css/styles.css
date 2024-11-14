@@ -394,6 +394,48 @@ h2 {
 	text-align: right;
 }
 
+.question-details {
+	text-align: left;
+}
+
+.question-title {
+	margin-bottom: 15px;
+	font-size: 1.5em;
+	text-align: center;
+}
+
+.question-items {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-around;
+	flex-direction: row;
+}
+
+.question-items .info-group {
+	width: 274px;
+}
+
+.question-details svg {
+	width: 25px;
+	position: relative;
+	top: 4px;
+}
+
+.info-concepts {
+	margin-top: 8px;
+	margin-bottom: 16px;
+}
+.info-concepts ul {
+	margin: 0;
+}
+.info-concepts svg {
+	position: relative;
+	top: 8px;
+}
+.info-label {
+	font-weight: bold;
+}
+
 ::-webkit-scrollbar {
 	width: 16px;
 }

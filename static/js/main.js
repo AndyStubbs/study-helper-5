@@ -36,7 +36,7 @@ window.main = {
 		const responseObj = await response.json();
 		return responseObj.data;
 	},
-	"alert": ( msg ) => {
+	"alert": ( msg, hideButtons ) => {
 		return new Promise( ( resolve ) => {
 			const alertModal = document.getElementById( "modal-alert" );
 			alertModal.style.display = "block";
@@ -57,6 +57,10 @@ window.main = {
 					resolve();
 				}
 			} );
+
+			if( hideButtons ) {
+				okButton.style.display = "none";
+			}
 		} );
 	},
 	"confirm": async ( msg ) => {
