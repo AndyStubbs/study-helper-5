@@ -32,11 +32,13 @@
 				<div class="tab-container">
 					<button class="tab active" data-tab="generator">Topic Generator</button>
 					<button class="tab" data-tab="topics">Topics</button>
+					<button class="tab" data-tab="history">History</button>
 					<button class="tab" data-tab="about">About</button>
 				</div>
 				<div class="content-container">
 					<div id="generator-content" class="tab-content active" data-view="topics:generate"></div>
 					<div id="topics-content" class="tab-content" data-view="topics:topics" style="display: none;"></div>
+					<div id="history-content" class="tab-content" data-view="topics:historytab" style="display: none;"></div>
 					<div id="about-content" class="tab-content" data-view="about" style="display: none;"></div>
 				</div>
 			</div>
@@ -48,7 +50,7 @@
 		<div class="modal">
 			<div class="modal-content">
 				<div class="alert-message"></div>
-				<button class="btn-sm btn-c2">Ok</button>
+				<button id="modal-ok" class="btn-sm btn-c2">Ok</button>
 			</div>
 		</div>
 	</div>
@@ -66,5 +68,6 @@
 	<script src="{% static 'js/topics_filter.js' %}"></script>
 	<script src="{% static 'js/topics_quiz.js' %}"></script>
 	<script src="{% static 'js/topics_explain.js' %}"></script>
+	<script src="{% static 'js/history.js' %}"></script>
 </body>
 </html>

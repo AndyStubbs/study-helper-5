@@ -31,8 +31,13 @@ header {
 	background-color: var(--button-hover-bg-color-2);
 	transform: scale(1.1);
 }
+input[type="text"] {
+	padding: 10px;
+	font-size: 16px;
+	border-radius: 4px;
+}
 .outer-container {
-	max-width: 800px;
+	max-width: 1000px;
 	margin: 0 auto;
 	border-radius: 5px;
 	overflow: hidden;
@@ -61,9 +66,6 @@ h2 {
 }
 #topic-input {
 	flex-grow: 1;
-	padding: 10px;
-	font-size: 16px;
-	border-radius: 4px;
 	margin-right: 16px;
 }
 .sug-btn {
@@ -182,9 +184,6 @@ h2 {
 #topics-content input[type="text"] {
 	margin-bottom: 15px;
 	width: calc(100% - 20px);
-	padding: 10px;
-	font-size: 16px;
-	border-radius: 4px;
 }
 .result-options {
 	display: flex;
@@ -306,6 +305,9 @@ h2 {
 	line-height: 1.5;
 	min-height: 80px;
 }
+#explanation-content ul {
+	margin: 20px 30px;
+}
 .explanation-buttons {
 	margin-top: 20px;
 	text-align: center;
@@ -313,6 +315,83 @@ h2 {
 #close-explanation-button {
 	margin-top: 16px;
 	width: 100px;
+}
+
+.history-controls {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 10px;
+	justify-content: space-between;
+}
+
+.history-controls input {
+	flex-grow: 1;
+}
+
+.history-controls select {
+	padding: 10px;
+	border-radius: 4px;
+}
+
+.history-table {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.history-header {
+	font-weight: bold;
+	user-select: none;
+	margin-right: 35px;
+}
+
+.history-header, .history-row {
+	display: flex;
+	padding: 10px;
+}
+
+.header-cell, .row-cell {
+	flex: 1;
+	padding: 5px;
+	text-align: left;
+}
+
+/* Topic column */
+.header-cell:first-child,
+.row-cell:first-child {
+	flex: 1.2;
+}
+
+/* Question column */
+.header-cell:nth-child(2),
+.row-cell:nth-child(2) {
+	flex: 3.5;
+}
+
+/* Score column */
+.header-cell:nth-child(3),
+.row-cell:nth-child(3) {
+	flex: 0 0 65px;
+}
+
+/* Options column */
+.header-cell:last-child,
+.row-cell:last-child {
+	flex: 0 0 70px;
+	text-align: right;
+}
+
+.sortable {
+	cursor: pointer;
+}
+
+.history-body {
+	max-height: 500px;
+	overflow-y: auto;
+}
+
+.row-cell:last-child {
+	text-align: right;
 }
 
 ::-webkit-scrollbar {

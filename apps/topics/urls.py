@@ -18,4 +18,6 @@ urlpatterns = [
 	path( "delete/", views.delete, name="delete" ),
 	path( "explain/", views.explain, name="explain" ),
 	path( "explanation/", views.explanation, name="explanation" ),
+	path( "history/", views.history, name="history" ),
+	path( "historytab/", views.historytab, name="historytab" ),
 ]

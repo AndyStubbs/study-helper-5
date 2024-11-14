@@ -1,4 +1,5 @@
 // static/js/main.js
+
 "use strict";
 
 const g_readyItems = [];
@@ -41,7 +42,7 @@ window.main = {
 			alertModal.style.display = "block";
 			alertModal.querySelector( ".alert-message" ).innerHTML = msg;
 	
-			const okButton = alertModal.querySelector( ".ok-button" );
+			const okButton = document.getElementById( "modal-ok" );
 	
 			// Event listener for "Ok" button
 			okButton.onclick = () => {

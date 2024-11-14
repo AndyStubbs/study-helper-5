@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from utils.decorators import restrict_to_view
-from apps.topics.models import Topic
+from apps.topics.models import Topic, Question
 from apps.topics.services import (
 	get_next_question,
 	get_topic_evaluation,
@@ -17,6 +17,11 @@ from apps.topics.services import (
 	delete_topic,
 	explain_topic
 )
+
+
+##################
+# HTML COMPONENTS
+##################
 
 @restrict_to_view( "topics:generate" )
 @login_required
@@ -49,12 +54,22 @@ def quiz( request ):
 	"""Render the HTML for the quiz modal popup"""
 	return render( request, "topics/quiz.html" )
 
-
 @restrict_to_view( "topics:explanation" )
 @login_required
 def explanation( request ):
 	"""Render the HTML for the explanation modal popup"""
 	return render( request, "topics/explain.html" )
+
+@restrict_to_view( "topics:historytab" )
+@login_required
+def historytab( request ):
+	"""Render the HTML for the history tab"""
+	return render( request, "topics/history.html" )
+
+
+##################
+# AJAX API'S
+##################
 
 @csrf_exempt
 @login_required
@@ -215,3 +230,28 @@ def explain( request ):
 	else:
 		print( f"Error explaining topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
+@csrf_exempt
+@login_required
+def history( request ):
+	"""Fetch all questions answered by the user"""
+	user = request.user
+	questions = Question.objects.filter( topic__user=user, last_asked__isnull=False ).values(
+		"id", "topic__name", "text", "correct_count", "wrong_count"
+	)
+	questions_data = []
+	for question in questions:
+		total = question[ "correct_count" ] + question[ "wrong_count" ]
+		if total > 0:
+			average_score = round( question[ "correct_count" ] / total, 2 )
+		else:
+			average_score = 0
+		questions_data.append( {
+			"id": question[ "id" ],
+			"topic": question[ "topic__name" ],
+			"text": question[ "text" ],
+			"correct": question[ "correct_count" ],
+			"wrong": question[ "wrong_count" ],
+			"average": average_score,
+		} )
+	return JsonResponse( { "data": questions_data } )

@@ -1,0 +1,23 @@
+<!-- topics/templates/topics/topic_prompt.html -->
+{% load static %}
+
+{% csrf_token %}
+<h2>Question History</h2>
+<div class="history-controls">
+	<input type="text" id="search-input" placeholder="Search questions...">
+	<select id="topic-filter">
+		<option value="">All Topics</option>
+		<!-- Populate dynamically with topics -->
+	</select>
+</div>
+<div class="history-table">
+	<div class="history-header">
+		<div class="header-cell sortable" data-sort="topic" data-desc="false">Topic</div>
+		<div class="header-cell sortable" data-sort="text" data-desc="false">Question</div>
+		<div class="header-cell sortable" data-sort="average" data-desc="false" data-num="true">Score</div>
+		<div class="header-cell">Options</div>
+	</div>
+	<div class="history-body" style="max-height: 500px; overflow-y: auto;">
+		<!-- Data rows will be dynamically added here -->
+	</div>
+</div>

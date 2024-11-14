@@ -261,15 +261,6 @@ h2 {
 	color: var(--text-color-primary);
 }
 
-#modal-alert button {
-	background-color: var(--button-primary-bg-color);
-	color: var(--button-primary-text-color);
-}
-
-#modal-alert button:hover {
-	background-color: var(--button-primary-hover-bg-color);
-}
-
 ::-webkit-scrollbar-track {
 	background: var(--track-bg-color);
 }
