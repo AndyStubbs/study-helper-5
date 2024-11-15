@@ -59,7 +59,7 @@ window.main.onReady( () => {
 				<div class="row-cell">${question.text}</div>
 				<div class="row-cell">${Math.round(question.average * 100)}%</div>
 				<div class="row-cell">
-					<button onclick="main.showQuestion(${question.id})" class="btn-sm btn-c2">Show</button>
+					<button onclick="main.showQuestion(${question.id}, ${question.topic_id})" class="btn-sm btn-c2">Show</button>
 				</div>
 			`;
 			m_historyBody.appendChild( row );
@@ -111,7 +111,7 @@ window.main.onReady( () => {
 	} );
 
 	// Show Question Modal
-	window.main.showQuestion = ( id ) => {
+	window.main.showQuestion = ( id, topicId ) => {
 		const question = m_questionsData.find( q => q.id === id );
 		let conceptItems = "";
 		question.concepts.forEach( concept => {
@@ -133,7 +133,7 @@ window.main.onReady( () => {
 			qdModal.style.display = "none";
 		};
 		document.getElementById( "qd-try" ).onclick = () => {
-			window.main.quizQuestion( id );
+			window.main.quizQuestion( id, topicId );
 			qdModal.style.display = "none";
 		};
 		document.getElementById( "qd-close" ).onclick = () => {

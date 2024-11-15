@@ -428,6 +428,7 @@ def get_question_history( user ):
 		models.Question.objects.filter( topic__user=user, last_asked__isnull=False )
 		.values(
 			"id",
+			"topic__id",
 			"topic__name",
 			"text",
 			"correct_count",
@@ -459,6 +460,7 @@ def get_question_history( user ):
 			last_asked = question[ "last_asked" ].strftime( "%Y-%m-%d %H:%M:%S" )
 		questions_data.append( {
 			"id": question[ "id" ],
+			"topic_id": question[ "topic__id" ],
 			"topic": question[ "topic__name" ],
 			"text": question[ "text" ],
 			"correct": question[ "correct_count" ],

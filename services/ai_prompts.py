@@ -295,8 +295,10 @@ explain why the answer is incorrect. Try to include any tips or memory aids that
 remember the correct answer. You will return a boolean indicating correctness and an explanation 
 text. Format the explanation text using **Markdown** syntax.
 
-Use Markdown headings, bullet points, and code blocks where helpful for clarity. Do not include any 
-extra or unrelated information. Aim to make your explanation structured and accessible for learners.
+Use Markdown headings, bullet points, and code blocks where helpful for clarity. Do not include any
+extra or unrelated information. Aim to make your explanation structured and accessible for
+learners. Address the user directly (e.g., "Your answer is correct" or "Your answer is incorrect")
+to make the explanation engaging and learner-friendly. 
 
 Return the response as JSON:
 - "is_correct" (boolean): `true` if the answer is correct, `false` if the answer is incorrect.

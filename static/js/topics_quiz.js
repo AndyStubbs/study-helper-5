@@ -164,7 +164,7 @@ window.main.onReady( function () {
 	async function loadQuestion( questionId ) {
 		setQuestionLoadingState();
 		try {
-			m_quizModal.querySelector( ".loading-overlay" ).style.visibility = "visible";
+			toggleLoadingOverlay( false );
 			const data = await main.handleRequest(
 				"/topics/question2/",
 				{ "question_id": questionId }
@@ -177,7 +177,7 @@ window.main.onReady( function () {
 				button.textContent = "N/A";
 			} );
 		} finally {
-			m_quizModal.querySelector( ".loading-overlay" ).style.visibility = "hidden";
+			toggleLoadingOverlay( true );
 		}
 	}
 
@@ -185,6 +185,7 @@ window.main.onReady( function () {
 	async function loadNextQuestion() {
 		setQuestionLoadingState();
 		try {
+			toggleLoadingOverlay( false );
 			const data = await main.handleRequest( "/topics/question/", { "topic_id": m_topicId } );
 			setupQuestion( data );
 		} catch ( error ) {
@@ -194,15 +195,17 @@ window.main.onReady( function () {
 				button.textContent = "N/A";
 			} );
 		} finally {
-			m_quizModal.querySelector( ".loading-overlay" ).style.visibility = "hidden";
+			toggleLoadingOverlay( true );
 		}
 	}
 
 	// Submit answer
 	async function submitAnswer( answer ) {
 		if( m_questionId !== -1 && m_correctAnswer === "" ) {
-			m_quizModal.querySelector( ".loading-overlay" ).style.visibility = "visible";
 			try {
+
+				// Show loading overlay
+				toggleLoadingOverlay( false );
 
 				// Submit answer to server
 				const data = await main.handleRequest(
@@ -257,7 +260,7 @@ window.main.onReady( function () {
 					button.textContent = "N/A";
 				} );
 			} finally {
-				m_quizModal.querySelector( ".loading-overlay" ).style.visibility = "hidden";
+				toggleLoadingOverlay( true );
 			}
 		}
 	}
@@ -325,4 +328,12 @@ window.main.onReady( function () {
 		}
 	}
 
+	function toggleLoadingOverlay( isHidden ) {
+		const loadingOverlay = m_quizModal.querySelector( ".loading-overlay" );
+		if( isHidden ) {
+			loadingOverlay.style.visibility = "hidden";
+		} else {
+			loadingOverlay.style.visibility = "visible";
+		}
+	}
 } );
