@@ -155,6 +155,49 @@ Use the following description for context:
 Focus on the concept of '{concept_name}'.
 """
 
+def open_question_generator_system_prompt():
+	return """
+You are a question generator for a study helper app. Your task is to generate 5 open-text questions
+given a topic, a description of the topic, and a core concept. Each question should be relevant to 
+the topic, description, and core concept. Ensure that questions are unique, open-ended, and 
+designed to enhance understanding of the concept.
+
+Do not create multiple-choice or true/false questions. Questions should expect an open text 
+answer. If the question involves coding, indicate that in the JSON response, specifying the 
+programming language if needed. Provide a minimal boilerplate as a starting point if relevant.
+
+Return the response as JSON with the following fields:
+- "text" (string): The question text.
+- "is_code" (boolean): A boolean indicating if this is a coding problem.
+- "language_class" (string): If the question is language-specific, include the syntax highlighting 
+  class name (e.g., "language-python").
+- "boilerplate" (string): If a coding question, include minimal starting code for the user.
+
+Example JSON format:
+[
+	{
+		"text": "What year was JavaScript first released?",
+		"is_code": false,
+		"language_class": "",
+		"boilerplate": ""
+	},
+	{
+		"text": "Write a JavaScript function named findMax that takes in an array of numbers and returns the largest number in that array.",
+		"is_code": true,
+		"language_class": "language-javascript",
+		"boilerplate": "function findMax(arr) {\n    // Your code here\n}"
+	}
+]
+"""
+
+def open_question_generator_user_prompt( topic_name, topic_description, concept_name ):
+	return f"""
+Please create 5 open-text questions for the following topic: '{topic_name}'.
+Use the following description for context:
+{topic_description}
+Focus on the concept of '{concept_name}'.
+"""
+
 def concept_filter_system_prompt():
 	return """
 You are a concept filter for a study helper application. Your task is to identify and return only 
@@ -222,9 +265,64 @@ Example JSON format:
 }
 """
 
-def explain_question_user_prompt( question, answer ):
+def explain_question_user_prompt( question, answer, topic_name, topic_description, concept_name ):
 	return f"""
-Please explain why the following question and answer is correct:
+Please provide an explanation for why the following answer to the question is correct. Use 
+Markdown for formatting, and structure the response to make it easy to follow and educational.
+
+Topic:
+{topic_name}
+
+Topic Description:
+{topic_description}
+
+Concept:
+{concept_name}
+
+Question:
+{question}
+
+Answer:
+{answer}
+"""
+
+def submit_open_answer_system_prompt():
+	return """
+You are a question grader for a study helper app. Your task is to evalute the correctness of an
+answer to a question. Provide a clear and thorough explanation for why the answer is correct or
+not. Use examples to demonstrate the explanation if applicable. If the user has an incorrect answer
+explain why the answer is incorrect. Try to include any tips or memory aids that can help the user 
+remember the correct answer. You will return a boolean indicating correctness and an explanation 
+text. Format the explanation text using **Markdown** syntax.
+
+Use Markdown headings, bullet points, and code blocks where helpful for clarity. Do not include any 
+extra or unrelated information. Aim to make your explanation structured and accessible for learners.
+
+Return the response as JSON:
+- "is_correct" (boolean): `true` if the answer is correct, `false` if the answer is incorrect.
+- "explanation" (string): A Markdown-formatted explanation of the correct answer, detailing why the
+	user's answer is correct or not, with any helpful examples, tips, or clarifications.
+
+Example JSON format:
+{ 
+	"is_correct": true,
+	"explanation": "An explanation of the question and answer in detail written in markdown.",
+}
+"""
+
+def submit_open_answer_user_prompt( question, answer, topic_name, topic_description, concept_name ):
+	return f"""
+Please evaluate the following answer for correctness, based on the provided question, topic, and 
+concept.
+
+Topic:
+{topic_name}
+
+Topic Description:
+{topic_description}
+
+Concept:
+{concept_name}
 
 Question:
 {question}

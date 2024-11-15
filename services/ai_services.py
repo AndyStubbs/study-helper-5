@@ -1,4 +1,6 @@
 # services/ai_services.py
+
+import random
 from pydantic import BaseModel
 from openai import OpenAI
 from . import ai_prompts
@@ -24,12 +26,24 @@ class AI_Question( BaseModel ):
 class AI_GenQuestions( BaseModel ):
 	questions: list[ AI_Question ]
 
+class AI_OpenQuestion( BaseModel ):
+	text: str
+	is_code: bool
+	language_class: str
+	boilerplate: str
+
+class AI_GenOpenQuestions( BaseModel ):
+	questions: list[ AI_OpenQuestion ]
+
 class AI_QuestionsConcepts( BaseModel ):
 	questions_concepts: list[ list[ str ] ]
 
 class AI_QuestionExplanation( BaseModel ):
 	explanation: str
 
+class AI_OpenQuestionAnswer( BaseModel ):
+	is_correct: bool
+	explanation: str
 
 def evaluate_topic( topic ):
 	"""Evaluates the topic and offer suggestions."""
@@ -101,10 +115,21 @@ def generate_concepts( topic_name, topic_description ):
 
 def create_questions( topic_name, topic_description, concept_name, previous_questions ):
 	print( f"Creating question for topic: {topic_name}" )
+
+	# 30% chance of generating an open text question
+	if random.randint( 0, 10 ) <= 3:
+		system_prompt = ai_prompts.open_question_generator_system_prompt
+		user_prompt = ai_prompts.open_question_generator_user_prompt
+		response_format=AI_GenOpenQuestions
+	else:
+		system_prompt = ai_prompts.question_generator_system_prompt
+		user_prompt = ai_prompts.question_generator_user_prompt
+		response_format=AI_GenQuestions
+	
 	messages = []
 	messages.append( {
 		"role": "system",
-		"content": ai_prompts.question_generator_system_prompt()
+		"content": system_prompt()
 	} )
 	for question in previous_questions:
 		messages.append( {
@@ -113,12 +138,12 @@ def create_questions( topic_name, topic_description, concept_name, previous_ques
 		} )
 	messages.append( {
 		"role": "user",
-		"content": ai_prompts.question_generator_user_prompt( topic_name, topic_description, concept_name )
+		"content": user_prompt( topic_name, topic_description, concept_name )
 	} )
 	return run_chat(
 		model="gpt-4o-mini",
 		messages=messages,
-		response_format=AI_GenQuestions
+		response_format=response_format
 	)
 
 def filter_question_concepts( concepts, questions ):
@@ -138,7 +163,7 @@ def filter_question_concepts( concepts, questions ):
 		response_format=AI_QuestionsConcepts
 	)
 
-def explain_question( question, answer ):
+def explain_question( question, answer, topic_name, topic_description, concept_name ):
 	print( f"Creating explanation for question" )
 	return run_chat(
 		model="gpt-4o-mini",
@@ -149,10 +174,39 @@ def explain_question( question, answer ):
 			},
 			{
 				"role": "user",
-				"content": ai_prompts.explain_question_user_prompt( question, answer )
+				"content": ai_prompts.explain_question_user_prompt(
+					question, answer, topic_name, topic_description, concept_name
+				)
 			}
 		],
 		response_format=AI_QuestionExplanation
+	)
+
+def submit_open_answer( question, answer, topic_name, topic_description, concept_name ):
+	print( f"Creating explanation for question" )
+	print( f"""
+question: {question}
+answer: {answer}
+topic: {topic_name}
+description: {topic_description}
+concept: {concept_name}
+""" 
+)
+	return run_chat(
+		model="gpt-4o-mini",
+		messages=[
+			{
+				"role": "system",
+				"content": ai_prompts.submit_open_answer_system_prompt()
+			},
+			{
+				"role": "user",
+				"content": ai_prompts.submit_open_answer_user_prompt(
+					question, answer, topic_name, topic_description, concept_name
+				)
+			}
+		],
+		response_format=AI_OpenQuestionAnswer
 	)
 
 def run_chat( model, messages, response_format ):
@@ -164,14 +218,14 @@ def run_chat( model, messages, response_format ):
 			response_format=response_format
 		)
 		message = completion.choices[ 0 ].message
-		print( "*****************************" )
-		if( message.refusal ):
-			raise ValueError( message.refusal )
+		print( "*** RUNING AI CHAT ***" )
+		if hasattr( message, 'refusal') and message.refusal:
+			raise ValueError(message.refusal)
 		else:
 			return message.parsed
 	except Exception as e:
-		print( f"Error evaluating topic: {e}" )
+		print( f"Error running AI CHAT: {e}" )
 		return {
 			"status": "error",
-			"message": "An error occurred while processing the message."
+			"message": "An error occurred while processing."
 		}

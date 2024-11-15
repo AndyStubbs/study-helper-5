@@ -14,16 +14,20 @@ window.main.onReady( function () {
 	const m_loadingOverlay = m_explanationModal.querySelector( ".loading-overlay" );
 
 	// Show explanation modal and load explanation content
-	function updateExplanation( question, answer, explanation ) {
+	function updateExplanation( question, answer, explanation, isCorrect ) {
 		m_explanationQuestion.style.textAlign = "left";
 		m_explanationQuestion.textContent = question;
-		m_explanationAnswer.innerHTML = "<strong>Answer: </strong>" + answer;
+		if( isCorrect === undefined ) {
+			const answerSpan = `<span>${answer}</span>`;
+			m_explanationAnswer.innerHTML = `<strong>Answer: </strong> ${answerSpan}`;
+		} else if( isCorrect ) {
+			const spanCheck = "<span class='result-success explanation-mark'>&#10004;</span>";
+			m_explanationAnswer.innerHTML = `${spanCheck} ${answer}`;
+		} else {
+			const spanCheck = "<span class='result-error explanation-mark'>&#10008;</span>";
+			m_explanationAnswer.innerHTML = `${spanCheck} ${answer}`;
+		}
 		m_explanationContent.innerHTML = window.marked.parse( explanation );
-
-		// Toggle Highlight.js theme based on dark or light mode
-		const isDarkMode = document.body.dataset.theme === "dark";
-		document.getElementById( "hljs-light-theme" ).disabled = isDarkMode;
-		document.getElementById( "hljs-dark-theme" ).disabled = !isDarkMode;
 
 		// Apply syntax highlighting
 		hljs.highlightAll();
@@ -63,6 +67,12 @@ window.main.onReady( function () {
 			m_loadingOverlay.style.visibility = "hidden";
 		}
 	};
+
+	// Explain open question
+	window.main.explainOpen = function( data ) {
+		m_explanationModal.style.display = "block";
+		updateExplanation( data.question, data.answer, data.explanation, data.isCorrect );
+	}
 
 	// Close the modal when the close button is clicked
 	m_closeExplanationButton.addEventListener( "click", hideExplanation );

@@ -127,6 +127,12 @@ select {
 	color: var(--text-color-primary);
 }
 
+input:disabled,
+textarea:disabled,
+select:disabled {
+	background-color: var(--button-tertiary-disabled-border-color);
+}
+
 select {
 	cursor: pointer;
 }

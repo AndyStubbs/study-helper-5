@@ -27,6 +27,8 @@ def get_next_question( topic_id ):
 		concepts=selected_concept
 	).count()
 	
+	# TODO: if there are unasked questions for the selected topic, ask those before generating new
+	# ones.
 	# Either generate new question or use question from database based on random chance
 	q_scale = 20
 	generate_new_chance = max( 1, q_scale - question_count )
@@ -64,7 +66,7 @@ def get_next_question( topic_id ):
 		
 		# Save all the generated questions
 		saved_questions = []
-		for i, question_data in enumerate(questions_data.questions):
+		for i, question_data in enumerate( questions_data.questions ):
 			print( f"New Question: {question_data.text}" )
 
 			# Get concept instances and associate them with the question
@@ -73,21 +75,41 @@ def get_next_question( topic_id ):
 			for concept_name in question_concepts:
 				normalized_name = normalize_concept_name( concept_name )
 				concept = models.Concept.objects.filter( normalized_name=normalized_name ).first()
-				concept_instances.append( concept )
 				if concept:
 					concept_instances.append( concept )
 				else:
 					print( f"Warning: Concept '{concept_name}' not found." )
 
-			# Create the question in the database
-			question = models.Question.objects.create(
-				topic=topic,
-				text=question_data.text,
-				answers=question_data.answers,
-				correct=question_data.correct,
-				main_concept=selected_concept
-			)
+			# Create the question database record
+			if isinstance( question_data, ai_services.AI_OpenQuestion ):
+				question = models.Question.objects.create(
+					topic = topic,
+					text = question_data.text,
+					is_open = True,
+					is_code = question_data.is_code,
+					language_class = question_data.language_class,
+					boilerplate = question_data.boilerplate,
+					answers = "",
+					correct = "",
+					main_concept = selected_concept
+				)
+			else:
+				question = models.Question.objects.create(
+					topic = topic,
+					text = question_data.text,
+					is_open = False,
+					is_code = False,
+					language_class = "",
+					boilerplate = "",
+					answers = question_data.answers,
+					correct = question_data.correct,
+					main_concept = selected_concept
+				)
+
+			# Set qeustion concepts
 			question.concepts.set( concept_instances )
+
+			# Store all saved questions for picking random one
 			saved_questions.append( question )
 
 		# Return a random question from new questions
@@ -97,13 +119,14 @@ def get_next_question( topic_id ):
 		question_response = {
 			"id": question.id,
 			"text": question.text,
+			"is_open": question.is_open,
+			"is_code": question.is_code,
+			"language_class": question.language_class,
+			"boilerplate": question.boilerplate,
 			"answers": question.answers,
 			"concepts": [ concept.name for concept in question.concepts.all() ]
 		}
-		return {
-			"status": "success",
-			"data": question_response
-		}
+		return question_response
 	
 	# Return a random question from the database
 	else:
@@ -120,13 +143,28 @@ def get_next_question( topic_id ):
 		question_response = {
 			"id": question.id,
 			"text": question.text,
+			"is_open": question.is_open,
+			"is_code": question.is_code,
+			"language_class": question.language_class,
+			"boilerplate": question.boilerplate,
 			"answers": question.answers,
 			"concepts": [ concept.name for concept in question.concepts.all() ]
 		}
-		return {
-			"status": "success",
-			"data": question_response
-		}
+		return question_response
+
+def get_question_by_id( question_id ):
+	question = models.Question.objects.get( id=question_id )
+	question_response = {
+		"id": question.id,
+		"text": question.text,
+		"is_open": question.is_open,
+		"is_code": question.is_code,
+		"language_class": question.language_class,
+		"boilerplate": question.boilerplate,
+		"answers": question.answers,
+		"concepts": [ concept.name for concept in question.concepts.all() ]
+	}
+	return question_response
 
 def get_topic_evaluation( topic_name ):
 	ai_response = ai_services.evaluate_topic( topic_name )
@@ -134,20 +172,14 @@ def get_topic_evaluation( topic_name ):
 		"description": ai_response.summary,
 		"suggestions": ai_response.suggestions
 	}
-	return {
-		"status": "success",
-		"data": response_data
-	}
+	return response_data
 
 def get_topic_suggestions( topic_name ):
 	ai_response = ai_services.suggest_topics( topic_name )
 	response_data = {
 		"suggestions": ai_response.suggestions
 	}
-	return {
-		"status": "success",
-		"data": response_data
-	}
+	return response_data
 
 def save_topic( topic_name, topic_description, user ):
 		print( "SAVING TOPIC IN SERVICE" )
@@ -170,10 +202,7 @@ def save_topic( topic_name, topic_description, user ):
 			# Generate the concepts for the topic
 			generate_topic_concepts( existing_topic.id )
 
-			return {
-				"status": "success",
-				"data": response_data
-			}
+			return response_data
 		else:
 			print( "CREATING TOPIC" )
 			# If the topic does not exist, create a new topic
@@ -192,10 +221,7 @@ def save_topic( topic_name, topic_description, user ):
 				"name": topic.name,
 				"description": topic.description
 			}
-			return {
-				"status": "success",
-				"data": response_data
-			}
+			return response_data
 
 def delete_topic( topic_id, user ):
 	# Retrieve the topic
@@ -215,7 +241,6 @@ def delete_topic( topic_id, user ):
 	topic.delete()
 	
 	return {
-		"status": "success",
 		"message": f"Topic '{topic.name}' and its related data have been deleted."
 	}
 
@@ -270,10 +295,7 @@ def get_topic_description( topic_name ):
 	response_data = {
 		"description": ai_response.summary
 	}
-	return {
-		"status": "success",
-		"data": response_data
-	}
+	return response_data
 
 def set_answer( user, question_id, answer ):
 	
@@ -293,17 +315,25 @@ def set_answer( user, question_id, answer ):
 		question.skip_count += 1
 		question.last_asked = timezone.now()
 		question.save()
-		return {
-			"status": "success",
-			"data": { "answer": question.correct }
-		}
+		return { "is_skipped": True }
 
-	# Set question answered correct
-	if answer == question.correct:
-		is_correct = True
+	# Evaluate if answer is correct
+	if question.is_open:
+		# question, answer, topic_name, topic_description, concept_name
+		ai_response = ai_services.submit_open_answer(
+			question.text, answer, question.topic.name, question.topic.description,
+			question.main_concept.name
+		)
+		is_correct = ai_response.is_correct
+		correct = ai_response.explanation
+	else:
+		is_correct = answer == question.correct
+		correct = question.correct
+
+	# Increment question score
+	if is_correct:
 		question.correct_count += 1
 	else:
-		is_correct = False
 		question.wrong_count += 1
 	
 	# Save question
@@ -317,7 +347,12 @@ def set_answer( user, question_id, answer ):
 	for concept in question.concepts.exclude( id=question.main_concept.id ):
 		update_user_knowledge( user, question.topic, concept, is_correct, False )
 	
-	return { "status": "success", "data": { "answer": question.correct } }
+	return {
+		"correct": correct,
+		"is_correct": is_correct,
+		"is_skipped": False,
+		"is_open": question.is_open
+	}
 
 def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):
 
@@ -363,7 +398,12 @@ def explain_topic( question_id, user ):
 	# Create a new explanation for question
 	if created:
 		print( "CREATING NEW EXPLANATION" )
-		ai_response = ai_services.explain_question( question.text, question.correct )
+		topic_name = question.topic.name
+		topic_description = question.topic.description
+		concept_name = question.main_concept
+		ai_response = ai_services.explain_question(
+			question.text, question.correct,  topic_name, topic_description, concept_name
+		)
 		explanation.text = ai_response.explanation
 		explanation.save()
 		response_data = {
@@ -379,7 +419,54 @@ def explain_topic( question_id, user ):
 			"explanation": explanation.text
 		}
 	
-	return {
-		"status": "success",
-		"data": response_data
-	}
+	return  response_data
+
+def get_question_history( user ):
+	
+	# Fetch questions with selected fields
+	questions = (
+		models.Question.objects.filter( topic__user=user, last_asked__isnull=False )
+		.values(
+			"id",
+			"topic__name",
+			"text",
+			"correct_count",
+			"wrong_count",
+			"skip_count",
+			"last_asked",
+			"main_concept__name"
+		)
+	)
+	questions_data = []
+	for question in questions:
+
+		# Calculate average score
+		total = question[ "correct_count" ] + question[ "wrong_count" ]
+		if total > 0:
+			average_score = round( question[ "correct_count" ] / total, 2 )
+		else:
+			average_score = 0
+		
+		# Get related concepts for each question
+		concepts = list(
+			models.Question.objects.get( id=question[ "id" ] ).concepts.values_list( 
+				"name", flat=True
+			)
+		)
+
+		# Set last asked date
+		if question[ "last_asked" ]:
+			last_asked = question[ "last_asked" ].strftime( "%Y-%m-%d %H:%M:%S" )
+		questions_data.append( {
+			"id": question[ "id" ],
+			"topic": question[ "topic__name" ],
+			"text": question[ "text" ],
+			"correct": question[ "correct_count" ],
+			"wrong": question[ "wrong_count" ],
+			"average": average_score,
+			"concepts": concepts,
+			"main_concept": question[ "main_concept__name" ],
+			"last_asked": last_asked
+		} )
+	
+	return questions_data

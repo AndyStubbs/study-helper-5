@@ -8,16 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from utils.decorators import restrict_to_view
 from apps.topics.models import Topic, Question
-from apps.topics.services import (
-	get_next_question,
-	get_topic_evaluation,
-	save_topic,
-	get_topic_description,
-	set_answer,
-	get_topic_suggestions,
-	delete_topic,
-	explain_topic
-)
+from apps.topics import services
 
 
 ##################
@@ -88,8 +79,8 @@ def question( request ):
 			if not isinstance( topic_id, int ) or topic_id == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			topic_id = int( topic_id )
-			question_data = get_next_question( topic_id )
-			return JsonResponse( question_data )
+			response = services.get_next_question( topic_id )
+			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
 			print( f"Error generating question topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -108,16 +99,10 @@ def question2( request ):
 			if not isinstance( question_id, int ) or question_id == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			question_id = int( question_id )
-			question = Question.objects.get( id=question_id )
-			question_response = {
-				"id": question.id,
-				"text": question.text,
-				"answers": question.answers,
-				"concepts": [ concept.name for concept in question.concepts.all() ]
-			}
+			response = services.get_question_by_id( question_id )
 			return JsonResponse( {
 				"status": "success",
-				"data": question_response
+				"data": response
 			} )
 		except Exception as e:
 			print( f"Error generating question topic: {e}" )
@@ -137,10 +122,12 @@ def answer( request ):
 			answer = data.get( "answer", "" )
 			if( question_id == -1 ):
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			answer_response = set_answer( request.user, question_id, answer )
-			return JsonResponse( answer_response )
+			response = services.set_answer( request.user, question_id, answer )
+			print( "************************" )
+			print( response )
+			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
-			print( f"Error generating question topic: {e}" )
+			print( f"Error setting answer: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
 		print( f"Error generating question: Wrong request method: {request.method}" )
@@ -156,8 +143,8 @@ def evaluate( request ):
 			topic_name = data.get( "topic_name", "" )
 			if topic_name == "":
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			response = get_topic_evaluation( topic_name )
-			return JsonResponse( response )
+			response = services.get_topic_evaluation( topic_name )
+			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
 			print( f"Error evaluating topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -175,8 +162,8 @@ def summarize( request ):
 			topic_name = data.get( "topic_name", "" ).strip()
 			if topic_name == "":
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			response = get_topic_description( topic_name )
-			return JsonResponse( response )
+			response = services.get_topic_description( topic_name )
+			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
 			print( f"Error summarizing topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -194,8 +181,8 @@ def suggest( request ):
 			topic_name = data.get( "topic_name", "" ).strip()
 			if topic_name == "":
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			response = get_topic_suggestions( topic_name )
-			return JsonResponse( response )
+			response = services.get_topic_suggestions( topic_name )
+			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
 			print( f"Error suggesting topics: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -217,8 +204,8 @@ def save( request ):
 				return JsonResponse( {
 					"error": "Invalid request. Both topic and description are required."
 				}, status=400 )
-			topic_response = save_topic( topic_name, topic_description, request.user )
-			return JsonResponse( topic_response )
+			response = services.save_topic( topic_name, topic_description, request.user )
+			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
 			print( f"Error saving topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -237,8 +224,8 @@ def delete( request ):
 			topic_id = data.get( "topic_id", -1 )
 			if not isinstance( topic_id, int ) or topic_id == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			topic_response = delete_topic( topic_id, request.user )
-			return JsonResponse( topic_response )
+			response = services.delete_topic( topic_id, request.user )
+			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
 			print( f"Error deleting topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -257,8 +244,8 @@ def explain( request ):
 			question_id = data.get( "question_id", -1 )
 			if not isinstance( question_id, int ) or question_id == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			topic_response = explain_topic( question_id, request.user )
-			return JsonResponse( topic_response )
+			response = services.explain_topic( question_id, request.user )
+			return JsonResponse( { "status": "success", "data": response } )
 		except Exception as e:
 			print( f"Error explaining topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -270,49 +257,14 @@ def explain( request ):
 @login_required
 def history( request ):
 	"""Fetch all questions answered by the user"""
-	user = request.user
-
-	# Fetch questions with selected fields
-	questions = (
-		Question.objects.filter( topic__user=user, last_asked__isnull=False )
-		.values(
-			"id",
-			"topic__name",
-			"text",
-			"correct_count",
-			"wrong_count",
-			"skip_count",
-			"last_asked",
-			"main_concept__name"
-		)
-	)
-	questions_data = []
-	for question in questions:
-
-		# Calculate average score
-		total = question[ "correct_count" ] + question[ "wrong_count" ]
-		if total > 0:
-			average_score = round( question[ "correct_count" ] / total, 2 )
-		else:
-			average_score = 0
-		
-		# Get related concepts for each question
-		concepts = list(
-			Question.objects.get( id=question[ "id" ] ).concepts.values_list( "name", flat=True )
-		)
-
-		# Set last asked date
-		if question[ "last_asked" ]:
-			last_asked = question[ "last_asked" ].strftime( "%Y-%m-%d %H:%M:%S" )
-		questions_data.append( {
-			"id": question[ "id" ],
-			"topic": question[ "topic__name" ],
-			"text": question[ "text" ],
-			"correct": question[ "correct_count" ],
-			"wrong": question[ "wrong_count" ],
-			"average": average_score,
-			"concepts": concepts,
-			"main_concept": question[ "main_concept__name" ],
-			"last_asked": last_asked
-		} )
-	return JsonResponse( { "data": questions_data } )
+	if request.method == "POST":
+		try:
+			print( "GETTING HISTORY FOR USER" )
+			questions_data = services.get_question_history( request.user )
+			return JsonResponse( { "status": "success", "data": questions_data } )
+		except Exception as e:
+			print( f"Error getting history: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error getting history: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )

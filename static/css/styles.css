@@ -36,6 +36,10 @@ input[type="text"] {
 	font-size: 16px;
 	border-radius: 4px;
 }
+textarea {
+	padding: 5px;
+	border-radius: 4px;
+}
 .outer-container {
 	max-width: 1000px;
 	margin: 0 auto;
@@ -276,12 +280,18 @@ h2 {
 	text-align: left;
 }
 
+#quiz-open-answer {
+	width: 545px;
+	height: 200px;
+	resize: vertical;
+}
+
 .quiz-buttons {
 	text-align: left;
 }
 
-#explain-button {
-	margin-left: 12px;
+.quiz-buttons button {
+	margin-right: 10px;
 }
 
 /* Explanation modal */
@@ -322,7 +332,11 @@ h2 {
 	margin-top: 16px;
 	width: 100px;
 }
-
+.explanation-mark {
+	position: relative;
+	top: 4px;
+	font-size: 32px;
+}
 .history-controls {
 	display: flex;
 	gap: 10px;

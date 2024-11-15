@@ -36,6 +36,23 @@ class Concept( models.Model ):
 class Question( models.Model ):
 	topic = models.ForeignKey( Topic, on_delete=models.CASCADE, related_name="questions" )
 	text = models.CharField( max_length=500 )
+	is_open = models.BooleanField(
+		default=False,
+		help_text="Indicates if the question is an open-ended question (not multiple choice)."
+	)
+	is_code = models.BooleanField(
+		default=False,
+		help_text="Indicates if the question involves coding."
+	)
+	language_class = models.CharField(
+		max_length=50,
+		blank=True,
+		help_text="Programming language class for code highlighting, e.g., 'language-python'."
+	)
+	boilerplate = models.TextField(
+		blank=True,
+		help_text="Boilerplate code provided as a starting point if this is a coding question."
+	)
 	answers = models.JSONField( help_text="Store answers as a JSON array" )
 	correct = models.CharField( max_length=100, help_text="Text of the correct answer" )
 	concepts = models.ManyToManyField( "Concept", related_name="questions", blank=True )

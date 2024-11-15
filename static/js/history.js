@@ -128,17 +128,17 @@ window.main.onReady( () => {
 		document.getElementById( "qd-last-asked" ).innerHTML = lastAskedShort;
 		document.getElementById( "qd-main-concept" ).innerHTML = question.main_concept;
 		document.getElementById( "qd-related-concepts" ).innerHTML = conceptItems;
-		document.getElementById( "qd-explain" ).addEventListener( "click", () => {
+		document.getElementById( "qd-explain" ).onclick = () => {
 			window.main.explain( id );
 			qdModal.style.display = "none";
-		} );
-		document.getElementById( "qd-try" ).addEventListener( "click", () => {
+		};
+		document.getElementById( "qd-try" ).onclick = () => {
 			window.main.quizQuestion( id );
 			qdModal.style.display = "none";
-		} );
-		document.getElementById( "qd-close" ).addEventListener( "click", () => {
+		};
+		document.getElementById( "qd-close" ).onclick = () => {
 			qdModal.style.display = "none";
-		} );
+		};
 	}
 
 	m_searchInput.addEventListener( "input", renderTable );

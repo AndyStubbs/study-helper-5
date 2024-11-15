@@ -157,8 +157,12 @@ document.addEventListener( "DOMContentLoaded", function () {
 	document.getElementById( "theme-toggle" ).addEventListener( "click", () => {
 		if( document.body.dataset.theme === "dark" ) {
 			document.body.dataset.theme = "light";
+			document.getElementById( "hljs-light-theme" ).disabled = true;
+			document.getElementById( "hljs-dark-theme" ).disabled = false;
 		} else {
 			document.body.dataset.theme = "dark";
+			document.getElementById( "hljs-light-theme" ).disabled = false;
+			document.getElementById( "hljs-dark-theme" ).disabled = true;
 		}
 		localStorage.setItem( "theme", document.body.dataset.theme );
 	} );
@@ -167,5 +171,7 @@ document.addEventListener( "DOMContentLoaded", function () {
 	const theme = localStorage.getItem( "theme" );
 	if( theme ) {
 		document.body.dataset.theme = theme;
+		document.getElementById( "hljs-light-theme" ).disabled = theme === "dark";
+		document.getElementById( "hljs-dark-theme" ).disabled = theme !== "dark";
 	}
 } );
