@@ -104,6 +104,7 @@ window.main.onReady( function () {
 			m_skipBtn.textContent = "Skip";
 			m_explainBtn.style.display = "none";
 			m_submitAnswerBtn.style.display = "none";
+			m_quizResetBtn.style.display = "none";
 			m_answersContainer.style.display = "";
 			m_openAnswerTextarea.style.display = "none";
 			m_answerButtons.forEach( button => {
@@ -143,18 +144,17 @@ window.main.onReady( function () {
 		} else {
 			m_answersContainer.style.display = "";
 			m_openAnswerTextarea.style.display = "none";
+			m_quizResetBtn.style.display = "none";
 			if( m_state[ "isAnswered" ] ) {
 				m_submitAnswerBtn.style.display = "none";
 				m_skipBtn.style.display = "";
 				m_explainBtn.style.display = "";
-				m_quizResetBtn.style.display = "";
 				m_explainBtn.textContent = "Explain";
 				m_skipBtn.textContent = "Next";
 			} else {
 				m_submitAnswerBtn.style.display = "none";
 				m_skipBtn.style.display = "";
 				m_explainBtn.style.display = "none";
-				m_quizResetBtn.style.display = "none";
 				m_skipBtn.textContent = "Skip";
 				m_quizResults.innerHTML = "&nbsp;";
 			}
