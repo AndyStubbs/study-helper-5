@@ -85,6 +85,7 @@ def get_next_question( topic_id ):
 				question = models.Question.objects.create(
 					topic = topic,
 					text = question_data.text,
+					details = question_data.details,
 					is_open = True,
 					is_code = question_data.is_code,
 					language_class = question_data.language_class,
@@ -97,6 +98,7 @@ def get_next_question( topic_id ):
 				question = models.Question.objects.create(
 					topic = topic,
 					text = question_data.text,
+					details = question_data.details,
 					is_open = False,
 					is_code = False,
 					language_class = "",
@@ -119,6 +121,7 @@ def get_next_question( topic_id ):
 		question_response = {
 			"id": question.id,
 			"text": question.text,
+			"details": question.details,
 			"is_open": question.is_open,
 			"is_code": question.is_code,
 			"language_class": question.language_class,
@@ -143,6 +146,7 @@ def get_next_question( topic_id ):
 		question_response = {
 			"id": question.id,
 			"text": question.text,
+			"details": question.details,
 			"is_open": question.is_open,
 			"is_code": question.is_code,
 			"language_class": question.language_class,
@@ -157,6 +161,7 @@ def get_question_by_id( question_id ):
 	question_response = {
 		"id": question.id,
 		"text": question.text,
+		"details": question.details,
 		"is_open": question.is_open,
 		"is_code": question.is_code,
 		"language_class": question.language_class,
@@ -321,8 +326,8 @@ def set_answer( user, question_id, answer ):
 	if question.is_open:
 		# question, answer, topic_name, topic_description, concept_name
 		ai_response = ai_services.submit_open_answer(
-			question.text, answer, question.topic.name, question.topic.description,
-			question.main_concept.name
+			question.text, question.details, answer, question.topic.name,
+			question.topic.description, question.main_concept.name
 		)
 		is_correct = ai_response.is_correct
 		correct = ai_response.explanation

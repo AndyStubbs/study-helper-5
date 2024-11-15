@@ -20,6 +20,7 @@ class AI_Concepts( BaseModel ):
 
 class AI_Question( BaseModel ):
 	text: str
+	details: str
 	answers: list[ str ]
 	correct: str
 
@@ -28,6 +29,7 @@ class AI_GenQuestions( BaseModel ):
 
 class AI_OpenQuestion( BaseModel ):
 	text: str
+	details: str
 	is_code: bool
 	language_class: str
 	boilerplate: str
@@ -182,10 +184,11 @@ def explain_question( question, answer, topic_name, topic_description, concept_n
 		response_format=AI_QuestionExplanation
 	)
 
-def submit_open_answer( question, answer, topic_name, topic_description, concept_name ):
+def submit_open_answer( question, details, answer, topic_name, topic_description, concept_name ):
 	print( f"Creating explanation for question" )
 	print( f"""
 question: {question}
+details: {details}
 answer: {answer}
 topic: {topic_name}
 description: {topic_description}
@@ -202,7 +205,7 @@ concept: {concept_name}
 			{
 				"role": "user",
 				"content": ai_prompts.submit_open_answer_user_prompt(
-					question, answer, topic_name, topic_description, concept_name
+					question, details, answer, topic_name, topic_description, concept_name
 				)
 			}
 		],

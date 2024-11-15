@@ -35,7 +35,8 @@ class Concept( models.Model ):
 
 class Question( models.Model ):
 	topic = models.ForeignKey( Topic, on_delete=models.CASCADE, related_name="questions" )
-	text = models.CharField( max_length=500 )
+	text = models.CharField( max_length=300 )
+	details = models.TextField( max_length=1000, blank=True, null=True )
 	is_open = models.BooleanField(
 		default=False,
 		help_text="Indicates if the question is an open-ended question (not multiple choice)."

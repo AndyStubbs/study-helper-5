@@ -46,7 +46,9 @@
 	
 	/* Status Colors */
 	--status-success-color: #383;
+	--status-success-color-light: #dede;
 	--status-error-color: #833;
+	--status-error-color-light: #faa;
 
 	.icon-light {
 		display: none;
@@ -95,6 +97,8 @@
 	/* Status Colors */
 	--status-success-color: #3a3;
 	--status-error-color: #e33;
+	--status-success-color-light: #091209ee;
+	--status-error-color-light: #120909ee;
 
 	.icon-light {
 		display: block;
@@ -272,6 +276,15 @@ h2 {
 
 #quiz-answers h2 {
 	color: var(--text-color-primary);
+}
+
+textarea.quiz-correct {
+	border: 2px solid var(--status-success-color);
+	background-color: var(--status-success-color-light);
+}
+textarea.quiz-wrong {
+	border: 2px solid var(--status-error-color);
+	background-color: var(--status-error-color--light);
 }
 
 ::-webkit-scrollbar-track {

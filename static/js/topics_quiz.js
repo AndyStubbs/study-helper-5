@@ -10,7 +10,8 @@ window.main.onReady( function () {
 
 	const m_quizModal = document.getElementById( "quiz-modal" );
 	const m_closeModal = document.querySelector( ".close" );
-	const m_questionElement = document.getElementById( "quiz-question" );
+	const m_questionText = document.getElementById( "quiz-question" );
+	const m_questionDetails = document.getElementById( "quiz-details" );
 	const m_openAnswerTextarea = document.getElementById( "quiz-open-answer" );
 	const m_answersContainer = document.getElementById( "quiz-answers" );
 	const m_answerButtons = document.querySelectorAll( "#quiz-answers button" );
@@ -119,6 +120,8 @@ window.main.onReady( function () {
 			m_quizResults.innerHTML = "&nbsp;";
 			m_quizResults.classList.remove( "result-success" );
 			m_quizResults.classList.remove( "result-error" );
+			m_openAnswerTextarea.classList.remove( "quiz-correct" );
+			m_openAnswerTextarea.classList.remove( "quiz-wrong" );
 			return;
 		}
 		if( m_state[ "isOpen" ] ) {
@@ -140,6 +143,8 @@ window.main.onReady( function () {
 				m_skipBtn.textContent = "Skip";
 				m_quizResults.innerHTML = "&nbsp;";
 				m_openAnswerTextarea.disabled = false;
+				m_openAnswerTextarea.classList.remove( "quiz-correct" );
+				m_openAnswerTextarea.classList.remove( "quiz-wrong" );
 			}
 		} else {
 			m_answersContainer.style.display = "";
@@ -172,7 +177,7 @@ window.main.onReady( function () {
 			setupQuestion( data );
 		} catch ( error ) {
 			console.error( "Error loading quiz:", error );
-			m_questionElement.textContent = "Error loading quiz.";
+			m_questionText.textContent = "Error loading quiz.";
 			m_answerButtons.forEach( button => {
 				button.textContent = "N/A";
 			} );
@@ -190,7 +195,7 @@ window.main.onReady( function () {
 			setupQuestion( data );
 		} catch ( error ) {
 			console.error( "Error loading quiz:", error );
-			m_questionElement.textContent = "Error loading quiz.";
+			m_questionText.textContent = "Error loading quiz.";
 			m_answerButtons.forEach( button => {
 				button.textContent = "N/A";
 			} );
@@ -231,13 +236,15 @@ window.main.onReady( function () {
 
 				// Update result text
 				if( data.is_correct ) {
-					m_quizResults.textContent = "Correct!";
+					m_quizResults.textContent = "* Correct";
 					m_quizResults.classList.add( "result-success" );
 					m_quizResults.classList.remove( "result-error" );
+					m_openAnswerTextarea.classList.add( "quiz-correct" );
 				} else {
-					m_quizResults.textContent = "Wrong";
+					m_quizResults.textContent = "* Wrong";
 					m_quizResults.classList.remove( "result-success" );
 					m_quizResults.classList.add( "result-error" );
+					m_openAnswerTextarea.classList.add( "quiz-wrong" );
 				}
 
 				// Update answer data
@@ -255,7 +262,7 @@ window.main.onReady( function () {
 				window.main.loadHistory();
 			} catch ( error ) {
 				console.error( "Error answering question:", error );
-				m_questionElement.textContent = "Error answering question.";
+				m_questionText.textContent = "Error answering question.";
 				m_answerButtons.forEach( button => {
 					button.textContent = "N/A";
 				} );
@@ -275,7 +282,9 @@ window.main.onReady( function () {
 			"isCorrect": undefined,
 			"questionData": undefined
 		};
-		m_questionElement.textContent = "Loading question...";
+		m_questionText.textContent = "Loading question...";
+		m_questionDetails.textContent = "";
+		m_openAnswerTextarea.textContent = "";
 		m_state[ "isLoadingQuestion" ] = true;
 		updateUI();
 		m_questionId = -1;
@@ -304,7 +313,11 @@ window.main.onReady( function () {
 			}
 		}
 		m_questionId = data.id;
-		m_questionElement.textContent = data.text;
+		m_questionText.textContent = data.text;
+		if( data.details !== "" ) {
+			m_questionDetails.innerHTML = window.marked.parse( data.details );
+			hljs.highlightAll();
+		}
 		m_data[ "question" ] = data.text;
 		let maxLength = 0;
 		m_answerButtons.forEach( ( button, index ) => {

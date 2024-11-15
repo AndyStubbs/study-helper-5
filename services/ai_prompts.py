@@ -121,13 +121,24 @@ questions given a topic, a description of the topic, and a core concept. Each qu
 relevant to the topic, description, and core concept. Ensure the questions are not duplicates of 
 previously asked questions and that they provide a clear understanding of the concept.
 
-For the answer choices:
-- Answers should be formatted as text only, without label identifiers (e.g., "A:", "B:", etc.), as 
-	answers will be shown in random order to the user.
-- Each question should include exactly 4 answer choices, with one correct answer.
+Guidelines:
+1. **Question Text**:
+   - Keep the "text" field concise and brief. Do not include code snippets or any Markdown in the
+     text field. Use the "details" field for any code snippets or when additional clarification or 
+	 context is necessary.
+2. **Details Field**:
+   - Provide optional details or explanation in Markdown format in the "details" field. This is 
+     useful for clarifying complex questions or including code snippets.
+   - Use code blocks, bullet points, or headings for clarity in Markdown.
+3. **Answer Choices**:
+   - Each question should have exactly 4 answer choices.
+   - Answers should be formatted as plain text, without any label identifiers (e.g., "A:", "B:").
+   - Avoid generic options like "All of the Above" or "None of the Above".
+   - Ensure all answers are distinct and directly relevant to the question.
 
 Return the response as JSON:
 - "text" (string): The question text.
+- "details" (string/optional): An optional details section written in **Markdown**.
 - "answers" (list of strings): A list of 4 possible answers.
 - "correct" (string): The correct answer, which must match exactly with one of the answers in the 
 	"answers" field.
@@ -136,13 +147,15 @@ Example JSON format:
 [
 	{
 		"text": "What is 1 + 2?",
+		"details": "",
 		"answers": ["2", "3", "4", "5"],
 		"correct": "3"
 	},
 	{
-		"text": "What is 2 + 2?",
-		"answers": ["4", "5", "6", "7"],
-		"correct": "4"
+		"text": "What will be the output of the following code?",
+		"details": "```javascript\nfor(let i = 0; i < 3; i++) { \n    console.log(i); \n}\n```",
+		"answers": ["0 1 2", "1 2 3", " 0 1 2 3", "3"],
+		"correct": "0 1 2"
 	}
 ]
 """
@@ -162,12 +175,21 @@ given a topic, a description of the topic, and a core concept. Each question sho
 the topic, description, and core concept. Ensure that questions are unique, open-ended, and 
 designed to enhance understanding of the concept.
 
-Do not create multiple-choice or true/false questions. Questions should expect an open text 
-answer. If the question involves coding, indicate that in the JSON response, specifying the 
-programming language if needed. Provide a minimal boilerplate as a starting point if relevant.
+Guidelines:
+1. Do not create multiple-choice or true/false questions. Questions should expect an open text 
+   answer that encourages explanation, reasoning, or creativity.
+2. If the question involves coding:
+   - Indicate this with the "is_code" field.
+   - Specify the programming language in the "language_class" field using a syntax highlighting 
+     class (e.g., "language-python").
+   - Include minimal boilerplate code in the "boilerplate" field to provide a starting point for 
+     the user.
+3. If additional clarification or context is required, use the "details" field. Format the content 
+   of this field using **Markdown** for better readability.
 
-Return the response as JSON with the following fields:
-- "text" (string): The question text.
+Return the response as JSON:
+- "text" (string): The main question text, concise and clear.
+- "details" (string/optional): An optional Markdown-formatted field for additional context or examples.
 - "is_code" (boolean): A boolean indicating if this is a coding problem.
 - "language_class" (string): If the question is language-specific, include the syntax highlighting 
   class name (e.g., "language-python").
@@ -177,12 +199,14 @@ Example JSON format:
 [
 	{
 		"text": "What year was JavaScript first released?",
+		"details": "",
 		"is_code": false,
 		"language_class": "",
 		"boilerplate": ""
 	},
 	{
 		"text": "Write a JavaScript function named findMax that takes in an array of numbers and returns the largest number in that array.",
+		"details": "Ensure your function handles empty arrays gracefully and optimizes performance.",
 		"is_code": true,
 		"language_class": "language-javascript",
 		"boilerplate": "function findMax(arr) {\n    // Your code here\n}"
@@ -312,7 +336,9 @@ Example JSON format:
 }
 """
 
-def submit_open_answer_user_prompt( question, answer, topic_name, topic_description, concept_name ):
+def submit_open_answer_user_prompt( 
+		question, details, answer, topic_name, topic_description, concept_name 
+):
 	return f"""
 Please evaluate the following answer for correctness, based on the provided question, topic, and 
 concept.
@@ -328,6 +354,7 @@ Concept:
 
 Question:
 {question}
+{details}
 
 Answer:
 {answer}
