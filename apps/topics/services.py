@@ -11,6 +11,8 @@ from apps.topics import models
 from services import ai_services
 
 def get_next_question( topic_id ):
+
+	# Load topic from database
 	topic = models.Topic.objects.get( id=topic_id )
 
 	# Pick a random concept associated with the topic
@@ -21,18 +23,16 @@ def get_next_question( topic_id ):
 	selected_concept = models.Concept.objects.get( id=selected_concept_id )
 	print( f"Selected concept: {selected_concept.name}" )
 
-	 # Count the number of questions linked to the selected concept
-	question_count = models.Question.objects.filter(
-		topic=topic,
-		concepts=selected_concept
-	).count()
-	
-	# TODO: if there are unasked questions for the selected topic, ask those before generating new
-	# ones.
+	# Load all questions from database
+	all_questions = models.Question.objects.filter( topic=topic, concepts=selected_concept )
+	unasked_questions = all_questions.filter( last_asked__isnull=True )
+	question_count = all_questions.count()
+	unasked_question_count = unasked_questions.count()
+
 	# Either generate new question or use question from database based on random chance
 	q_scale = 20
 	generate_new_chance = max( 1, q_scale - question_count )
-	if random.randint( 0, q_scale ) <= generate_new_chance:
+	if unasked_question_count == 0 and random.randint( 0, q_scale ) <= generate_new_chance:
 		print( "GENERATING NEW QUESTIONS" )
 
 		# Get previously asked questions text
@@ -67,6 +67,10 @@ def get_next_question( topic_id ):
 		# Save all the generated questions
 		saved_questions = []
 		for i, question_data in enumerate( questions_data.questions ):
+			if not questions_concepts[ i ]:
+				print( f"Warning: No concepts matched for question {i}" )
+				continue
+			
 			print( f"New Question: {question_data.text}" )
 
 			# Get concept instances and associate them with the question
@@ -85,7 +89,7 @@ def get_next_question( topic_id ):
 				question = models.Question.objects.create(
 					topic = topic,
 					text = question_data.text,
-					details = question_data.details,
+					details = getattr( question_data, "details", "" ),
 					is_open = True,
 					is_code = question_data.is_code,
 					language_class = question_data.language_class,
@@ -98,7 +102,7 @@ def get_next_question( topic_id ):
 				question = models.Question.objects.create(
 					topic = topic,
 					text = question_data.text,
-					details = question_data.details,
+					details = getattr( question_data, "details", "" ),
 					is_open = False,
 					is_code = False,
 					language_class = "",
@@ -134,15 +138,27 @@ def get_next_question( topic_id ):
 	# Return a random question from the database
 	else:
 		print( "LOADING RANDOM QUESITON FROM DB" )
-		questions = list( models.Question.objects.filter( topic=topic ) )
-		questions.sort( key=lambda q: q.question_rank() )
-		choices = []
-		for question in questions:
-			rank = question.question_rank()
-			num_copies = max( round( rank / 100 ), 1 )
-			for _ in range( num_copies ):
-				choices.append( question )
-		question = choices[ random.randint( 0, len( choices ) - 1 ) ]
+		if unasked_question_count > 0:
+			question = models.Question.objects.filter(
+				topic=topic, concepts=selected_concept, last_asked__isnull=True
+			).first()
+		else:
+			questions = list(
+				models.Question.objects.filter( topic=topic, concepts=selected_concept )
+			)
+			questions.sort( key=lambda q: q.question_rank() )
+			choices = []
+			for question in questions:
+				rank = question.question_rank()
+				num_copies = max( round( rank / 100 ), 1 )
+				for _ in range( num_copies ):
+					choices.append( question )
+			question = choices[ random.randint( 0, len( choices ) - 1 ) ]
+		
+		if not question:
+			raise ValueError( "No questions available." )
+		
+		# Set the question response
 		question_response = {
 			"id": question.id,
 			"text": question.text,

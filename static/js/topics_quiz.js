@@ -284,7 +284,7 @@ window.main.onReady( function () {
 		};
 		m_questionText.textContent = "Loading question...";
 		m_questionDetails.textContent = "";
-		m_openAnswerTextarea.textContent = "";
+		m_openAnswerTextarea.value = "";
 		m_state[ "isLoadingQuestion" ] = true;
 		updateUI();
 		m_questionId = -1;
@@ -302,7 +302,7 @@ window.main.onReady( function () {
 		m_data[ "questionData" ] = data;
 		const answers = [];
 		if( data.is_open ) {
-			m_openAnswerTextarea.innerHTML = data.boilerplate;
+			m_openAnswerTextarea.value = data.boilerplate;
 		} else {
 			// Shuffle the answers
 			while( data.answers.length > 0 ) {
