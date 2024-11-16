@@ -291,6 +291,13 @@ h2 {
 .quiz-buttons button {
 	margin-right: 10px;
 }
+.quiz-footer {
+	display: flex;
+	justify-content: space-between;
+}
+.quiz-score {
+	padding: 15px;
+}
 
 /* Explanation modal */
 #explanation-modal .modal {

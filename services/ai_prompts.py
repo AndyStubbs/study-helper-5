@@ -178,6 +178,7 @@ designed to enhance understanding of the concept.
 Guidelines:
 1. Do not create multiple-choice or true/false questions. Questions should expect an open text 
    answer that encourages explanation, reasoning, or creativity.
+2. Do not include examples or code in the question text these need to go into the details field.
 2. If the question involves coding:
    - Indicate this with the "is_code" field.
    - Specify the programming language in the "language_class" field using a syntax highlighting 
@@ -186,6 +187,8 @@ Guidelines:
      the user.
 3. If additional clarification or context is required, use the "details" field. Format the content 
    of this field using **Markdown** for better readability.
+4. For coding problems do not give away the answer in the boilerplate code. It should only provide
+   a starting point and not include a solution.
 
 Return the response as JSON:
 - "text" (string): The main question text, concise and clear.

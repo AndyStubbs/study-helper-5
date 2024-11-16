@@ -350,9 +350,10 @@ def set_answer( user, question_id, answer ):
 
 	# User skipped question
 	if answer == "":
-		question.skip_count += 1
-		question.last_asked = timezone.now()
-		question.save()
+		#question.skip_count += 1
+		#question.last_asked = timezone.now()
+		#question.save()
+		question.delete()
 		return { "is_skipped": True }
 
 	# Evaluate if answer is correct

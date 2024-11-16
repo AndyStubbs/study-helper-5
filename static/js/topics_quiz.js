@@ -37,6 +37,10 @@ window.main.onReady( function () {
 		"isOpen": false,
 		"isAnswered": false
 	};
+	let m_score = {
+		"correct": 0,
+		"total": 0
+	};
 
 	// Close modal event
 	m_closeModal.addEventListener( "click", () => {
@@ -57,7 +61,7 @@ window.main.onReady( function () {
 		} );
 	} );
 
-	// Submit button login
+	// Submit answer button
 	m_submitAnswerBtn.addEventListener( "click", async () => {
 		const answer = m_openAnswerTextarea.value;
 		if( answer === "" ) {
@@ -100,12 +104,14 @@ window.main.onReady( function () {
 
 	// Function to open the quiz modal and load the next question
 	function openQuizModal( topicId ) {
+		resetScore();
 		m_topicId = parseInt( topicId );
 		m_quizModal.style.display = "block";
 		loadNextQuestion();
 	}
 
 	function openQuestionModal( questionId, topicId ) {
+		resetScore();
 		m_topicId = parseInt( topicId );
 		m_quizModal.style.display = "block";
 		loadQuestion( questionId );
@@ -247,11 +253,15 @@ window.main.onReady( function () {
 
 				// Update result text
 				if( data.is_correct ) {
+					incScore( true );
 					m_quizResults.textContent = "* Correct";
 					m_quizResults.classList.add( "result-success" );
 					m_quizResults.classList.remove( "result-error" );
 					m_openAnswerTextarea.classList.add( "quiz-correct" );
 				} else {
+					if( answer !== "" ) {
+						incScore( false );
+					}
 					m_quizResults.textContent = "* Wrong";
 					m_quizResults.classList.remove( "result-success" );
 					m_quizResults.classList.add( "result-error" );
@@ -369,5 +379,19 @@ window.main.onReady( function () {
 		} else {
 			loadingOverlay.style.visibility = "visible";
 		}
+	}
+
+	function resetScore() {
+		m_score.correct = 0;
+		m_score.total = 0;
+		document.querySelector( ".quiz-score" ).textContent = `${m_score.correct}/${m_score.total}`;
+	}
+
+	function incScore( isCorrect ) {
+		if( isCorrect ) {
+			m_score.correct += 1;
+		}
+		m_score.total += 1;
+		document.querySelector( ".quiz-score" ).textContent = `${m_score.correct}/${m_score.total}`;
 	}
 } );
