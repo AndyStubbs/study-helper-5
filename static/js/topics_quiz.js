@@ -87,6 +87,17 @@ window.main.onReady( function () {
 		setupQuestion( m_data[ "questionData" ] );
 	} );
 
+	m_openAnswerTextarea.addEventListener( "keydown", ( e ) => {
+		if( e.key === "Tab" ) {
+			e.preventDefault();
+			const start = m_openAnswerTextarea.selectionStart;
+			const end = m_openAnswerTextarea.selectionEnd;
+			m_openAnswerTextarea.value = m_openAnswerTextarea.value.substring( 0, start ) + "\t" +
+				m_openAnswerTextarea.value.substring( end );
+			m_openAnswerTextarea.selectionStart = m_openAnswerTextarea.selectionEnd = start + 1;
+		}
+	} );
+
 	// Function to open the quiz modal and load the next question
 	function openQuizModal( topicId ) {
 		m_topicId = parseInt( topicId );
@@ -304,12 +315,20 @@ window.main.onReady( function () {
 		if( data.is_open ) {
 			m_openAnswerTextarea.value = data.boilerplate;
 		} else {
-			// Shuffle the answers
-			while( data.answers.length > 0 ) {
-				const i = Math.floor( Math.random() * data.answers.length );
-				const answer = data.answers[ i ];
-				data.answers.splice( i, 1 );
-				answers.push( answer );
+
+			// Don't shuffle true/false questions
+			if( data.answers.length === 2 ) {
+				answers.push( data.answers[ 0 ] );
+				answers.push( data.answers[ 1 ] );
+			} else {
+
+				// Shuffle the answers
+				while( data.answers.length > 0 ) {
+					const i = Math.floor( Math.random() * data.answers.length );
+					const answer = data.answers[ i ];
+					data.answers.splice( i, 1 );
+					answers.push( answer );
+				}
 			}
 		}
 		m_questionId = data.id;
@@ -322,8 +341,10 @@ window.main.onReady( function () {
 		let maxLength = 0;
 		m_answerButtons.forEach( ( button, index ) => {
 			if( index >= answers.length ) {
+				button.style.display = "none";
 				return;
 			}
+			button.style.display = "";
 			button.style.fontSize = "";
 			button.style.fontWeight = "";
 			button.textContent = answers[ index ] || "";

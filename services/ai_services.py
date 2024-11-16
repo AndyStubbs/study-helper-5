@@ -37,6 +37,14 @@ class AI_OpenQuestion( BaseModel ):
 class AI_GenOpenQuestions( BaseModel ):
 	questions: list[ AI_OpenQuestion ]
 
+class AI_TF_Question( BaseModel ):
+	text: str
+	details: str
+	is_true: bool
+
+class AI_Gen_TF_Questions( BaseModel ):
+	questions: list[ AI_TF_Question ]
+
 class AI_QuestionsConcepts( BaseModel ):
 	questions_concepts: list[ list[ str ] ]
 
@@ -118,15 +126,19 @@ def generate_concepts( topic_name, topic_description ):
 def create_questions( topic_name, topic_description, concept_name, previous_questions ):
 	print( f"Creating question for topic: {topic_name}" )
 
-	# 30% chance of generating an open text question
-	if random.randint( 0, 10 ) <= 3:
-		system_prompt = ai_prompts.open_question_generator_system_prompt
-		user_prompt = ai_prompts.open_question_generator_user_prompt
-		response_format=AI_GenOpenQuestions
-	else:
+	# 20% chance of generating an open text question
+	if random.randint( 0, 10 ) >= 8:
 		system_prompt = ai_prompts.question_generator_system_prompt
 		user_prompt = ai_prompts.question_generator_user_prompt
-		response_format=AI_GenQuestions
+		response_format = AI_GenQuestions
+	elif random.randint( 0, 10 ) >= 6:
+		system_prompt = ai_prompts.tf_question_generator_system_prompt
+		user_prompt = ai_prompts.tf_question_generator_user_prompt
+		response_format = AI_Gen_TF_Questions
+	else:
+		system_prompt = ai_prompts.open_question_generator_system_prompt
+		user_prompt = ai_prompts.open_question_generator_user_prompt
+		response_format = AI_GenOpenQuestions
 	
 	messages = []
 	messages.append( {

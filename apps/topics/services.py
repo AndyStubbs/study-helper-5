@@ -85,7 +85,24 @@ def get_next_question( topic_id ):
 					print( f"Warning: Concept '{concept_name}' not found." )
 
 			# Create the question database record
-			if isinstance( question_data, ai_services.AI_OpenQuestion ):
+			if isinstance( question_data, ai_services.AI_TF_Question ):
+				if question_data.is_true:
+					correct = "true"
+				else:
+					correct = "false"
+				question = models.Question.objects.create(
+					topic = topic,
+					text = question_data.text,
+					details = getattr( question_data, "details", "" ),
+					is_open = False,
+					is_code = False,
+					language_class = "",
+					boilerplate = "",
+					answers = [ "true", "false" ],
+					correct = correct,
+					main_concept = selected_concept
+				)
+			elif isinstance( question_data, ai_services.AI_OpenQuestion ):
 				question = models.Question.objects.create(
 					topic = topic,
 					text = question_data.text,

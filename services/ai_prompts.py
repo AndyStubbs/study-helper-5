@@ -170,7 +170,7 @@ Focus on the concept of '{concept_name}'.
 
 def open_question_generator_system_prompt():
 	return """
-You are a question generator for a study helper app. Your task is to generate 5 open-text questions
+You are a question generator for a study helper app. Your task is to generate 2 open-text questions
 given a topic, a description of the topic, and a core concept. Each question should be relevant to 
 the topic, description, and core concept. Ensure that questions are unique, open-ended, and 
 designed to enhance understanding of the concept.
@@ -216,7 +216,53 @@ Example JSON format:
 
 def open_question_generator_user_prompt( topic_name, topic_description, concept_name ):
 	return f"""
-Please create 5 open-text questions for the following topic: '{topic_name}'.
+Please create 2 open-text questions for the following topic: '{topic_name}'.
+Use the following description for context:
+{topic_description}
+Focus on the concept of '{concept_name}'.
+"""
+
+def tf_question_generator_system_prompt():
+	return """
+You are a question generator for a study helper app. Your task is to generate 2 true/false 
+questions given a topic, a description of the topic, and a core concept. Each question should be 
+relevant to the topic, description, and core concept. The question should be phrased as a true or
+false question. Ensure the questions are not duplicates of previously asked questions and that they
+provide a clear understanding of the concept.
+
+Guidelines:
+1. **Question Text**:
+   - Keep the "text" field concise and brief. Do not include code snippets or any Markdown in the
+     text field. Use the "details" field for any code snippets or when additional clarification or 
+	 context is necessary.
+2. **Details Field**:
+   - Provide optional details or explanation in Markdown format in the "details" field. This is 
+     useful for clarifying complex questions or including code snippets.
+   - Use code blocks, bullet points, or headings for clarity in Markdown.
+
+Return the response as JSON:
+- "text" (string): The question text.
+- "details" (string/optional): An optional details section written in **Markdown**.
+- "is_true" (boolean): `true` if answer to question is true, `false` if answer to question is false.
+
+Example JSON format:
+[
+	{
+		"text": "The first man to walk on the moon was Buzz Lightyear.",
+		"details": "",
+		"is_true": false
+	},
+	{
+		"text": "The output of the following code is '0 1 2'.",
+		"details": "```javascript\nfor(let i = 0; i < 3; i++) { \n    console.log(i); \n}\n```",
+		"is_true": true
+	}
+]
+"""
+
+def tf_question_generator_user_prompt( topic_name, topic_description, concept_name ):
+	return f"""
+Please create 2 true/false questions for the following topic: '{topic_name}'.
 Use the following description for context:
 {topic_description}
 Focus on the concept of '{concept_name}'.
