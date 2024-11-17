@@ -183,6 +183,9 @@ h2 {
 	border-radius: 8px;
 	transition-duration: 0.25s;
 }
+#topics-content li p {
+	white-space: pre-wrap;
+}
 #topics-content li p.short {
 	cursor: pointer;
 }

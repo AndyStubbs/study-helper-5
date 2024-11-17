@@ -68,7 +68,6 @@ def qd( request ):
 # AJAX API'S
 ##################
 
-@csrf_exempt
 @login_required
 def question( request ):
 	"""Gets a question for the quiz modal popup"""
@@ -88,7 +87,6 @@ def question( request ):
 		print( f"Error generating question: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def question2( request ):
 	"""Gets a question for the quiz modal popup by questionId"""
@@ -111,7 +109,6 @@ def question2( request ):
 		print( f"Error generating question: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def answer( request ):
 	"""Submit an answer from from the user"""
@@ -133,7 +130,6 @@ def answer( request ):
 		print( f"Error generating question: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def evaluate( request ):
 	"""Gets topic title suggestions and topic description"""
@@ -152,7 +148,6 @@ def evaluate( request ):
 		print( f"Error evaluating topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def summarize( request ):
 	"""Get a topic description"""
@@ -171,7 +166,6 @@ def summarize( request ):
 		print( f"Error summarizing topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def suggest( request ):
 	"""Get a topic suggestions"""
@@ -190,7 +184,6 @@ def suggest( request ):
 		print( f"Error suggesting topics: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def save( request ):
 	"""Save a topic to the database"""
@@ -213,7 +206,6 @@ def save( request ):
 		print( f"Error saving topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def delete( request ):
 	"""Delete a topic to the database"""
@@ -233,7 +225,6 @@ def delete( request ):
 		print( f"Error deleting topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def explain( request ):
 	"""Explain a topic"""
@@ -253,7 +244,6 @@ def explain( request ):
 		print( f"Error explaining topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@csrf_exempt
 @login_required
 def history( request ):
 	"""Fetch all questions answered by the user"""

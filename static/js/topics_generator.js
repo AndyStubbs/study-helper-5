@@ -147,7 +147,7 @@ window.main.onReady( () => {
 			let truncated = topic.description.split( " " ).slice( 0, 30 ).join( " " ) + "... ▼";
 			let shortStyle = "style='display: none;'";
 			let fullStyle = "";
-			if( truncated.length < description.length ) {
+			if( truncated.length < topic.description.length ) {
 				shortStyle = "";
 				fullStyle = "style='display: none;'";
 			}
