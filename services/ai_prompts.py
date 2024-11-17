@@ -170,7 +170,7 @@ Focus on the concept of '{concept_name}'.
 
 def open_question_generator_system_prompt():
 	return """
-You are a question generator for a study helper app. Your task is to generate 2 open-text questions
+You are a question generator for a study helper app. Your task is to generate 1 open-text questions
 given a topic, a description of the topic, and a core concept. Each question should be relevant to 
 the topic, description, and core concept. Ensure that questions are unique, open-ended, and 
 designed to enhance understanding of the concept.
@@ -219,7 +219,7 @@ Example JSON format:
 
 def open_question_generator_user_prompt( topic_name, topic_description, concept_name ):
 	return f"""
-Please create 2 open-text questions for the following topic: '{topic_name}'.
+Please create 1 open-text questions for the following topic: '{topic_name}'.
 Use the following description for context:
 {topic_description}
 Focus on the concept of '{concept_name}'.

@@ -4,6 +4,7 @@
 /* global window.main */
 
 window.main.onReady( function () {
+	const DELAY = 500;
 
 	window.main.quizTopic = openQuizModal;
 	window.main.quizQuestion = openQuestionModal;
@@ -20,21 +21,26 @@ window.main.onReady( function () {
 	const m_explainBtn = document.getElementById( "quiz-explain-btn" );
 	const m_quizResetBtn = document.getElementById( "quiz-reset-btn" );
 	const m_quizResults = document.getElementById( "quiz-result" );
+	const m_quizEditor = document.getElementById( "quiz-editor" );
+	const m_quizEditorCode = document.getElementById( "quiz-editor-code" );
+	const m_quizEditorText = document.getElementById( "quiz-editor-text" );
 
 	let m_topicId = -1;
 	let m_questionId = -1;
-	let m_correctAnswer = "";
 	let m_data = {
 		"isOpen": false,
 		"question": "",
 		"answer": "",
 		"explanation": "",
 		"isCorrect": undefined,
-		"questionData": undefined
+		"questionData": undefined,
+		"languageClass": "plaintext",
+		"maxWidth": 600
 	};
 	let m_state = {
 		"isLoadingQuestion": false,
 		"isOpen": false,
+		"isCode": false,
 		"isAnswered": false
 	};
 	let m_score = {
@@ -63,7 +69,12 @@ window.main.onReady( function () {
 
 	// Submit answer button
 	m_submitAnswerBtn.addEventListener( "click", async () => {
-		const answer = m_openAnswerTextarea.value;
+		let answer;
+		if( m_state.isCode ) {
+			answer = m_quizEditorText.textContent;
+		} else {
+			answer = m_openAnswerTextarea.value;
+		}
 		if( answer === "" ) {
 			window.main.alert( "Please enter an answer or hit the skip button." );
 			return;
@@ -73,7 +84,15 @@ window.main.onReady( function () {
 
 	// Skip button logic
 	m_skipBtn.addEventListener( "click", async () => {
-		await submitAnswer( "" );
+
+		// If question is already answered no need to skip answer
+		if( !m_state.isAnswered ) {
+
+			// Skips the answer by submitting an empty string
+			await submitAnswer( "" );
+		}
+
+		// Load the next question
 		loadNextQuestion();
 	} );
 
@@ -91,16 +110,111 @@ window.main.onReady( function () {
 		setupQuestion( m_data[ "questionData" ] );
 	} );
 
-	m_openAnswerTextarea.addEventListener( "keydown", ( e ) => {
+	// Allow tabs for textareas
+	m_openAnswerTextarea.addEventListener( "keydown", allowTabs );
+	m_quizEditorText.addEventListener( "keydown", allowTabs );
+
+	// Handle input for the text editor
+	m_quizEditorText.addEventListener( "input", e => {
+		e.preventDefault();
+		syncHighlighting();
+	} );
+
+	// Attach scroll event listeners to synchronize scrolling
+	m_quizEditorText.addEventListener( "scroll", syncScroll );
+	m_quizEditorText.addEventListener( "paste", sanitizePaste );
+	m_quizEditorCode.addEventListener( "scroll", syncScroll );
+
+	// Handle past of text editor
+	function sanitizePaste( e ) {
+
+		// Prevent the default paste behavior
+		e.preventDefault();
+	
+		// Get the clipboard text data
+		const clipboardData = ( e.clipboardData || window.clipboardData ).getData( "text/plain" );
+	
+		// Sanitize the pasted content to plain text
+		const sanitizedContent = clipboardData.replace( /\r?\n/g, "\n" );
+	
+		// Insert the sanitized content at the caret position
+		const selection = window.getSelection();
+		const range = selection.getRangeAt( 0 );
+	
+		// Create a text node for the pasted content
+		const textNode = document.createTextNode( sanitizedContent );
+	
+		// Insert the text node into the contenteditable
+		range.deleteContents();
+		range.insertNode( textNode );
+	
+		// Move the caret to the end of the inserted content
+		range.setStartAfter( textNode );
+		range.setEndAfter( textNode );
+	
+		// Apply the updated range
+		selection.removeAllRanges();
+		selection.addRange( range );
+
+		syncHighlighting();
+	}
+
+	// Synchronize scrollbars for the editor and code preview
+	function syncScroll( event ) {
+		const source = event.target;
+
+		// Determine the target
+		let target;
+		if( source === m_quizEditorText ) {
+			target = m_quizEditorCode;
+		} else {
+			target = m_quizEditorText;
+		}
+
+		// Synchronize the scroll positions
+		target.scrollTop = source.scrollTop;
+		target.scrollLeft = source.scrollLeft;
+	}
+
+	// Allow tabs for text areas
+	function allowTabs( e ) {
 		if( e.key === "Tab" ) {
 			e.preventDefault();
-			const start = m_openAnswerTextarea.selectionStart;
-			const end = m_openAnswerTextarea.selectionEnd;
-			m_openAnswerTextarea.value = m_openAnswerTextarea.value.substring( 0, start ) + "\t" +
-				m_openAnswerTextarea.value.substring( end );
-			m_openAnswerTextarea.selectionStart = m_openAnswerTextarea.selectionEnd = start + 1;
+			const element = e.target;
+			if( element.tagName.toLowerCase() === "div" ) {
+				const selection = window.getSelection();
+				const range = selection.getRangeAt( 0 );
+				const tabNode = document.createTextNode( "\t" );
+				range.insertNode( tabNode );
+				range.setStartAfter( tabNode );
+				range.setEndAfter( tabNode );
+				selection.removeAllRanges();
+				selection.addRange( range );
+				syncHighlighting();
+			} else {
+				const start = element.selectionStart;
+				const end = element.selectionEnd;
+				element.value = element.value.substring( 0, start ) + "\t" +
+				element.value.substring( end );
+				element.selectionStart = element.selectionEnd = start + 1;
+			}
 		}
-	} );
+	}
+	
+	// Add syntax higlighting for code editor
+	function syncHighlighting() {
+		if( !m_state.isCode ) {
+			return;
+		}
+		const code = m_quizEditorText.textContent;
+		let language = m_data.languageClass.replace( "language-", "" );
+		if( !hljs.getLanguage( language ) ) {
+			console.error( `Invalid language: ${language} - using plaintext` );
+			language = "plaintext";
+		}
+		const highlighted = hljs.highlight( code, { language: language } ).value;
+		m_quizEditorCode.innerHTML = highlighted;
+	}
 
 	// Function to open the quiz modal and load the next question
 	function openQuizModal( topicId ) {
@@ -125,6 +239,8 @@ window.main.onReady( function () {
 			m_quizResetBtn.style.display = "none";
 			m_answersContainer.style.display = "";
 			m_openAnswerTextarea.style.display = "none";
+			m_quizEditor.style.display = "none";
+			m_quizModal.querySelector( ".modal" ).style.maxWidth = "600px";
 			m_answerButtons.forEach( button => {
 				button.textContent = "...";
 				button.style.fontSize = "18px";
@@ -137,6 +253,8 @@ window.main.onReady( function () {
 			m_quizResults.innerHTML = "&nbsp;";
 			m_quizResults.classList.remove( "result-success" );
 			m_quizResults.classList.remove( "result-error" );
+			m_quizEditor.classList.remove( "quiz-correct" );
+			m_quizEditor.classList.remove( "quiz-wrong" );
 			m_openAnswerTextarea.classList.remove( "quiz-correct" );
 			m_openAnswerTextarea.classList.remove( "quiz-wrong" );
 			return;
@@ -144,6 +262,7 @@ window.main.onReady( function () {
 		if( m_state[ "isOpen" ] ) {
 			m_answersContainer.style.display = "none";
 			m_openAnswerTextarea.style.display = "";
+			m_quizEditor.style.display = "none";
 			if( m_state[ "isAnswered" ] ) {
 				m_submitAnswerBtn.style.display = "none";
 				m_skipBtn.style.display = "";
@@ -163,10 +282,36 @@ window.main.onReady( function () {
 				m_openAnswerTextarea.classList.remove( "quiz-correct" );
 				m_openAnswerTextarea.classList.remove( "quiz-wrong" );
 			}
+		} else if( m_state[ "isCode" ] ) {
+			m_answersContainer.style.display = "none";
+			m_openAnswerTextarea.style.display = "none";
+			m_quizEditor.style.display = "";
+			if( m_state[ "isAnswered" ] ) {
+				m_submitAnswerBtn.style.display = "none";
+				m_skipBtn.style.display = "";
+				m_explainBtn.style.display = "";
+				m_quizResetBtn.style.display = "";
+				m_explainBtn.textContent = "See Details";
+				m_skipBtn.textContent = "Next";
+				m_quizEditorText.contentEditable = false;
+				m_quizEditor.classList.add( "disabled" );
+			} else {
+				m_submitAnswerBtn.style.display = "";
+				m_skipBtn.style.display = "";
+				m_explainBtn.style.display = "none";
+				m_quizResetBtn.style.display = "none";
+				m_skipBtn.textContent = "Skip";
+				m_quizResults.innerHTML = "&nbsp;";
+				m_quizEditorText.contentEditable = true;
+				m_quizEditor.classList.remove( "disabled" );
+				m_quizEditor.classList.remove( "quiz-correct" );
+				m_quizEditor.classList.remove( "quiz-wrong" );
+			}
 		} else {
 			m_answersContainer.style.display = "";
 			m_openAnswerTextarea.style.display = "none";
 			m_quizResetBtn.style.display = "none";
+			m_quizEditor.style.display = "none";
 			if( m_state[ "isAnswered" ] ) {
 				m_submitAnswerBtn.style.display = "none";
 				m_skipBtn.style.display = "";
@@ -208,8 +353,19 @@ window.main.onReady( function () {
 		setQuestionLoadingState();
 		try {
 			toggleLoadingOverlay( false );
-			const data = await main.handleRequest( "/topics/question/", { "topic_id": m_topicId } );
+
+			// Add a minimum delay to response - to allow for smooth animations
+			const minDelay = new Promise( resolve => setTimeout( resolve, DELAY ) );
+
+			// Run the requst
+			const data = await Promise.all( [
+				main.handleRequest( "/topics/question/", { "topic_id": m_topicId } ),
+				minDelay
+			] ).then( results => results[ 0 ] );
+
+			// Setup the question data
 			setupQuestion( data );
+
 		} catch ( error ) {
 			console.error( "Error loading quiz:", error );
 			m_questionText.textContent = "Error loading quiz.";
@@ -223,64 +379,26 @@ window.main.onReady( function () {
 
 	// Submit answer
 	async function submitAnswer( answer ) {
-		if( m_questionId !== -1 && m_correctAnswer === "" ) {
+		if( m_questionId !== -1 && !m_state.isAnswered ) {
 			try {
 
 				// Show loading overlay
 				toggleLoadingOverlay( false );
 
+				// Add a minimum delay to response - to allow for smooth animations
+				const minDelay = new Promise( resolve => setTimeout( resolve, DELAY ) );
+
 				// Submit answer to server
-				const data = await main.handleRequest(
-					"/topics/answer/", { "question_id": m_questionId, "answer": answer }
-				);
+				const data = await Promise.all( [
+					main.handleRequest(
+						"/topics/answer/", { "question_id": m_questionId, "answer": answer }
+					),
+					minDelay
+				] ).then( results => results[ 0 ] );
 				
-				// Update state and data
-				m_state[ "isAnswered" ] = true;
-				updateUI();
+				// Update answer response
+				updateAnswerResponse( answer, data );
 
-				// Update button status
-				if( !data.is_open ) {
-					m_correctAnswer = data.answer;
-					m_answerButtons.forEach( button => {
-						if( data.correct === button.textContent ) {
-							button.classList.add( "correct" );
-						} else if ( button.textContent === answer ) {
-							button.classList.add( "wrong" );
-						}
-						button.disabled = true;
-					} );
-				}
-
-				// Update result text
-				if( data.is_correct ) {
-					incScore( true );
-					m_quizResults.textContent = "* Correct";
-					m_quizResults.classList.add( "result-success" );
-					m_quizResults.classList.remove( "result-error" );
-					m_openAnswerTextarea.classList.add( "quiz-correct" );
-				} else {
-					if( answer !== "" ) {
-						incScore( false );
-					}
-					m_quizResults.textContent = "* Wrong";
-					m_quizResults.classList.remove( "result-success" );
-					m_quizResults.classList.add( "result-error" );
-					m_openAnswerTextarea.classList.add( "quiz-wrong" );
-				}
-
-				// Update answer data
-				m_data[ "answer" ] = answer;
-				m_data[ "isCorrect" ] = data.is_correct;
-				m_data[ "isOpen" ] = data.is_open;
-
-				if( data.is_open ) {
-					m_data[ "explanation" ] = data.correct;
-				} else {
-					m_data[ "explanation" ] = "";
-				}
-
-				// Update the history data
-				window.main.loadHistory();
 			} catch ( error ) {
 				console.error( "Error answering question:", error );
 				m_questionText.textContent = "Error answering question.";
@@ -291,6 +409,58 @@ window.main.onReady( function () {
 				toggleLoadingOverlay( true );
 			}
 		}
+	}
+
+	function updateAnswerResponse( answer, data ) {
+
+		// Update state and data
+		m_state.isAnswered = true;
+		updateUI();
+
+		// Update button status
+		if( !data.is_open ) {
+			m_answerButtons.forEach( button => {
+				if( data.correct === button.textContent ) {
+					button.classList.add( "correct" );
+				} else if ( button.textContent === answer ) {
+					button.classList.add( "wrong" );
+				}
+				button.disabled = true;
+			} );
+		}
+
+		// Update result text
+		if( data.is_correct ) {
+			incScore( true );
+			m_quizResults.textContent = "* Correct";
+			m_quizResults.classList.add( "result-success" );
+			m_quizResults.classList.remove( "result-error" );
+			m_quizEditor.classList.add( "quiz-correct" );
+			m_openAnswerTextarea.classList.add( "quiz-correct" );
+		} else {
+			if( answer !== "" ) {
+				incScore( false );
+			}
+			m_quizResults.textContent = "* Wrong";
+			m_quizResults.classList.remove( "result-success" );
+			m_quizResults.classList.add( "result-error" );
+			m_quizEditor.classList.add( "quiz-wrong" );
+			m_openAnswerTextarea.classList.add( "quiz-wrong" );
+		}
+
+		// Update answer data
+		m_data[ "answer" ] = answer;
+		m_data[ "isCorrect" ] = data.is_correct;
+		m_data[ "isOpen" ] = data.is_open;
+
+		if( data.is_open ) {
+			m_data[ "explanation" ] = data.correct;
+		} else {
+			m_data[ "explanation" ] = "";
+		}
+
+		// Update the history data
+		window.main.loadHistory();
 	}
 
 	// Reset to empty question
@@ -306,24 +476,43 @@ window.main.onReady( function () {
 		m_questionText.textContent = "Loading question...";
 		m_questionDetails.textContent = "";
 		m_openAnswerTextarea.value = "";
-		m_state[ "isLoadingQuestion" ] = true;
+		m_quizEditorText.textContent = "";
+		m_quizEditorCode.textContent = "";
+		m_state.isLoadingQuestion = true;
+		m_state.isAnswered = false;
 		updateUI();
 		m_questionId = -1;
-		m_correctAnswer = "";
 	}
 
 	function setupQuestion( data ) {
 
 		// Update state
-		m_state[ "isLoadingQuestion" ] = false;
-		m_state[ "isAnswered" ] = false;
-		m_state[ "isOpen" ] = data.is_open;
+		m_state.isLoadingQuestion = false;
+		m_state.isAnswered = false;
+		m_state.isOpen = data.is_open;
+		m_state.isCode = data.is_code;
+		if( data.is_code ) {
+			m_state.isOpen = false;
+		}
 		updateUI();
 
-		m_data[ "questionData" ] = data;
+		m_data.questionData = data;
 		const answers = [];
-		if( data.is_open ) {
-			m_openAnswerTextarea.value = data.boilerplate;
+		if( data.is_code ) {
+			let code = data.boilerplate;
+			
+			// Convert spaces into tabs
+			const lines = code.split( "\n" );
+			code = "";
+
+			// Detect spaces indent
+			for( let line of lines ) {
+				code += line.replaceAll( "    ", "\t" ) + "\n";
+			}
+
+			m_quizEditorText.textContent  = code;
+			m_data.languageClass = data.language_class;
+			syncHighlighting();
 		} else {
 
 			// Don't shuffle true/false questions
@@ -365,10 +554,21 @@ window.main.onReady( function () {
 			}
 			button.disabled = false;
 		} );
+
+		// Change the style of the buttons for longer text
 		if( maxLength > 40 ) {
 			m_answerButtons.forEach( button => {
 				button.classList.add( "long" );
 			} );
+		}
+
+		// Adjust the modal size if the container needs to be bigger
+		const modal = m_quizModal.querySelector( ".modal" );
+		if( m_state.isCode ) {
+			modal.style.maxWidth = maxWidth + "px";
+		} else if( m_answersContainer.scrollWidth > m_answersContainer.clientWidth ) {
+			let maxWidth = m_answersContainer.scrollWidth + 50;
+			modal.style.maxWidth = maxWidth + "px";
 		}
 	}
 
