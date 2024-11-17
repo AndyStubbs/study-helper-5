@@ -179,15 +179,16 @@ Guidelines:
 1. Do not create multiple-choice or true/false questions. Questions should expect an open text 
    answer that encourages explanation, reasoning, or creativity.
 2. Do not include examples or code in the question text these need to go into the details field.
-2. If the question involves coding:
+   Also make sure to not give away the answer in the details.
+3. If the question involves coding:
    - Indicate this with the "is_code" field.
    - Specify the programming language in the "language_class" field using a syntax highlighting 
      class (e.g., "language-python").
    - Include minimal boilerplate code in the "boilerplate" field to provide a starting point for 
      the user.
-3. If additional clarification or context is required, use the "details" field. Format the content 
+4. If additional clarification or context is required, use the "details" field. Format the content 
    of this field using **Markdown** for better readability.
-4. For coding problems do not give away the answer in the boilerplate code. It should only provide
+5. For coding problems do not give away the answer in the boilerplate code. It should only provide
    a starting point and not include a solution.
 
 Return the response as JSON:
@@ -361,23 +362,28 @@ Answer:
 
 def submit_open_answer_system_prompt():
 	return """
-You are a question grader for a study helper app. Your task is to evalute the correctness of an
-answer to a question. Provide a clear and thorough explanation for why the answer is correct or
-not. Use examples to demonstrate the explanation if applicable. If the answer is mostly or half
-correct mark it as correct but mention how it could be improved. If the user has an incorrect answer
-explain why the answer is incorrect. Try to include any tips or memory aids that can help the user 
-remember the correct answer. You will return a boolean indicating correctness and an explanation 
-text. Format the explanation text using **Markdown** syntax.
+You are a question grader for a study helper app. Your task is to evaluate the correctness of an
+answer to a question. Provide a clear and thorough explanation of why the answer is correct or
+not. Use examples to demonstrate the explanation if applicable.
 
-Use Markdown headings, bullet points, and code blocks where helpful for clarity. Do not include any
-extra or unrelated information. Aim to make your explanation structured and accessible for
-learners. Address the user directly (e.g., "Your answer is correct" or "Your answer is incorrect")
-to make the explanation engaging and learner-friendly. 
+If the answer is mostly or partially correct, mark it as correct, but explain how it could be
+improved. Be lenient if the answer demonstrates an understanding of the question, even if it isn't
+perfectly aligned with the expected answer. However, do not accept answers that lack substantial
+relevance to the question.
+
+For incorrect answers, explain why they are incorrect and include tips or memory aids to help the
+user understand and remember the correct answer. 
+
+Address the user directly (e.g., "Your answer is correct" or "Your answer is incorrect") to make 
+the explanation engaging and learner-friendly.
+
+Format the explanation text using **Markdown** syntax. Use Markdown headings, bullet points, and
+code blocks where helpful for clarity. Keep the explanation structured, concise, and focused.
 
 Return the response as JSON:
 - "is_correct" (boolean): `true` if the answer is correct, `false` if the answer is incorrect.
 - "explanation" (string): A Markdown-formatted explanation of the correct answer, detailing why the
-	user's answer is correct or not, with any helpful examples, tips, or clarifications.
+  user's answer is correct or not, with any helpful examples, tips, or clarifications.
 
 Example JSON format:
 { 
