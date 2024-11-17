@@ -177,17 +177,27 @@ h2 {
 	overflow-y: auto;
 }
 #topics-content li {
-	padding: 15px;
 	margin-bottom: 15px;
 	margin-right: 10px;
 	border-radius: 8px;
 	transition-duration: 0.25s;
 }
+#topics-content li h3 {
+	display: flex;
+	justify-content: space-between;
+	cursor: pointer;
+	margin: 0;
+	padding: 15px;
+	transition-duration: 0.3s;
+}
+#topics-content li div {
+	margin: 15px;
+}
 #topics-content li p {
 	white-space: pre-wrap;
-}
-#topics-content li p.short {
-	cursor: pointer;
+	transition-duration: 0.5s;
+	overflow: hidden;
+	max-height: 0px;
 }
 #topics-content input[type="text"] {
 	margin-bottom: 15px;

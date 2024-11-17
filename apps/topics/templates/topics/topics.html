@@ -7,18 +7,18 @@
 <ul id="topics-list">
 	{% for topic in topics %}
 	<li class="topic-item" data-topic-id="{{ topic.id }}">
-		<h3>{{ topic.name }}</h3>
+		<h3>{{ topic.name }}<span class="arrow">▼</span></h3>
 		<div>
-			{% if topic.is_truncated %}
-				<p class="short">{{ topic.truncated }} ▼</p>
-				<p class="full" style="display: none;">{{ topic.description }}</p>
-			{% else %}
-				<p class="short" style="display: none;">{{ topic.truncated }} ▼</p>
-				<p class="full">{{ topic.description }}</p>
-			{% endif %}
+			<p class="short">{{ topic.description }}</p>
 		</div>
-		<button onclick="window.main.editTopic('{{ topic.id }}')" class="btn-sm btn-c2">Edit</button>
-		<button onclick="window.main.quizTopic('{{ topic.id }}')" class="btn-sm btn-c1">Quiz</button>
+		<div>
+			<button onclick="window.main.editTopic('{{ topic.id }}')" class="btn-sm btn-c2">
+				Edit
+			</button>
+			<button onclick="window.main.quizTopic('{{ topic.id }}')" class="btn-sm btn-c1">
+				Quiz
+			</button>
+		</div>
 	</li>
 	{% endfor %}
 </ul>

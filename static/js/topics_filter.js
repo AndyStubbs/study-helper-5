@@ -1,4 +1,5 @@
 // static/js/topics_filter.js
+
 "use strict";
 
 /* global window.main */
@@ -27,12 +28,15 @@ window.main.onReady( () => {
 
 	// Handle expand short content
 	topicsList.addEventListener( "click", ( e ) => {
-		if( e.target && e.target.classList.contains( "short" ) ) {
-			const shortParagraph = e.target;
-			const fullParagraph = shortParagraph.parentElement.querySelector( ".full" );
-			if( fullParagraph ) {
-				fullParagraph.style.display = "";
-				shortParagraph.style.display = "none";
+		if( e.target && e.target.nodeName === "H3" ) {
+			const p = e.target.parentElement.querySelector( "p" );
+			const arrow = e.target.querySelector( ".arrow" );
+			if( arrow.textContent === "▼" ) {
+				arrow.textContent = "▲";
+				p.style.maxHeight = p.scrollHeight + "px";
+			} else {
+				arrow.textContent = "▼";
+				p.style.maxHeight = "0px";
 			}
 		}
 	} );

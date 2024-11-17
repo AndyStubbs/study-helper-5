@@ -144,15 +144,8 @@ window.main.onReady( () => {
 			} );
 			setTopicId( topic.id );
 			let topicLi = document.querySelector( `[data-topic-id='${topic.id}']` );
-			let truncated = topic.description.split( " " ).slice( 0, 30 ).join( " " ) + "... ▼";
-			let shortStyle = "style='display: none;'";
 			let fullStyle = "";
-			if( truncated.length < topic.description.length ) {
-				shortStyle = "";
-				fullStyle = "style='display: none;'";
-			}
 			if( topicLi ) {
-				topicLi.querySelector( ".short" ).innerHTML = truncated;
 				topicLi.querySelector( ".full" ).innerHTML = topic.description;
 			} else {
 				topicLi = document.createElement( "li" );
@@ -160,11 +153,14 @@ window.main.onReady( () => {
 				topicLi.innerHTML = `
 					<h3>${ topic.name }</h3>
 					<div>
-						<p class="short" ${ shortStyle }>${ truncated }</p>
 						<p class="full" ${ fullStyle }>${ topic.description }</p>
 					</div>
-					<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">Edit</button>
-					<button onclick="window.main.quizTopic('${ topic.id }')" class="btn-sm btn-c1">Quiz</button>
+					<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">
+						Edit
+					</button>
+					<button onclick="window.main.quizTopic('${ topic.id }')" class="btn-sm btn-c1">
+						Quiz
+					</button>
 				`;
 				document.querySelector( "#topics-list" ).appendChild( topicLi );
 			}
