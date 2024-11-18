@@ -22,4 +22,5 @@ urlpatterns = [
 	path( "explanation/", views.explanation, name="explanation" ),
 	path( "history/", views.history, name="history" ),
 	path( "historytab/", views.historytab, name="historytab" ),
+	path( "documentselector/", views.documentselector, name="documentselector" ),
 ]

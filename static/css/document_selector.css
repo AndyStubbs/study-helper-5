@@ -1,0 +1,70 @@
+#document-selector-modal .modal-content {
+	text-align: left;
+}
+#document-selector-modal .modal {
+	max-width: 800px;
+}
+#document-filter {
+	width: calc(100% - 23px);
+	margin-bottom: 15px;
+}
+#document-selector-modal .document-container {
+	display: flex;
+	align-items: flex-start;
+	gap: 15px;
+}
+#document-selector-modal .document-container > div {
+	flex-grow: 1;
+	height: 250px;
+	border: 1px solid var(--border-color-light);
+	border-radius: 5px;
+	padding: 15px;
+}
+#document-list {
+	max-height: 300px;
+	overflow-y: auto;
+	border: 1px solid #ddd;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+.document-item {
+	display: flex;
+	align-items: center;
+	margin-bottom: 5px;
+}
+.document-item input[type="checkbox"] {
+	margin-right: 10px;
+}
+.preview-placeholder {
+	margin: auto;
+	text-align: center;
+	vertical-align: middle;
+	position: relative;
+	top: 100px;
+	color: #888;
+}
+
+#document-upload {
+	display: none;
+}
+
+.custom-file-upload {
+	width: 140px;
+	display: inline-block;
+	padding: 6px 12px;
+	cursor: pointer;
+	border-radius: 4px;
+	background-color: var(--button-secondary-bg-color);
+	color: var(--button-secondary-text-color);
+	border: 1px solid var(--button-secondary-border-color);
+}
+
+.custom-file-upload:hover {
+	background-color: var(--button-secondary-hover-bg-color);
+}
+
+.custom-file-upload img {
+	width: 18px;
+	position: relative;
+	top: 2.5px;
+}

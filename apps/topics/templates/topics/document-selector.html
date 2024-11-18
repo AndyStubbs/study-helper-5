@@ -1,0 +1,26 @@
+<!-- topics/templates/topics/document-selctor.html -->
+
+{% load static %}
+
+<div class="modal">
+	<div class="modal-content">
+		<span class="close">&times;</span>
+		<h3>Select Documents</h3>
+		<div>
+			<input type="text" id="document-filter" placeholder="Filter documents..." />
+		</div>
+		<div class="document-container">
+			<div id="document-list"></div>
+			<div id="document-preview">
+				<h3 class="preview-placeholder">Preview</h3>
+			</div>
+		</div>
+		<div>
+			<label class="custom-file-upload">
+				<img src="{% static 'svg/document.svg' %}" alt="Document Icon">
+				Upload File
+				<input type="file" id="document-upload" accept=".txt,.csv,.json,.pdf">
+			</label>
+		</div>
+	</div>
+</div>

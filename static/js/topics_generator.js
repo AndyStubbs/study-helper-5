@@ -12,6 +12,8 @@ window.main.onReady( () => {
 	const descriptionArea = document.getElementById( "description" );
 	const suggestionsList = document.getElementById( "suggestions" );
 	const saveTopicBtn = document.getElementById( "save-topic-btn" );
+	const attachDocumentsBtn = document.getElementById( "attach-documents" );
+
 	let m_topicId = -1;
 
 	form.addEventListener( "submit", async ( e ) => {
@@ -22,6 +24,10 @@ window.main.onReady( () => {
 	saveTopicBtn.addEventListener( "click", async ( e ) => {
 		e.preventDefault();
 		await saveTopic( topicInput.value, descriptionArea.value );
+	} );
+
+	attachDocumentsBtn.addEventListener( "click", () => {
+		window.main.selectDocuments( 0 );
 	} );
 
 	async function evaluateTopic( topic_name ) {
@@ -134,6 +140,7 @@ window.main.onReady( () => {
 		}
 	}
 
+	// Save topic function
 	async function saveTopic( topicName, topicDescription ) {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
 		try {
@@ -186,8 +193,10 @@ window.main.onReady( () => {
 		m_topicId = topicId;
 
 		const topicLi = document.querySelector( `[data-topic-id="${m_topicId}"]` );
-		const topicName = topicLi.querySelector( "h3" ).textContent;
-		const topicDescription = topicLi.querySelector( ".full" ).textContent;
+		let topicName = topicLi.querySelector( "h3" ).textContent;
+		const topicDescription = topicLi.querySelector( "p" ).textContent;
+
+		topicName = topicName.replace( "▼", "" ).replace( "▲", "" );
 
 		// Select the generator tab
 		main.selectTab( "generator" );

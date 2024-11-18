@@ -8,6 +8,7 @@
 	<title>Study Helper</title>
 	<link rel="stylesheet" href="{% static 'css/colors.css' %}">
 	<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+	<link rel="stylesheet" href="{% static 'css/document_selector.css' %}">
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/github.min.css" id="hljs-light-theme">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/github-dark.min.css" id="hljs-dark-theme" disabled>
@@ -49,6 +50,7 @@
 	<div id="quiz-modal" class="modal-overlay" style="display: none;" data-view="topics:quiz"></div>
 	<div id="explanation-modal" class="modal-overlay" style="display: none;" data-view="topics:explanation"></div>
 	<div id="qd-modal" class="modal-overlay" style="display: none;" data-view="topics:qd"></div>
+	<div id="document-selector-modal" class="modal-overlay" style="display: none;" data-view="topics:documentselector"></div>
 	<div id="modal-alert" class="modal-overlay" style="display: none;">
 		<div class="modal">
 			<div class="modal-content">
@@ -72,5 +74,6 @@
 	<script src="{% static 'js/topics_quiz.js' %}"></script>
 	<script src="{% static 'js/topics_explain.js' %}"></script>
 	<script src="{% static 'js/history.js' %}"></script>
+	<script src="{% static 'js/document_selector.js' %}"></script>
 </body>
 </html>

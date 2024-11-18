@@ -58,6 +58,12 @@ def qd( request ):
 	"""Render the HTML for the question-details modal popup"""
 	return render( request, "topics/question-details.html" )
 
+@restrict_to_view( "topics:documentselector" )
+@login_required
+def documentselector( request ):
+	"""Render the HTML for the document-selector modal popup"""
+	return render( request, "topics/document-selector.html" )
+
 ##################
 # AJAX API'S
 ##################
