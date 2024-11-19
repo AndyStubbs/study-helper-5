@@ -1,13 +1,16 @@
 # topics/views.py
 
+import os
 import json
-from django.db.models import F, Value
-from django.http import JsonResponse, HttpResponseForbidden
-from django.views.decorators.csrf import csrf_exempt
+import mimetypes
+from django.http import JsonResponse, FileResponse, HttpResponseForbidden
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from utils.decorators import restrict_to_view
-from apps.topics.models import Topic, Question
+from apps.topics.models import Topic
 from apps.topics import services
 
 
@@ -258,3 +261,47 @@ def history( request ):
 	else:
 		print( f"Error getting history: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
+@login_required
+def uploaddoc( request ):
+	if request.method == "POST" and request.FILES.get( "file" ):
+		try:
+			uploaded_file = request.FILES[ "file" ]
+
+			# Make sure the users folder exists
+			user_folder = os.path.join( settings.MEDIA_ROOT, "uploads", str( request.user.id ) )
+			os.makedirs( user_folder, exist_ok=True )
+
+			# Upload the file content
+			file_name = os.path.join( "uploads", str( request.user.id ), uploaded_file.name )
+			file_path = default_storage.save( file_name, ContentFile( uploaded_file.read() ) )
+
+			# Example preview (adjust based on file type)
+			preview = "File uploaded successfully. (Preview unavailable for this file type)"
+
+			return JsonResponse( {
+				"name": uploaded_file.name,
+				"path": file_path,
+				"preview": preview,
+			} )
+		except Exception as e:
+			return JsonResponse( { "error": str( e ) }, status=500 )
+
+##################
+# USER FILES
+##################
+
+@login_required
+def serve_user_file( request, user_id, file_name ):
+
+	# Make sure user is owner of this file - return file not found if not owner
+	if request.user.id != int( user_id ):
+		return JsonResponse( { "error": "File not found" }, status=404 )
+
+	# Get the file
+	file_path = os.path.join( settings.MEDIA_ROOT, "uploads", user_id, file_name )
+	if not os.path.exists( file_path ):
+		return JsonResponse( { "error": "File not found" }, status=404 )
+
+	mime_type, _ = mimetypes.guess_type( file_path )
+	return FileResponse( open( file_path, "rb" ), content_type=mime_type )
