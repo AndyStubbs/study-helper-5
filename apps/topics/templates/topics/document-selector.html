@@ -23,7 +23,7 @@
 			<label class="custom-file-upload">
 				<img src="{% static 'svg/document.svg' %}" alt="Document Icon">
 				Upload File
-				<input type="file" id="document-upload" accept=".txt,.csv,.json,.pdf">
+				<input type="file" name="files[]" id="document-upload" accept=".txt,.csv,.json,.pdf" multiple>
 			</label>
 			<button id="document-select-all" class="btn btn-c2">Select All</button>
 			<button id="document-clear" class="btn btn-c2">Unselect All</button>

@@ -59,42 +59,58 @@ window.main.onReady( () => {
 	} );
 
 	// Handle file upload
-	m_uploadInput.addEventListener( "change", async (e) => {
-		const file = e.target.files[ 0 ];
-		if( !file ) {
+	m_uploadInput.addEventListener( "change", async ( e ) => {
+		const files = e.target.files;
+		if( !files || files.length === 0 ) {
 			return;
 		}
 
+		let errorMessages = [];
 		try {
-			const formData = new FormData();
-			formData.append( "file", file );
-
-			// Send the file to the backend
-			const response = await fetch( "/topics/uploaddoc/", {
-				method: "POST",
-				headers: {
-					"X-CSRFToken": document.querySelector( "meta[name='csrf-token']" ).content,
-				},
-				body: formData,
-			} );
-
-			const docData = await response.json();
-			if( response.ok ) {
-				// Add the uploaded document to the list
-				addDocumentToList( docData, true );
-
-			} else {
-				console.error( "Upload failed:", docData.error );
-				window.main.alert( `Error uploading document: ${docData.error}` );
+			for( let i = 0; i < files.length; i++ ) {
+				try {
+					const docData = await uploadFile( files[ i ] );
+					addDocumentToList( docData, true );
+				} catch( error ) {
+					console.error( `Error uploading file ${files[i].name}:`, error );
+					errorMessages.push( `Error uploading file ${files[i].name}: ${error}` );
+				}
 			}
-		} catch( error ) {
-			console.error( "Error uploading document:", error );
-			window.main.alert( "An error occurred while uploading the document." );
+		} catch( globalError ) {
+			console.error( "Unexpected error during file upload process:", globalError );
+		}
+
+		// Show a single error message if there are errors
+		if( errorMessages.length > 0 ) {
+			const errorSummary = errorMessages.join( "\n" );
+			window.main.alert( `The following errors occurred:\n\n${errorSummary}` );
 		}
 	} );
 
+	// Function to upload a single file
+	async function uploadFile( file ) {
+		const formData = new FormData();
+		formData.append( "file", file );
+
+		// Send the file to the backend
+		const response = await fetch( "/topics/uploaddoc/", {
+			method: "POST",
+			headers: {
+				"X-CSRFToken": document.querySelector( "meta[name='csrf-token']" ).content,
+			},
+			body: formData,
+		} );
+
+		const docData = await response.json();
+		if( response.ok ) {
+			return docData;
+		} else {
+			throw docData.error || "An unknown error occurred.";
+		}
+	}
+
 	// Add uploaded document to the list
-	function addDocumentToList( docData ) {
+	function addDocumentToList( docData, isJustUploaded ) {
 		const docItem = document.createElement( "div" );
 		docItem.classList.add( "document-item" );
 		docItem.setAttribute( "data-document-id", docData.name );
@@ -131,8 +147,16 @@ window.main.onReady( () => {
 		// Append the document item to the list
 		m_documentList.appendChild( docItem );
 
-		// Automatically load the preview
-		getDocPreview( docData.name, docItem );
+		// Automatically preview just uploaded documents
+		if( isJustUploaded ) {
+			getDocPreview( docData.name, docItem );
+		}
+
+		// Checkbox checked changed
+		const checkbox = docItem.querySelector( "input[type='checkbox']" );
+		checkbox.addEventListener( "input", () => {
+			updateCheckbox( checkbox, docData );
+		} );
 	}
 
 	async function getDocPreview( name, docItem ) {
@@ -165,6 +189,22 @@ window.main.onReady( () => {
 		const previewButton = docItem.querySelector( ".preview-button" );
 		previewButton.classList.add( "active" );
 		previewButton.disabled = true;
+	}
+
+	function updateCheckbox( checkbox, docData ) {
+		const attachedDocumentsInput = document.getElementById( "hidden-attached-documents" );
+		let attachedDocuments = JSON.parse( attachedDocumentsInput.value );
+		if( checkbox.checked ) {
+			attachedDocuments.push( docData.name );
+		} else {
+			attachedDocuments = attachedDocuments.filter( name => name != docData.name );
+		}
+		attachedDocumentsInput.value = JSON.stringify( attachedDocuments );
+		let msg = "";
+		if( attachedDocuments.length > 0 ) {
+			msg = attachedDocuments.length + " Attached Documents";
+		}
+		document.getElementById( "topic-doc-count" ).textContent = msg;
 	}
 
 	// Reset upload state

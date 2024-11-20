@@ -222,6 +222,10 @@ h2 {
 }
 .result-options {
 	margin-top: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 15px;
 }
 .result-actions {
 	display: flex;
