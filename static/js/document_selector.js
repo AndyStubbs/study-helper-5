@@ -4,6 +4,12 @@
 
 window.main.onReady( () => {
 
+	/*
+		<button id="document-clear" class="btn btn-c2">Unselect All</button>
+		<button id="document-select-all" class="btn btn-c2">Select All</button>
+		<button id="document-close-upload" class="btn btn-c2">Close</button>
+	*/
+
 	const m_documentSelectorModal = document.getElementById( "document-selector-modal" );
 	const m_uploadInput = document.getElementById( "document-upload" );
 	const m_documentList = document.getElementById( "document-list" );
@@ -12,7 +18,10 @@ window.main.onReady( () => {
 	const m_previewDoc = document.querySelector( ".preview-doc" );
 	const m_previewDocName = document.querySelector( ".preview-doc-name" );
 	const m_previewDocContent = document.querySelector( ".preview-doc-content" );
-	
+	const m_unselectAllBtn = document.getElementById( "document-clear" );
+	const m_selectAllBtn = document.getElementById( "document-select-all" );
+	const m_closeBtn = document.getElementById( "document-close-upload" );
+
 	// Open select documents modal
 	window.main.selectDocuments = ( topicId ) => {
 		m_documentSelectorModal.style.display = "";
@@ -28,6 +37,25 @@ window.main.onReady( () => {
 		if( e.target === e.currentTarget ) {
 			m_documentSelectorModal.style.display = "none";
 		}
+	} );
+
+	// Close button
+	m_closeBtn.addEventListener( "click", () => {
+		m_documentSelectorModal.style.display = "none";
+	} );
+
+	// Handle Select all items
+	m_selectAllBtn.addEventListener( "click", () => {
+		document.querySelectorAll( ".document-item .document-checkbox" ).forEach( check => {
+			check.checked = true;
+		} );
+	} );
+
+	// Handle Unselect all items
+	m_unselectAllBtn.addEventListener( "click", () => {
+		document.querySelectorAll( ".document-item .document-checkbox" ).forEach( check => {
+			check.checked = false;
+		} );
 	} );
 
 	// Handle file upload
@@ -53,8 +81,7 @@ window.main.onReady( () => {
 			const docData = await response.json();
 			if( response.ok ) {
 				// Add the uploaded document to the list
-				addDocumentToList( docData );
-				showDocumentPreview( docData );
+				addDocumentToList( docData, true );
 
 			} else {
 				console.error( "Upload failed:", docData.error );
@@ -68,9 +95,6 @@ window.main.onReady( () => {
 
 	// Add uploaded document to the list
 	function addDocumentToList( docData ) {
-		const documentList = document.getElementById( "document-list" );
-	
-		// Create a document item container
 		const docItem = document.createElement( "div" );
 		docItem.classList.add( "document-item" );
 		docItem.setAttribute( "data-document-id", docData.name );
@@ -83,7 +107,8 @@ window.main.onReady( () => {
 			</label>
 			<div class="document-item-buttons">
 				<button class="btn btn-sm btn-c2 preview-button">
-					<img src="/static/svg/preview.svg" alt="Delete" class="icon-preview">
+					<img src="/static/svg/preview.svg" alt="Preview" class="icon-preview">
+					<img src="/static/svg/preview-active.svg" alt="Preview" class="icon-preview-active">
 				</button>
 				<button class="btn btn-sm btn-c2 delete-button">
 					<img src="/static/svg/trashcan.svg" alt="Delete" class="icon-trash">
@@ -104,7 +129,7 @@ window.main.onReady( () => {
 		} );
 	
 		// Append the document item to the list
-		documentList.appendChild( docItem );
+		m_documentList.appendChild( docItem );
 
 		// Automatically load the preview
 		getDocPreview( docData.name, docItem );
@@ -115,7 +140,7 @@ window.main.onReady( () => {
 			"/topics/previewdoc/",
 			{ "name": name }
 		);
-		showDocumentPreview( docData );
+		showDocumentPreview( docData, docItem );
 	}
 
 	async function deleteDocument( name, docItem ) {
@@ -127,12 +152,19 @@ window.main.onReady( () => {
 	}
 
 	// Show document preview
-	function showDocumentPreview( docData ) {
+	function showDocumentPreview( docData, docItem ) {
 		m_previewPlaceholder.style.display = "none";
 		m_previewDoc.style.display = "block";
 		m_previewPlaceholder.style.display = "none";
 		m_previewDocName.textContent = docData.name;
 		m_previewDocContent.textContent = docData.preview;
+		document.querySelectorAll( ".preview-button.active" ).forEach( button => {
+			button.classList.remove( "active" );
+			button.disabled = false;
+		} );
+		const previewButton = docItem.querySelector( ".preview-button" );
+		previewButton.classList.add( "active" );
+		previewButton.disabled = true;
 	}
 
 	// Reset upload state

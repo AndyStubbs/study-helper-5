@@ -1,0 +1,32 @@
+<svg
+	width="30"
+	height="30"
+	viewBox="0 0 30 30"
+	xmlns="http://www.w3.org/2000/svg"
+>
+	<!-- Outer Eye Shape -->
+	<path
+		d="M15 7C8 7 3 15 3 15s5 8 12 8 12-8 12-8-5-8-12-8z"
+		fill="none"
+		stroke="#eee"
+		stroke-width="1.5"
+	/>
+
+	<!-- Iris -->
+	<circle
+		cx="15"
+		cy="15"
+		r="3"
+		fill="none"
+		stroke="#eee"
+		stroke-width="1.5"
+	/>
+
+	<!-- Pupil -->
+	<circle
+		cx="15"
+		cy="15"
+		r="1.5"
+		fill="#eee"
+	/>
+</svg>
