@@ -4,12 +4,6 @@
 
 window.main.onReady( () => {
 
-	/*
-		<button id="document-clear" class="btn btn-c2">Unselect All</button>
-		<button id="document-select-all" class="btn btn-c2">Select All</button>
-		<button id="document-close-upload" class="btn btn-c2">Close</button>
-	*/
-
 	const m_documentSelectorModal = document.getElementById( "document-selector-modal" );
 	const m_uploadInput = document.getElementById( "document-upload" );
 	const m_documentList = document.getElementById( "document-list" );
@@ -49,6 +43,7 @@ window.main.onReady( () => {
 		document.querySelectorAll( ".document-item .document-checkbox" ).forEach( check => {
 			check.checked = true;
 		} );
+		updateCheckCount();
 	} );
 
 	// Handle Unselect all items
@@ -56,6 +51,7 @@ window.main.onReady( () => {
 		document.querySelectorAll( ".document-item .document-checkbox" ).forEach( check => {
 			check.checked = false;
 		} );
+		updateCheckCount();
 	} );
 
 	// Handle file upload
@@ -70,7 +66,7 @@ window.main.onReady( () => {
 			for( let i = 0; i < files.length; i++ ) {
 				try {
 					const docData = await uploadFile( files[ i ] );
-					addDocumentToList( docData, true );
+					addDocumentToList( docData, i === 0 );
 				} catch( error ) {
 					console.error( `Error uploading file ${files[i].name}:`, error );
 					errorMessages.push( `Error uploading file ${files[i].name}: ${error}` );
@@ -154,9 +150,8 @@ window.main.onReady( () => {
 
 		// Checkbox checked changed
 		const checkbox = docItem.querySelector( "input[type='checkbox']" );
-		checkbox.addEventListener( "input", () => {
-			updateCheckbox( checkbox, docData );
-		} );
+		checkbox.addEventListener( "input", updateCheckCount );
+		checkbox.dataset.name = docData.name;
 	}
 
 	async function getDocPreview( name, docItem ) {
@@ -191,14 +186,21 @@ window.main.onReady( () => {
 		previewButton.disabled = true;
 	}
 
-	function updateCheckbox( checkbox, docData ) {
-		const attachedDocumentsInput = document.getElementById( "hidden-attached-documents" );
-		let attachedDocuments = JSON.parse( attachedDocumentsInput.value );
-		if( checkbox.checked ) {
-			attachedDocuments.push( docData.name );
-		} else {
-			attachedDocuments = attachedDocuments.filter( name => name != docData.name );
+	function updateCheckCount() {
+		const checkboxes = document.querySelectorAll( "#document-list .document-checkbox" );
+		if( checkboxes.length === 0 ) {
+			return;
 		}
+		let attachedDocuments = [];
+		checkboxes.forEach( checkbox => {
+			const name = checkbox.dataset.name;
+			if( checkbox.checked ) {
+				attachedDocuments.push( name );
+			} else {
+				attachedDocuments = attachedDocuments.filter( name => name === name );
+			}
+		} );
+		const attachedDocumentsInput = document.getElementById( "hidden-attached-documents" );
 		attachedDocumentsInput.value = JSON.stringify( attachedDocuments );
 		let msg = "";
 		if( attachedDocuments.length > 0 ) {

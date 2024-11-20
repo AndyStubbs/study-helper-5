@@ -295,6 +295,10 @@ h2 {
 	background-color: var(--status-error-color-light) !important;
 }
 
+::-webkit-scrollbar-corner {
+	background: rgba(0,0,0,0);
+}
+
 ::-webkit-scrollbar-track {
 	background: var(--track-bg-color);
 }

@@ -2,7 +2,8 @@
 	text-align: left;
 }
 #document-selector-modal .modal {
-	max-width: 800px;
+	max-width: 900px;
+	min-width: min(700px, 100%);
 }
 #document-filter {
 	width: calc(100% - 23px);
@@ -10,6 +11,7 @@
 }
 #document-selector-modal .document-container {
 	font-size: 0;
+
 }
 #document-selector-modal .document-container > div {
 	display: inline-block;
@@ -23,12 +25,20 @@
 }
 #document-list {
 	margin-right: 15px;
+	overflow-y: auto;
 }
 .document-item {
-	display: flex;
-	align-items: center;
 	margin-bottom: 5px;
-	justify-content: space-between;
+}
+.document-item label {
+	display: inline-block;
+	width: calc(100% - 80px);
+	overflow: hidden;
+	white-space: nowrap;
+}
+.document-item-buttons {
+	display: inline-block;
+	width: 70px;
 }
 .document-item input[type="checkbox"] {
 	margin-right: 10px;
