@@ -527,7 +527,6 @@ def get_file_preview(file_path):
 	"""
 	# Determine file extension
 	file_extension = os.path.splitext( file_path )[ 1 ].lower()
-
 	if file_extension in [ ".txt", ".csv", ".json" ]:
 		# Generate preview for plain text files
 		file_content = default_storage.open( file_path ).read().decode( "utf-8" )

@@ -177,7 +177,11 @@ window.main.onReady( () => {
 			"/topics/deletedoc/",
 			{ "name": name }
 		);
+		if( docItem.querySelector( ".active" ) ) {
+			resetUploadState();
+		}
 		docItem.remove();
+		updateCheckCount();
 	}
 
 	// Show document preview

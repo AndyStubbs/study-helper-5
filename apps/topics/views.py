@@ -341,14 +341,13 @@ def previewdoc( request ):
 				"name": name,
 				"preview": preview
 			}
-			print( response )
 			return JsonResponse( { "data": response } )
 		except Exception as e:
+			print( f"Error uploading doc: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
 		print( f"Error uploading doc: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
-
 
 @login_required
 def deletedoc( request ):
