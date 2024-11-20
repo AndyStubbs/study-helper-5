@@ -66,7 +66,7 @@ window.main.onReady( () => {
 			for( let i = 0; i < files.length; i++ ) {
 				try {
 					const docData = await uploadFile( files[ i ] );
-					addDocumentToList( docData, i === 0 );
+					addDocumentToList( docData.name, i === 0 );
 				} catch( error ) {
 					console.error( `Error uploading file ${files[i].name}:`, error );
 					errorMessages.push( `Error uploading file ${files[i].name}: ${error}` );
@@ -82,6 +82,16 @@ window.main.onReady( () => {
 			window.main.alert( `The following errors occurred:\n\n${errorSummary}` );
 		}
 	} );
+
+	getAllDocs();
+
+	// Load all documents
+	async function getAllDocs() {
+		const allDocs = await window.main.handleRequest( "/topics/getalldocs/", {} );
+		allDocs.forEach( docName => {
+			addDocumentToList( docName, false );
+		} );
+	}
 
 	// Function to upload a single file
 	async function uploadFile( file ) {
@@ -106,16 +116,16 @@ window.main.onReady( () => {
 	}
 
 	// Add uploaded document to the list
-	function addDocumentToList( docData, isJustUploaded ) {
+	function addDocumentToList( docName, isJustUploaded ) {
 		const docItem = document.createElement( "div" );
 		docItem.classList.add( "document-item" );
-		docItem.setAttribute( "data-document-id", docData.name );
+		docItem.setAttribute( "data-document-id", docName );
 	
 		// Inline HTML structure
 		docItem.innerHTML = `
 			<label>
 				<input type="checkbox" class="document-checkbox">
-				${docData.name}
+				${docName}
 			</label>
 			<div class="document-item-buttons">
 				<button class="btn btn-sm btn-c2 preview-button">
@@ -131,13 +141,13 @@ window.main.onReady( () => {
 		// Add the preview functionality
 		const previewButton = docItem.querySelector( ".preview-button" );
 		previewButton.addEventListener( "click", () => {
-			getDocPreview( docData.name, docItem );
+			getDocPreview( docName, docItem );
 		} );
 
 		// Add delete functionality
 		const deleteButton = docItem.querySelector( ".delete-button" );
 		deleteButton.addEventListener( "click", () => {
-			deleteDocument( docData.name, docItem );
+			deleteDocument( docName, docItem );
 		} );
 	
 		// Append the document item to the list
@@ -145,13 +155,13 @@ window.main.onReady( () => {
 
 		// Automatically preview just uploaded documents
 		if( isJustUploaded ) {
-			getDocPreview( docData.name, docItem );
+			getDocPreview( docName, docItem );
 		}
 
 		// Checkbox checked changed
 		const checkbox = docItem.querySelector( "input[type='checkbox']" );
 		checkbox.addEventListener( "input", updateCheckCount );
-		checkbox.dataset.name = docData.name;
+		checkbox.dataset.name = docName;
 	}
 
 	async function getDocPreview( name, docItem ) {

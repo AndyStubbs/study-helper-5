@@ -296,6 +296,32 @@ def uploaddoc( request ):
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 @login_required
+def getalldocs( request ):
+	if request.method == "POST":
+		try:
+			# Path to the user's upload directory
+			user_folder = os.path.join( settings.MEDIA_ROOT, "uploads", str( request.user.id ) )
+
+			# Ensure the directory exists
+			if not os.path.exists( user_folder ):
+				return JsonResponse( { "data": [] } )
+
+			# Get all file names in the user's directory
+			document_names = []
+			docs = os.listdir( user_folder )
+			for doc in docs:
+				if os.path.isfile( os.path.join( user_folder, doc ) ):
+					document_names.append( doc )
+
+			return JsonResponse( { "data": document_names } )
+		except Exception as e:
+			print( f"Error retrieving documents: {e}" )
+			return JsonResponse( {"error": str(e)}, status=500 )
+	else:
+		print( f"Error retrieving documents: Wrong request method: {request.method}" )
+		return JsonResponse( {"error": "Invalid request"}, status=400 )
+
+@login_required
 def previewdoc( request ):
 	if request.method == "POST":
 		try:
