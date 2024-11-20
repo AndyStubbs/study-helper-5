@@ -37,10 +37,6 @@ window.main.onReady( () => {
 			return;
 		}
 
-		// Preview the uploaded file name
-		m_previewPlaceholder.style.display = "none";
-		m_previewDoc.style.display = "block";
-
 		try {
 			const formData = new FormData();
 			formData.append( "file", file );
@@ -54,14 +50,15 @@ window.main.onReady( () => {
 				body: formData,
 			} );
 
-			const data = await response.json();
-
+			const docData = await response.json();
 			if( response.ok ) {
 				// Add the uploaded document to the list
-				addDocumentToList( data );
+				addDocumentToList( docData );
+				showDocumentPreview( docData );
+
 			} else {
-				console.error( "Upload failed:", data.error );
-				window.main.alert( `Error uploading document: ${data.error}` );
+				console.error( "Upload failed:", docData.error );
+				window.main.alert( `Error uploading document: ${docData.error}` );
 			}
 		} catch( error ) {
 			console.error( "Error uploading document:", error );
@@ -71,17 +68,68 @@ window.main.onReady( () => {
 
 	// Add uploaded document to the list
 	function addDocumentToList( docData ) {
+		const documentList = document.getElementById( "document-list" );
+	
+		// Create a document item container
 		const docItem = document.createElement( "div" );
 		docItem.classList.add( "document-item" );
-		docItem.textContent = docData.name;
-		docItem.addEventListener( "click", () => {
-			showDocumentPreview( docData );
+		docItem.setAttribute( "data-document-id", docData.name );
+	
+		// Inline HTML structure
+		docItem.innerHTML = `
+			<label>
+				<input type="checkbox" class="document-checkbox">
+				${docData.name}
+			</label>
+			<div class="document-item-buttons">
+				<button class="btn btn-sm btn-c2 preview-button">
+					<img src="/static/svg/preview.svg" alt="Delete" class="icon-preview">
+				</button>
+				<button class="btn btn-sm btn-c2 delete-button">
+					<img src="/static/svg/trashcan.svg" alt="Delete" class="icon-trash">
+				</button>
+			</div>
+		`;
+		
+		// Add the preview functionality
+		const previewButton = docItem.querySelector( ".preview-button" );
+		previewButton.addEventListener( "click", () => {
+			getDocPreview( docData.name, docItem );
 		} );
-		m_documentList.appendChild( docItem );
+
+		// Add delete functionality
+		const deleteButton = docItem.querySelector( ".delete-button" );
+		deleteButton.addEventListener( "click", () => {
+			deleteDocument( docData.name, docItem );
+		} );
+	
+		// Append the document item to the list
+		documentList.appendChild( docItem );
+
+		// Automatically load the preview
+		getDocPreview( docData.name, docItem );
+	}
+
+	async function getDocPreview( name, docItem ) {
+		const docData = await main.handleRequest(
+			"/topics/previewdoc/",
+			{ "name": name }
+		);
+		showDocumentPreview( docData );
+	}
+
+	async function deleteDocument( name, docItem ) {
+		const docData = await main.handleRequest(
+			"/topics/deletedoc/",
+			{ "name": name }
+		);
+		docItem.remove();
 	}
 
 	// Show document preview
 	function showDocumentPreview( docData ) {
+		m_previewPlaceholder.style.display = "none";
+		m_previewDoc.style.display = "block";
 		m_previewPlaceholder.style.display = "none";
 		m_previewDocName.textContent = docData.name;
 		m_previewDocContent.textContent = docData.preview;
@@ -94,4 +142,5 @@ window.main.onReady( () => {
 		m_previewDoc.style.display = "none";
 		m_documentPreview.innerHTML = "";
 	}
+
 } );

@@ -213,7 +213,6 @@ h2 {
 	background-color: var(--button-4-bg-color);
 	color: var(--button-4-text-color);
 }
-
 .btn-c4:hover {
 	background-color: var(--button-4-hover-bg-color);
 }

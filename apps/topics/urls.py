@@ -28,6 +28,8 @@ urlpatterns = [
 	path( "explain/", views.explain, name="explain" ),
 	path( "history/", views.history, name="history" ),
 	path( "uploaddoc/", views.uploaddoc, name="uploaddoc" ),
+	path( "previewdoc/", views.previewdoc, name="previewdoc" ),
+	path( "deletedoc/", views.deletedoc, name="deletedoc" ),
 
 	# User Files
 	path( "files/<int:user_id>/<str:file_name>/", views.serve_user_file, name="serve_user_file" ),

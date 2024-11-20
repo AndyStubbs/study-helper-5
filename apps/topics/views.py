@@ -12,7 +12,7 @@ from django.core.files.base import ContentFile
 from utils.decorators import restrict_to_view
 from apps.topics.models import Topic
 from apps.topics import services
-
+from services import sanity
 
 ##################
 # HTML COMPONENTS
@@ -264,7 +264,9 @@ def history( request ):
 
 @login_required
 def uploaddoc( request ):
-	if request.method == "POST" and request.FILES.get( "file" ):
+	if request.method == "POST":
+		if not request.FILES.get( "file" ):
+			return JsonResponse( { "error": "Invalid request" }, status=400 )
 		try:
 			uploaded_file = request.FILES[ "file" ]
 
@@ -272,20 +274,80 @@ def uploaddoc( request ):
 			user_folder = os.path.join( settings.MEDIA_ROOT, "uploads", str( request.user.id ) )
 			os.makedirs( user_folder, exist_ok=True )
 
-			# Upload the file content
-			file_name = os.path.join( "uploads", str( request.user.id ), uploaded_file.name )
-			file_path = default_storage.save( file_name, ContentFile( uploaded_file.read() ) )
+			# Get the filename
+			file_name = sanity.sanitize_filename( uploaded_file.name )
+			file_path = os.path.join( "uploads", str( request.user.id ), file_name )
 
-			# Example preview (adjust based on file type)
-			preview = "File uploaded successfully. (Preview unavailable for this file type)"
+			# If the file already exists, delete it to override
+			if default_storage.exists( file_path ):
+				default_storage.delete( file_path )
+			
+			# Save the file to storage
+			saved_path = default_storage.save( file_path, ContentFile( uploaded_file.read() ) )
 
 			return JsonResponse( {
 				"name": uploaded_file.name,
-				"path": file_path,
-				"preview": preview,
+				"path": saved_path,
 			} )
 		except Exception as e:
 			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error uploading doc: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
+@login_required
+def previewdoc( request ):
+	if request.method == "POST":
+		try:
+			data = json.loads( request.body )
+			name = data.get( "name", -1 )
+			if not isinstance( name, str ) or name == -1:
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			
+			# Get the filename
+			file_name = sanity.sanitize_filename( name )
+			file_path = os.path.join( "uploads", str( request.user.id ), file_name )
+
+			# Get the preview
+			preview = services.get_file_preview( file_path )
+
+			response = {
+				"name": name,
+				"preview": preview
+			}
+			print( response )
+			return JsonResponse( { "data": response } )
+		except Exception as e:
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error uploading doc: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
+
+@login_required
+def deletedoc( request ):
+	if request.method == "POST":
+		try:
+			data = json.loads( request.body )
+			file_name = data.get( "name", -1 )
+			print( file_name )
+			if not isinstance( file_name, str ) or file_name == -1:
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			
+			# Get the filename
+			file_name = sanity.sanitize_filename( file_name )
+			file_path = os.path.join( "uploads", str( request.user.id ), file_name )
+			if default_storage.exists( file_path ):
+				default_storage.delete( file_path )
+			
+			return JsonResponse( {
+				"status": "success"
+			} )
+		except Exception as e:
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error uploading doc: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 ##################
 # USER FILES

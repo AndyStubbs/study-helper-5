@@ -3,8 +3,11 @@
 import random
 import re
 
-from datetime import datetime
-from django.db.models import Func, Q, F
+import os
+from django.core.files.storage import default_storage
+from PyPDF2 import PdfReader
+from PIL import Image
+from io import BytesIO
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from apps.topics import models
@@ -77,7 +80,7 @@ def get_next_question( topic_id ):
 			question_concepts = questions_concepts[ i ]
 			concept_instances = []
 			for concept_name in question_concepts:
-				normalized_name = normalize_concept_name( concept_name )
+				normalized_name = normalize_name( concept_name )
 				concept = models.Concept.objects.filter( normalized_name=normalized_name ).first()
 				if concept:
 					concept_instances.append( concept )
@@ -297,7 +300,7 @@ def generate_topic_concepts( topic_id ):
 	for concept_name in ai_response.concepts:
 
 		# Normalize the name for searching
-		normalized_name = normalize_concept_name( concept_name )
+		normalized_name = normalize_name( concept_name )
 
 		print( f"Normalized name: {normalized_name}" )
 
@@ -325,7 +328,7 @@ def generate_topic_concepts( topic_id ):
 			f"Concept '{concept_name}' {'created' if created else 'found'} and added to the topic."
 		)
 
-def normalize_concept_name( name ):
+def normalize_name( name ):
 	return re.sub( r"[^a-zA-Z]", "", name ).lower()
 
 def get_topic_description( topic_name ):
@@ -511,3 +514,36 @@ def get_question_history( user ):
 		} )
 	
 	return questions_data
+
+def get_file_preview(file_path):
+	"""
+	Generate a preview for the given file based on its type.
+
+	Args:
+		file_path (str): Path to the file in the storage system.
+
+	Returns:
+		str: A preview string or base64-encoded data for the file.
+	"""
+	# Determine file extension
+	file_extension = os.path.splitext( file_path )[ 1 ].lower()
+
+	if file_extension in [ ".txt", ".csv", ".json" ]:
+		# Generate preview for plain text files
+		file_content = default_storage.open( file_path ).read().decode( "utf-8" )
+		return file_content[ :500 ]
+
+	elif file_extension == ".pdf":
+		# Generate preview for PDF files
+		pdf_file = default_storage.open( file_path )
+		reader = PdfReader( pdf_file )
+		if reader.pages:
+			return reader.pages[ 0 ].extract_text()[ :500 ]
+
+	elif file_extension in [ ".jpg", ".jpeg", ".png", ".gif" ]:
+		image_file = default_storage.open( file_path )
+		img = Image.open( image_file )
+		img.thumbnail( ( 200, 200 ) )
+		buffer = BytesIO()
+		img.save( buffer, format="PNG" )
+		return f"data:image/png;base64,{buffer.getvalue().encode('base64').decode('utf-8')}"
