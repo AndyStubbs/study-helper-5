@@ -1,0 +1,71 @@
+.history-controls {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 10px;
+	justify-content: space-between;
+}
+.history-controls input {
+	flex-grow: 1;
+}
+.history-controls select {
+	padding: 10px;
+	border-radius: 4px;
+}
+.history-table {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+.history-header {
+	font-weight: bold;
+	user-select: none;
+	margin-right: 35px;
+}
+.history-header, .history-row {
+	display: flex;
+	padding: 10px;
+}
+
+.header-cell, .row-cell {
+	flex: 1;
+	padding: 5px;
+	text-align: left;
+}
+
+/* Topic column */
+.header-cell:first-child,
+.row-cell:first-child {
+	flex: 1.2;
+}
+
+/* Question column */
+.header-cell:nth-child(2),
+.row-cell:nth-child(2) {
+	flex: 3.5;
+}
+
+/* Score column */
+.header-cell:nth-child(3),
+.row-cell:nth-child(3) {
+	flex: 0 0 65px;
+}
+
+/* Options column */
+.header-cell:last-child,
+.row-cell:last-child {
+	flex: 0 0 70px;
+	text-align: right;
+}
+
+.history-body {
+	max-height: 500px;
+	overflow-y: auto;
+}
+
+.sortable {
+	cursor: pointer;
+}
+
+.row-cell:last-child {
+	text-align: right;
+}

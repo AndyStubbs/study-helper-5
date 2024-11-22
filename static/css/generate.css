@@ -1,0 +1,86 @@
+#topic-form {
+	display: flex;
+	margin-bottom: 20px;
+}
+#topic-input {
+	flex-grow: 1;
+	margin-right: 16px;
+}
+.sug-btn {
+	text-align: center;
+}
+#attach-documents {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 12px;
+}
+#attach-documents img {
+	width: 18px;
+}
+#save-topic-btn {
+	margin-top: 20px;
+}
+#result-area {
+	display: none;
+	margin-top: 20px;
+}
+#description {
+	width: 100%;
+	height: 100%;
+	padding: 10px;
+	font-size: 16px;
+	border-radius: 4px;
+	resize: none;
+	box-sizing: border-box;
+}
+#suggestions {
+	list-style-type: none;
+	padding: 0;
+	flex-grow: 1;
+	overflow-y: auto;
+	margin-top: 0;
+}
+#suggestions li {
+	cursor: pointer;
+	padding: 5px 10px;
+	margin: 5px 0;
+	border-radius: 3px;
+}
+.flex-container {
+	display: flex;
+	justify-content: space-between;
+	min-height: 300px;
+}
+.left-column {
+	flex: 2;
+	margin-right: 20px;
+	display: flex;
+	flex-direction: column;
+	min-height: 300px;
+}
+.right-column {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+.description-container {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+}
+.result-options {
+	margin-top: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 15px;
+}
+.result-actions {
+	display: flex;
+	align-items: baseline;
+	justify-content: flex-start;
+}
+.result-actions button {
+	margin-right: 15px;
+}

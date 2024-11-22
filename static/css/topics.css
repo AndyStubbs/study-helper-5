@@ -1,0 +1,33 @@
+#topics-content ul {
+	list-style-type: none;
+	padding: 0;
+	max-height: calc(100vh - 400px);
+	overflow-y: auto;
+}
+#topics-content li {
+	margin-bottom: 15px;
+	margin-right: 10px;
+	border-radius: 8px;
+	transition-duration: 0.25s;
+}
+#topics-content li h3 {
+	display: flex;
+	justify-content: space-between;
+	cursor: pointer;
+	margin: 0;
+	padding: 15px;
+	transition-duration: 0.3s;
+}
+#topics-content li div {
+	margin: 15px;
+}
+#topics-content li p {
+	white-space: pre-wrap;
+	transition-duration: 0.5s;
+	overflow: hidden;
+	max-height: 0px;
+}
+#topics-content input[type="text"] {
+	margin-bottom: 15px;
+	width: calc(100% - 20px);
+}
