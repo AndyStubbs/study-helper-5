@@ -4,6 +4,7 @@ import random
 import re
 
 import os
+from django.conf import settings
 from django.core.files.storage import default_storage
 from PyPDF2 import PdfReader
 from PIL import Image
@@ -11,7 +12,8 @@ from io import BytesIO
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from apps.topics import models
-from services import ai_services
+from services import ai_services, sanity
+
 
 def get_next_question( topic_id ):
 
@@ -227,6 +229,9 @@ def save_topic( topic_name, topic_description, user, topic_data=None ):
 		print( topic_name )
 		print( topic_data )
 
+		# Validate topic_data
+		topic_data = sanity.sanitize_topic_data( topic_data )
+		
 		# Check if the topic already exists
 		existing_topic = models.Topic.objects.filter( name=topic_name ).first()
 
@@ -526,7 +531,7 @@ def get_question_history( user ):
 	
 	return questions_data
 
-def get_file_preview(file_path):
+def get_file_preview( file_path ):
 	"""
 	Generate a preview for the given file based on its type.
 
