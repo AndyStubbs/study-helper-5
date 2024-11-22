@@ -21,6 +21,16 @@ window.main.onReady( () => {
 		m_documentSelectorModal.style.display = "";
 	};
 
+	// Get topic attachments
+	window.main.getTopicAttachments = () => {
+		const attachedDocumentsInput = document.getElementById( "hidden-attached-documents" );
+		const attachments = attachedDocumentsInput.value;
+		if( attachments === "" ) {
+			return [];
+		}
+		return JSON.parse( attachedDocumentsInput.value  );
+	};
+
 	// Close modal event
 	m_documentSelectorModal.querySelector( ".close" ).addEventListener( "click", () => {
 		m_documentSelectorModal.style.display = "none";

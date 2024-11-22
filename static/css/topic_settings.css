@@ -1,0 +1,62 @@
+#topic-settings-modal h3 {
+	margin-top: 0;
+}
+
+/* Section Headers */
+.settings-section h4 {
+	margin-top: 20px;
+	margin-bottom: 10px;
+	color: #333;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+/* Labels */
+.settings-section label {
+	display: inline-block;
+	margin-bottom: 5px;
+	color: #555;
+	font-size: 14px;
+}
+
+/* Sliders */
+input[type="range"] {
+	width: 100%;
+	margin: 5px 0 10px;
+	background: #ddd;
+	height: 5px;
+	border-radius: 5px;
+	outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 20px;
+	height: 20px;
+	background: #4CAF50;
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+	width: 20px;
+	height: 20px;
+	background: #4CAF50;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+/* Value Display */
+.settings-section span {
+	display: inline-block;
+	margin-left: 10px;
+	color: #333;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.settings-buttons {
+	margin-top: 10px;
+}

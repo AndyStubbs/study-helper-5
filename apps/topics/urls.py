@@ -15,6 +15,7 @@ urlpatterns = [
 	path( "explanation/", views.explanation, name="explanation" ),
 	path( "historytab/", views.historytab, name="historytab" ),
 	path( "documentselector/", views.documentselector, name="documentselector" ),
+	path( "topicsettings/", views.topicsettings, name="topicsettings" ),
 
 	# AJAX Requests
 	path( "question/", views.question, name="question" ),

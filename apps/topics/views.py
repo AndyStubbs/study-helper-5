@@ -67,6 +67,13 @@ def documentselector( request ):
 	"""Render the HTML for the document-selector modal popup"""
 	return render( request, "topics/document-selector.html" )
 
+@restrict_to_view( "topics:topicsettings" )
+@login_required
+def topicsettings( request ):
+	"""Render the HTML for the topic-settings modal popup"""
+	return render( request, "topics/topic-settings.html" )
+
+
 ##################
 # AJAX API'S
 ##################
@@ -194,20 +201,49 @@ def save( request ):
 		try:
 			print( "SAVING TOPIC" )
 			data = json.loads( request.body )
+			
+			# Extract and validate inputs
 			topic_name = data.get( "topic_name", "" ).strip()
 			topic_description = data.get( "topic_description", "" ).strip()
+			topic_data = data.get( "topic_data", {} )
+			
 			if not topic_name or not topic_description:
 				return JsonResponse( {
-					"error": "Invalid request. Both topic and description are required."
+					"error": "Invalid request. Both topic name and description are required."
 				}, status=400 )
-			response = services.save_topic( topic_name, topic_description, request.user )
-			return JsonResponse( { "status": "success",	"data": response } )
+
+			if not isinstance( topic_data, dict ):
+				return JsonResponse( {
+					"error": "Invalid request. 'topic_data' must be a dictionary."
+				}, status=400 )
+
+			# Optional: Validate specific keys in topic_data
+			data_keys = [ "attachments", "settings" ]
+			invalid_keys = [
+				key for key in topic_data.keys()
+				if key not in data_keys
+			]
+
+			if invalid_keys:
+				return JsonResponse( {
+					"error": f"Invalid keys in topic_data: {', '.join(invalid_keys)}"
+				}, status=400 )
+
+			# Save topic using the service
+			response = services.save_topic(
+				topic_name,
+				topic_description,
+				request.user,
+				topic_data
+			)
+
+			return JsonResponse( {"status": "success", "data": response} )
 		except Exception as e:
-			print( f"Error saving topic: {e}" )
-			return JsonResponse( { "error": str( e ) }, status=500 )
+			print(f"Error saving topic: {e}")
+			return JsonResponse({"error": str(e)}, status=500)
 	else:
-		print( f"Error saving topic: Wrong request method: {request.method}" )
-		return JsonResponse( { "error": "Invalid request" }, status=400 )
+		print(f"Error saving topic: Wrong request method: {request.method}")
+		return JsonResponse({"error": "Invalid request"}, status=400)
 
 @login_required
 def delete( request ):

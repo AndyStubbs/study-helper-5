@@ -5,29 +5,34 @@
 
 window.main.onReady( () => {
 
-	const form = document.getElementById( "topic-form" );
-	const topicInput = document.getElementById( "topic-input" );
-	const submitBtn = document.getElementById( "submit-btn" );
-	const resultArea = document.getElementById( "result-area" );
-	const descriptionArea = document.getElementById( "description" );
-	const suggestionsList = document.getElementById( "suggestions" );
-	const saveTopicBtn = document.getElementById( "save-topic-btn" );
-	const attachDocumentsBtn = document.getElementById( "attach-documents" );
+	const m_form = document.getElementById( "topic-form" );
+	const m_topicInput = document.getElementById( "topic-input" );
+	const m_submitBtn = document.getElementById( "submit-btn" );
+	const m_resultArea = document.getElementById( "result-area" );
+	const m_descriptionArea = document.getElementById( "description" );
+	const m_suggestionsList = document.getElementById( "suggestions" );
+	const m_saveTopicBtn = document.getElementById( "save-topic-btn" );
+	const m_attachDocumentsBtn = document.getElementById( "attach-documents" );
+	const m_topicSettingsBtn = document.getElementById( "topic-settings-btn" );
 
 	let m_topicId = -1;
 
-	form.addEventListener( "submit", async ( e ) => {
+	m_form.addEventListener( "submit", async ( e ) => {
 		e.preventDefault();
-		await evaluateTopic( topicInput.value );
+		await evaluateTopic( m_topicInput.value );
 	} );
 
-	saveTopicBtn.addEventListener( "click", async ( e ) => {
+	m_saveTopicBtn.addEventListener( "click", async ( e ) => {
 		e.preventDefault();
-		await saveTopic( topicInput.value, descriptionArea.value );
+		await saveTopic( m_topicInput.value, m_descriptionArea.value );
 	} );
 
-	attachDocumentsBtn.addEventListener( "click", () => {
-		window.main.selectDocuments( 0 );
+	m_attachDocumentsBtn.addEventListener( "click", () => {
+		window.main.selectDocuments( m_topicId );
+	} );
+
+	m_topicSettingsBtn.addEventListener( "click", () => {
+		window.main.topicSettings( m_topicId );
 	} );
 
 	async function evaluateTopic( topic_name ) {
@@ -54,7 +59,7 @@ window.main.onReady( () => {
 			loadingOverlay.style.visibility = "visible";
 			const data = await main.handleRequest( "/topics/summarize/", { topic_name } );
 			setTopicId( -1 );
-			descriptionArea.value = data.description;
+			m_descriptionArea.value = data.description;
 			document.querySelector( ".result-message" ).textContent = "";
 		} catch ( error ) {
 			console.error( "Error:", error );
@@ -70,12 +75,12 @@ window.main.onReady( () => {
 	function updateTopicDetails( data ) {
 
 		// Show the results
-		resultArea.style.display = "block";
-		submitBtn.textContent = "Update";
+		m_resultArea.style.display = "block";
+		m_submitBtn.textContent = "Update";
 
 		// Update description
 		if( data.description ) {
-			descriptionArea.value = data.description;
+			m_descriptionArea.value = data.description;
 		}
 
 		// Set the topic id
@@ -92,7 +97,7 @@ window.main.onReady( () => {
 		
 		// Update the suggestions
 		const getSuggestionsBtn = document.querySelector( ".sug-btn" );
-		suggestionsList.innerHTML = "";
+		m_suggestionsList.innerHTML = "";
 		if( data.suggestions && data.suggestions.length > 0 ) {
 			getSuggestionsBtn.style.display = "none";
 			getSuggestionsBtn.disabled = true;
@@ -104,14 +109,14 @@ window.main.onReady( () => {
 
 				// On suggestion clicked
 				li.addEventListener( "click", () => {
-					topicInput.value = suggestion;
-					suggestionsList.querySelectorAll( ".selected" ). forEach( selected_li => {
+					m_topicInput.value = suggestion;
+					m_suggestionsList.querySelectorAll( ".selected" ). forEach( selected_li => {
 						selected_li.classList.remove( "selected" );
 					} );
 					li.classList.add( "selected" );
 					summarizeTopic( suggestion );
 				} );
-				suggestionsList.appendChild( li );
+				m_suggestionsList.appendChild( li );
 			} );
 		} else {
 			getSuggestionsBtn.style.display = "";
@@ -143,24 +148,28 @@ window.main.onReady( () => {
 	// Save topic function
 	async function saveTopic( topicName, topicDescription ) {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
+		const topicData = {
+			"settings": window.main.getTopicSettings(),
+			"attachments": window.main.getTopicAttachments()
+		};
 		try {
 			loadingOverlay.style.visibility = "visible";
 			const topic = await main.handleRequest( "/topics/save/", {
 				"topic_name": topicName,
-				"topic_description": topicDescription
+				"topic_description": topicDescription,
+				"topic_data": topicData
 			} );
 			setTopicId( topic.id );
 			let topicLi = document.querySelector( `[data-topic-id='${topic.id}']` );
-			let fullStyle = "";
 			if( topicLi ) {
-				topicLi.querySelector( ".full" ).innerHTML = topic.description;
+				topicLi.querySelector( ".short" ).innerHTML = topic.description;
 			} else {
 				topicLi = document.createElement( "li" );
 				topicLi.dataset.topicId = topic.id;
 				topicLi.innerHTML = `
 					<h3>${ topic.name }</h3>
 					<div>
-						<p class="full" ${ fullStyle }>${ topic.description }</p>
+						<p class="short">${ topic.description }</p>
 					</div>
 					<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">
 						Edit
@@ -247,7 +256,7 @@ window.main.onReady( () => {
 		loadingOverlay.style.visibility = "visible";
 		try {
 			await main.handleRequest( "/topics/delete/", { topic_id } );
-			resultArea.style.display = "none";
+			m_resultArea.style.display = "none";
 			const topicLi = document.querySelector( `[data-topic-id="${m_topicId}"]` );
 			topicLi.remove();
 			document.getElementById( "topic-input" ).value = "";

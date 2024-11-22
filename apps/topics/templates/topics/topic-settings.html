@@ -1,0 +1,41 @@
+<!-- topics/templates/topics/topic-settings.html -->
+
+<div class="modal">
+	<div class="modal-content">
+		<span class="close">&times;</span>
+		<h3>Topic Settings</h3>
+
+		<!-- Question Type Frequency Settings -->
+		<div class="settings-section">
+			<h4>Question Type Frequency</h4>
+			<label for="mcq-frequency">Multiple Choice:</label>
+			<input type="range" id="mcq-frequency" name="mcq-frequency" min="0" max="100" value="50" step="5">
+			<span id="mcq-frequency-value">50%</span>
+			<br>
+			<label for="tf-frequency">True/False:</label>
+			<input type="range" id="tf-frequency" name="tf-frequency" min="0" max="100" value="30" step="5">
+			<span id="tf-frequency-value">30%</span>
+			<br>
+			<label for="open-text-frequency">Open Text:</label>
+			<input type="range" id="open-text-frequency" name="open-text-frequency" min="0" max="100" value="20" step="5">
+			<span id="open-text-frequency-value">20%</span>
+		</div>
+
+		<!-- Question Source Frequency Settings -->
+		<div class="settings-section">
+			<h4>Question Generation Source</h4>
+			<label for="document-frequency">From Attached Documents:</label>
+			<input type="range" id="document-frequency" name="document-frequency" min="0" max="100" value="50" step="5">
+			<span id="document-frequency-value">50%</span>
+			<br>
+			<label for="non-document-frequency">From Topic Description:</label>
+			<input type="range" id="non-document-frequency" name="non-document-frequency" min="0" max="100" value="50" step="5">
+			<span id="non-document-frequency-value">50%</span>
+		</div>
+
+		<!-- Action Buttons -->
+		<div class="settings-buttons">
+			<button id="topic-settings-ok" class="btn btn-c2">Ok</button>
+		</div>
+	</div>
+</div>

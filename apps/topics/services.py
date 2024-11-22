@@ -222,26 +222,36 @@ def get_topic_suggestions( topic_name ):
 	}
 	return response_data
 
-def save_topic( topic_name, topic_description, user ):
+def save_topic( topic_name, topic_description, user, topic_data=None ):
 		print( "SAVING TOPIC IN SERVICE" )
 		print( topic_name )
+		print( topic_data )
 
 		# Check if the topic already exists
 		existing_topic = models.Topic.objects.filter( name=topic_name ).first()
 
 		if existing_topic:
 			print( "UPDATING TOPIC" )
+			is_changed = False
+			if (
+				existing_topic.description != topic_description or
+				existing_topic.topic_data != topic_data
+			):
+				is_changed = True
 			existing_topic.description = topic_description
+			existing_topic.topic_data = topic_data
 			existing_topic.save()
 			response_data = {
 				"id": existing_topic.id,
 				"name": existing_topic.name,
-				"description": existing_topic.description
+				"description": existing_topic.description,
+				"data": topic_data
 			}
 			print( f"Topic: {existing_topic.id} updated" )
 
 			# Generate the concepts for the topic
-			generate_topic_concepts( existing_topic.id )
+			if is_changed:
+				generate_topic_concepts( existing_topic.id )
 
 			return response_data
 		else:
@@ -250,6 +260,7 @@ def save_topic( topic_name, topic_description, user ):
 			topic = models.Topic.objects.create(
 				name=topic_name,
 				description=topic_description,
+				data=topic_data,
 				user=user
 			)
 			print( f"Topic: {topic.id} created" )

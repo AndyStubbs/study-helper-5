@@ -14,7 +14,10 @@ class Topic( models.Model ):
 	user = models.ForeignKey( CustomUser, on_delete=models.SET_NULL, null=True, blank=True )
 	concepts = models.ManyToManyField( "Concept", related_name="topics", blank=True )
 	last_studied = models.DateTimeField( null=True, blank=True )
-
+	topic_data = models.JSONField(
+		default=dict,
+		help_text="Store custom settings like question type and source frequencies as JSON."
+	)
 	def __str__( self ):
 		return self.name
 
