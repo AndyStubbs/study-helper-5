@@ -1,18 +1,24 @@
 # topics/views.py
 
-import os
+# TODOS:
+# 1. Switch use GET instead of POST for all getters.
+# 2. Use Django’s logging module for better error logging.
+
 import json
-import mimetypes
-from django.http import JsonResponse, FileResponse, HttpResponseForbidden
-from django.conf import settings
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
+from django.shortcuts import render, get_object_or_404
 from utils.decorators import restrict_to_view
-from apps.topics.models import Topic
+from apps.topics import models
 from apps.topics import services
 from services import sanity
+
+##################
+# Globals
+##################
+
+MAX_FILE_SIZE_MB = 30
+MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
 
 ##################
 # HTML COMPONENTS
@@ -31,7 +37,7 @@ def generate( request ):
 @login_required
 def topics( request ):
 	"""Render the HTML for the Topics tab"""
-	topics = Topic.objects.filter( user=request.user ).order_by( "name" )
+	topics = models.Topic.objects.filter( user=request.user ).order_by( "name" )
 	context = {
 		"topics": topics
 	}
@@ -304,26 +310,14 @@ def uploaddoc( request ):
 		if not request.FILES.get( "file" ):
 			return JsonResponse( { "error": "Invalid request" }, status=400 )
 		try:
-			uploaded_file = request.FILES[ "file" ]
-
-			# Make sure the users folder exists
-			user_folder = os.path.join( settings.MEDIA_ROOT, "uploads", str( request.user.id ) )
-			os.makedirs( user_folder, exist_ok=True )
-
-			# Get the filename
-			file_name = sanity.sanitize_filename( uploaded_file.name )
-			file_path = os.path.join( "uploads", str( request.user.id ), file_name )
-
-			# If the file already exists, delete it to override
-			if default_storage.exists( file_path ):
-				default_storage.delete( file_path )
 			
-			# Save the file to storage
-			saved_path = default_storage.save( file_path, ContentFile( uploaded_file.read() ) )
-
+			uploaded_file = request.FILES[ "file" ]
+			if uploaded_file.size > MAX_FILE_SIZE:
+				raise ValueError( f"File size exceeds {MAX_FILE_SIZE_MB} MB limit" )
+			file_name = sanity.sanitize_filename( uploaded_file.name )
+			services.store_document( request.user, file_name, uploaded_file )
 			return JsonResponse( {
-				"name": uploaded_file.name,
-				"path": saved_path,
+				"name": file_name
 			} )
 		except Exception as e:
 			return JsonResponse( { "error": str( e ) }, status=500 )
@@ -335,20 +329,10 @@ def uploaddoc( request ):
 def getalldocs( request ):
 	if request.method == "POST":
 		try:
-			# Path to the user's upload directory
-			user_folder = os.path.join( settings.MEDIA_ROOT, "uploads", str( request.user.id ) )
-
-			# Ensure the directory exists
-			if not os.path.exists( user_folder ):
-				return JsonResponse( { "data": [] } )
-
-			# Get all file names in the user's directory
 			document_names = []
-			docs = os.listdir( user_folder )
+			docs = models.Document.objects.filter( user=request.user ).order_by( "name" )
 			for doc in docs:
-				if os.path.isfile( os.path.join( user_folder, doc ) ):
-					document_names.append( doc )
-
+				document_names.append( doc.name )
 			return JsonResponse( { "data": document_names } )
 		except Exception as e:
 			print( f"Error retrieving documents: {e}" )
@@ -361,24 +345,25 @@ def getalldocs( request ):
 def previewdoc( request ):
 	if request.method == "POST":
 		try:
+			# Parse user request and get the filename
 			data = json.loads( request.body )
 			name = data.get( "name", -1 )
-			print( name )
 			if not isinstance( name, str ) or name == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			
-			# Get the filename
 			file_name = sanity.sanitize_filename( name )
-			file_path = os.path.join( "uploads", str( request.user.id ), file_name )
-
-			print( file_path )
 
 			# Get the preview
-			preview = services.get_file_preview( file_path )
+			document = get_object_or_404( models.Document, name=file_name, user=request.user )
+			preview = document.chunks.order_by( "id" ).first()
+			if preview:
+				preview_text = preview.text
+			else:
+				preview_text = "No preview vailable"
 
+			# Return the respons
 			response = {
 				"name": name,
-				"preview": preview
+				"preview": preview_text
 			}
 			return JsonResponse( { "data": response } )
 		except Exception as e:
@@ -392,17 +377,16 @@ def previewdoc( request ):
 def deletedoc( request ):
 	if request.method == "POST":
 		try:
+			# Parse user request and get the filename
 			data = json.loads( request.body )
-			file_name = data.get( "name", -1 )
-			print( file_name )
-			if not isinstance( file_name, str ) or file_name == -1:
+			name = data.get( "name", -1 )
+			if not isinstance( name, str ) or name == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
-			
-			# Get the filename
-			file_name = sanity.sanitize_filename( file_name )
-			file_path = os.path.join( "uploads", str( request.user.id ), file_name )
-			if default_storage.exists( file_path ):
-				default_storage.delete( file_path )
+			file_name = sanity.sanitize_filename( name )
+
+			# Delete the document
+			document = get_object_or_404( models.Document, name=file_name, user=request.user )
+			document.delete()
 			
 			return JsonResponse( {
 				"status": "success"
@@ -412,22 +396,3 @@ def deletedoc( request ):
 	else:
 		print( f"Error uploading doc: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
-
-##################
-# USER FILES
-##################
-
-@login_required
-def serve_user_file( request, user_id, file_name ):
-
-	# Make sure user is owner of this file - return file not found if not owner
-	if request.user.id != int( user_id ):
-		return JsonResponse( { "error": "File not found" }, status=404 )
-
-	# Get the file
-	file_path = os.path.join( settings.MEDIA_ROOT, "uploads", user_id, file_name )
-	if not os.path.exists( file_path ):
-		return JsonResponse( { "error": "File not found" }, status=404 )
-
-	mime_type, _ = mimetypes.guess_type( file_path )
-	return FileResponse( open( file_path, "rb" ), content_type=mime_type )

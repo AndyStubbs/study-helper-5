@@ -33,6 +33,4 @@ urlpatterns = [
 	path( "deletedoc/", views.deletedoc, name="deletedoc" ),
 	path( "getalldocs/", views.getalldocs, name="getalldocs" ),
 
-	# Static User Data
-	path( "files/<int:user_id>/<str:file_name>/", views.serve_user_file, name="serve_user_file" ),
 ]

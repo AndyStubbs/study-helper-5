@@ -46,7 +46,7 @@ def get_next_question( topic_id ):
 
 		q_type = get_question_type( topic.topic_data )
 		print( f"Question Type: {q_type}" )
-		q_src = get_question_source( topic )
+		q_src = get_random_question_source( topic )
 		print( f"Question Source Length: {len( q_src )}" )
 
 		# Generate the new questions
@@ -219,16 +219,16 @@ def get_question_type( topic_data ):
 	# Randomly select a question type based on the weights
 	return random.choice( question_types )
 
-def get_question_source( topic ):
+def get_random_question_source( topic ):
 	"""
 	Determine the source of the question: an attachment filename or an empty string for the topic 
-	description. Ensures the file exists in the user's directory before selecting it.
+	description. Ensures the document exists in the user's data before selecting it.
 
 	Args:
 		topic (Topic): The Topic object containing the user and topic_data.
 
 	Returns:
-		str: Attachment filename (if it exists) or an empty string for topic description.
+		str: Document text (if it exists) or an empty string.
 	"""
 	topic_data = topic.topic_data or {}
 	settings = topic_data.get( "settings", {} )
@@ -252,25 +252,18 @@ def get_question_source( topic ):
 	selected_source = random.choice( sources )
 
 	if selected_source == "document" and attachments:
-		# User folder path
-		user_folder = os.path.join( conf.settings.MEDIA_ROOT, "uploads", str( topic.user.id ) )
 
-		# Filter attachments to only include files that exist
-		existing_files = []
-		for file in attachments:
-			file_path = os.path.join( user_folder, file )
-			if os.path.exists( file_path ):
-				existing_files.append( file_path )
-		
-		# Randomly select an existing file if any exist
-		if existing_files:
-			file_path = random.choice( existing_files )
-			print( f"File: {file_path}" )
-			chunk = get_file_preview( file_path, None, 500 )
-			print( f"Chunk Size: {len(chunk)}" )
-			return chunk
+		# Get all user documents
+		documents = models.Document.objects.filter( user=topic.user, name__in=attachments )
 
-	# Return empty string for topic description or if no valid files are found
+		if documents.exists():
+			document = documents.order_by( "?" ).first()
+			chunks = document.chunks.all()
+			if chunks.exists():
+				chunk = chunks.order_by( "?" ).first()
+				return chunk.text
+
+	# Return empty string for topic description or if no valid documents are found
 	return ""
 
 def get_question_by_id( question_id ):
@@ -618,68 +611,83 @@ def get_question_history( user ):
 	
 	return questions_data
 
-def get_file_preview( file_path, chunk_start=0, chunk_size=500 ):
-	"""
-	Generate a preview for the given file based on its type.
+def store_document( user, name, file_content ):
 
-	Args:
-		file_path (str): Path to the file in the storage system.
+	content = ""
 
-	Returns:
-		str: A preview string or base64-encoded data for the file.
-	"""
 	# Determine file extension
-	file_extension = os.path.splitext( file_path )[ 1 ].lower()
+	file_extension = os.path.splitext( name )[ 1 ].lower()
 
-	# Generate preview for plain text files
+	# Parse content for files
 	if file_extension in [ ".txt", ".csv", ".json" ]:
-		file_content = default_storage.open( file_path ).read().decode( "utf-8" )
-		return get_content_chunk( file_content, chunk_start, chunk_size )
+		content = file_content.read().decode( "utf-8" )
 
-	# Generate preview for PDF files
+	# Parse content for pdf
 	elif file_extension == ".pdf":
-		pdf_file = default_storage.open( file_path )
-		reader = PdfReader( pdf_file )
-		if reader.pages:
-			return get_content_chunk( reader.pages[ 0 ].extract_text(), chunk_start, chunk_size )
+		reader = PdfReader( file_content )
+		for page in reader.pages:
+			page_text = page.extract_text() or ""
+			content += page_text.strip() + "\n"
 	else:
-		return ""
+		raise ValueError( f"Unsupported file type: {file_extension}" )
 
-def get_content_chunk( content, chunk_start=0, chunk_size=500 ):
-
-	print( f"Chunk Start: {chunk_start}, Chunk Size: {chunk_size}" )
-	if chunk_start is None:
-		print( len( content ) )
-
-		chunk_start = max( random.randint( 0, len( content ) ) - chunk_size, 0 )
-		print( f"Random Chunk Start: {chunk_start}" )
-
-	# Move chunk-start to nearset new line or beginning of file
-	while chunk_start > 0 and content[ chunk_start ] != "\n":
-		chunk_start -= 1
+	if len( content ) == 0:
+		raise ValueError( "Document cannot be blank" )
 	
-	print( f"Final Chunk Start: {chunk_start}" )
+	# Delete document if it already exists
+	document = models.Document.objects.filter(user=user, name=name).first()
+	if document:
+		document.delete()
 
-	# Set chunk end to end of chunk size
-	chunk_end = min( chunk_start + chunk_size, len( content ) - 1 )
+	# Store the document chunks
+	store_document_chunks( user, name, content )
 
-	print( f"Start Chunk End: {chunk_end}" )
+def store_document_chunks( user, name, content ):
+	document = models.Document.objects.create( name=name, user=user )
+	chunk_overlap = 250
+	optimal_chunk_size = 750
+	max_chunk_size = 1000
 
-	# If not at end of the file
-	if chunk_end < len( content ) - 1:
+	# Convert to linux line feeds
+	content = content.replace( "\r\n", "\n" )
 
-		# Move chunk-end to nearest paragraph or a minimum size
-		chunk_end_start = chunk_end
-		chunk_min = chunk_size - 100
-		while chunk_end > chunk_start + chunk_min and content[ chunk_end ] != "\n":
-			chunk_end -= 1
+	# Start Chunking
+	chunk_start = 0
+	i = optimal_chunk_size
+	while i < len( content ):
+		chunk_index = i - chunk_start
+
+		# Store the optimal sized chunk
+		if chunk_index > optimal_chunk_size and content[ i ] == "\n":
+			chunk_text = content[ chunk_start : i ]
+			models.Chunk.objects.create( document=document, text=chunk_text )
+			chunk_start = i + 1
+			i = chunk_start + optimal_chunk_size
+			continue
 		
-		if content[ chunk_end ] != "\n":
-			chunk_end = chunk_end_start
+		# If passed the max size split in half with some overlap
+		if chunk_index > max_chunk_size:
+			chunk_text = content[ chunk_start : i ]
+			models.Chunk.objects.create( document=document, text=chunk_text )
 
+			# Move the chunk start back even further to get the overlap
+			chunk_start = i - chunk_overlap
+			i = chunk_start + optimal_chunk_size
+			continue
+		
+		# Increment the i index
+		i += 1
+
+	# Check if we reached the end
+	if chunk_start >= len( content ) - 1:
+		return
+
+	# Handle last remaining chunk
+	remaining_length = len( content) - chunk_start
 	
-	print( f"Final Chunk End: {chunk_end}" )
-	print( f"Final Chunk Size: {chunk_end - chunk_start}" )
+	# Include overlap to make the last chunk at least optimal size
+	if remaining_length < optimal_chunk_size:
+		chunk_start = max( 0, chunk_start - ( optimal_chunk_size - remaining_length ) )
 
-	chunk = content[ chunk_start : chunk_end ]
-	return chunk
+	chunk_text = content[ chunk_start: ]
+	models.Chunk.objects.create( document=document, text=chunk_text )

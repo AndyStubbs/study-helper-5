@@ -58,7 +58,7 @@ class Question( models.Model ):
 		help_text="Boilerplate code provided as a starting point if this is a coding question."
 	)
 	source = models.TextField(
-		max_length=500,
+		max_length=1000,
 		blank=True,
 		help_text="Additional details added for the source of the question."
 	)
@@ -166,3 +166,22 @@ class UserKnowledge( models.Model ):
 			f"{self.user} - {self.topic} - {self.concept} "
 			f"(Correct Points: {self.correct_points}, Wrong Points: {self.wrong_points})"
 		)
+
+class Document( models.Model ):
+	name = models.CharField( max_length=256 )
+	user = models.ForeignKey( CustomUser, on_delete=models.SET_NULL, null=True, blank=True )
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		unique_together = ( "name", "user" )
+	
+	def __str__(self):
+		return f"Document: {self.name} (User: {self.user})"
+
+class Chunk( models.Model ):
+	document = models.ForeignKey( Document, on_delete=models.CASCADE, related_name="chunks" )
+	text = models.TextField( max_length=1000, blank=True, null=True )
+
+	def __str__(self):
+		return f"Chunk: {self.text[:30]}... (Document: {self.document.name})"
