@@ -130,6 +130,8 @@ Guidelines:
 2. **Details Field**:
    - Provide optional details or explanation in Markdown format in the "details" field. This is 
 	 useful for clarifying complex questions or including code snippets.
+   - If the details is not necessary for answering the question omit it.
+   - Make sure that the details field does not give away the answer.
    - Use code blocks, bullet points, or headings for clarity in Markdown.
 3. **Answer Choices**:
    - Each question should have exactly 4 answer choices.
@@ -190,7 +192,9 @@ Guidelines:
 	 the user.
 4. If additional clarification or context is required, use the "details" field. Format the content 
    of this field using **Markdown** for better readability.
-5. For coding problems do not give away the answer in the boilerplate code. It should only provide
+5. Make sure that the details field does not give away the answer.
+6. If the details is not necessary for answering the question omit it.
+7. For coding problems do not give away the answer in the boilerplate code. It should only provide
    a starting point and not include a solution.
 
 Return the response as JSON:
@@ -245,6 +249,8 @@ Guidelines:
 2. **Details Field**:
    - Provide optional details or explanation in Markdown format in the "details" field. This is 
 	 useful for clarifying complex questions or including code snippets.
+   - Make sure that the details field does not give away the answer.
+   - If the details is not necessary for answering the question omit it.
    - Use code blocks, bullet points, or headings for clarity in Markdown.
 
 Return the response as JSON:

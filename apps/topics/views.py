@@ -363,12 +363,15 @@ def previewdoc( request ):
 		try:
 			data = json.loads( request.body )
 			name = data.get( "name", -1 )
+			print( name )
 			if not isinstance( name, str ) or name == -1:
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			
 			# Get the filename
 			file_name = sanity.sanitize_filename( name )
 			file_path = os.path.join( "uploads", str( request.user.id ), file_name )
+
+			print( file_path )
 
 			# Get the preview
 			preview = services.get_file_preview( file_path )

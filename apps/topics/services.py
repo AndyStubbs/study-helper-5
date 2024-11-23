@@ -630,6 +630,7 @@ def get_file_preview( file_path, chunk_start=0, chunk_size=500 ):
 	"""
 	# Determine file extension
 	file_extension = os.path.splitext( file_path )[ 1 ].lower()
+
 	# Generate preview for plain text files
 	if file_extension in [ ".txt", ".csv", ".json" ]:
 		file_content = default_storage.open( file_path ).read().decode( "utf-8" )
@@ -662,11 +663,23 @@ def get_content_chunk( content, chunk_start=0, chunk_size=500 ):
 	# Set chunk end to end of chunk size
 	chunk_end = min( chunk_start + chunk_size, len( content ) - 1 )
 
-	# Move chunk-end to nearest paragraph or a minimum of 400 characters
-	while chunk_end > chunk_start + 400 and content[ chunk_end ] != "\n":
-		chunk_end -= 1
+	print( f"Start Chunk End: {chunk_end}" )
+
+	# If not at end of the file
+	if chunk_end < len( content ) - 1:
+
+		# Move chunk-end to nearest paragraph or a minimum size
+		chunk_end_start = chunk_end
+		chunk_min = chunk_size - 100
+		while chunk_end > chunk_start + chunk_min and content[ chunk_end ] != "\n":
+			chunk_end -= 1
+		
+		if content[ chunk_end ] != "\n":
+			chunk_end = chunk_end_start
+
 	
 	print( f"Final Chunk End: {chunk_end}" )
 	print( f"Final Chunk Size: {chunk_end - chunk_start}" )
 
-	return content[ chunk_start : chunk_end ]
+	chunk = content[ chunk_start : chunk_end ]
+	return chunk

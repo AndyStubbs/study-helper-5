@@ -7,7 +7,6 @@ window.main.onReady( () => {
 	const m_documentSelectorModal = document.getElementById( "document-selector-modal" );
 	const m_uploadInput = document.getElementById( "document-upload" );
 	const m_documentList = document.getElementById( "document-list" );
-	const m_documentPreview = document.getElementById( "document-preview" );
 	const m_previewPlaceholder = document.querySelector( ".preview-placeholder" );
 	const m_previewDoc = document.querySelector( ".preview-doc" );
 	const m_previewDocName = document.querySelector( ".preview-doc-name" );
@@ -238,7 +237,6 @@ window.main.onReady( () => {
 		m_uploadInput.value = "";
 		m_previewPlaceholder.style.display = "block";
 		m_previewDoc.style.display = "none";
-		m_documentPreview.innerHTML = "";
 	}
 
 } );
