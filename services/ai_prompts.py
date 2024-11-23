@@ -117,18 +117,19 @@ Please provide a list of concepts for "{topic_name}". Given the following descri
 def question_generator_system_prompt():
 	return """
 You are a question generator for a study helper app. Your task is to generate 5 multiple-choice 
-questions given a topic, a description of the topic, and a core concept. Each question should be 
-relevant to the topic, description, and core concept. Ensure the questions are not duplicates of 
-previously asked questions and that they provide a clear understanding of the concept.
+questions given a topic, a description of the topic, a core concept, and optional source content. 
+Each question should be relevant to the topic, description, and core concept. Ensure the questions 
+are not duplicates of previously asked questions and that they provide a clear understanding of the 
+concept.
 
 Guidelines:
 1. **Question Text**:
    - Keep the "text" field concise and brief. Do not include code snippets or any Markdown in the
-     text field. Use the "details" field for any code snippets or when additional clarification or 
+	 text field. Use the "details" field for any code snippets or when additional clarification or 
 	 context is necessary.
 2. **Details Field**:
    - Provide optional details or explanation in Markdown format in the "details" field. This is 
-     useful for clarifying complex questions or including code snippets.
+	 useful for clarifying complex questions or including code snippets.
    - Use code blocks, bullet points, or headings for clarity in Markdown.
 3. **Answer Choices**:
    - Each question should have exactly 4 answer choices.
@@ -160,20 +161,21 @@ Example JSON format:
 ]
 """
 
-def question_generator_user_prompt( topic_name, topic_description, concept_name ):
+def question_generator_user_prompt( topic_name, topic_description, concept_name, src ):
 	return f"""
 Please create 5 multiple-choice questions for the following topic: '{topic_name}'.
 Use the following description for context:
 {topic_description}
 Focus on the concept of '{concept_name}'.
+{question_source( src )}
 """
 
 def open_question_generator_system_prompt():
 	return """
 You are a question generator for a study helper app. Your task is to generate 1 open-text questions
-given a topic, a description of the topic, and a core concept. Each question should be relevant to 
-the topic, description, and core concept. Ensure that questions are unique, open-ended, and 
-designed to enhance understanding of the concept.
+given a topic, a description of the topic, a core concept, and optional source content. Each 
+question should be relevant to the topic, description, and core concept. Ensure that questions are 
+unique, open-ended, and designed to enhance understanding of the concept.
 
 Guidelines:
 1. Do not create multiple-choice or true/false questions. Questions should expect an open text 
@@ -183,9 +185,9 @@ Guidelines:
 3. If the question involves coding:
    - Indicate this with the "is_code" field.
    - Specify the programming language in the "language_class" field using a syntax highlighting 
-     class (e.g., "language-python").
+	 class (e.g., "language-python").
    - Include minimal boilerplate code in the "boilerplate" field to provide a starting point for 
-     the user.
+	 the user.
 4. If additional clarification or context is required, use the "details" field. Format the content 
    of this field using **Markdown** for better readability.
 5. For coding problems do not give away the answer in the boilerplate code. It should only provide
@@ -218,30 +220,31 @@ Example JSON format:
 ]
 """
 
-def open_question_generator_user_prompt( topic_name, topic_description, concept_name ):
+def open_question_generator_user_prompt( topic_name, topic_description, concept_name, src ):
 	return f"""
 Please create 1 open-text questions for the following topic: '{topic_name}'.
 Use the following description for context:
 {topic_description}
 Focus on the concept of '{concept_name}'.
+{question_source( src )}
 """
 
 def tf_question_generator_system_prompt():
 	return """
 You are a question generator for a study helper app. Your task is to generate 2 true/false 
-questions given a topic, a description of the topic, and a core concept. Each question should be 
-relevant to the topic, description, and core concept. The question should be phrased as a true or
-false question. Ensure the questions are not duplicates of previously asked questions and that they
-provide a clear understanding of the concept.
+questions given a topic, a description of the topic, a core concept, and optional source content. 
+Each question should be relevant to the topic, description, and core concept. The question should 
+be phrased as a true or false question. Ensure the questions are not duplicates of previously asked 
+questions and that they provide a clear understanding of the concept.
 
 Guidelines:
 1. **Question Text**:
    - Keep the "text" field concise and brief. Do not include code snippets or any Markdown in the
-     text field. Use the "details" field for any code snippets or when additional clarification or 
+	 text field. Use the "details" field for any code snippets or when additional clarification or 
 	 context is necessary.
 2. **Details Field**:
    - Provide optional details or explanation in Markdown format in the "details" field. This is 
-     useful for clarifying complex questions or including code snippets.
+	 useful for clarifying complex questions or including code snippets.
    - Use code blocks, bullet points, or headings for clarity in Markdown.
 
 Return the response as JSON:
@@ -264,12 +267,21 @@ Example JSON format:
 ]
 """
 
-def tf_question_generator_user_prompt( topic_name, topic_description, concept_name ):
+def tf_question_generator_user_prompt( topic_name, topic_description, concept_name, src ):
 	return f"""
 Please create 2 true/false questions for the following topic: '{topic_name}'.
 Use the following description for context:
 {topic_description}
 Focus on the concept of '{concept_name}'.
+{question_source( src )}
+"""
+
+def question_source(src):
+	if not src:
+		return "The source content is not available. Use only the topic description and concept."
+	return f"""
+Use the following content as the source for the questions:
+{src}
 """
 
 def concept_filter_system_prompt():
@@ -339,7 +351,9 @@ Example JSON format:
 }
 """
 
-def explain_question_user_prompt( question, answer, topic_name, topic_description, concept_name ):
+def explain_question_user_prompt(
+	question, answer, topic_name, topic_description, concept_name, src
+):
 	return f"""
 Please provide an explanation for why the following answer to the question is correct. Use 
 Markdown for formatting, and structure the response to make it easy to follow and educational.
@@ -352,6 +366,9 @@ Topic Description:
 
 Concept:
 {concept_name}
+
+Source:
+{src}
 
 Question:
 {question}
@@ -393,7 +410,7 @@ Example JSON format:
 """
 
 def submit_open_answer_user_prompt( 
-		question, details, answer, topic_name, topic_description, concept_name 
+		question, details, answer, topic_name, topic_description, concept_name, src 
 ):
 	return f"""
 Please evaluate the following answer for correctness, based on the provided question, topic, and 
@@ -407,6 +424,9 @@ Topic Description:
 
 Concept:
 {concept_name}
+
+Source:
+{src}
 
 Question:
 {question}

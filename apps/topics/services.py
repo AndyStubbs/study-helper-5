@@ -2,13 +2,10 @@
 
 import random
 import re
-
 import os
-from django.conf import settings
+from django import conf
 from django.core.files.storage import default_storage
 from PyPDF2 import PdfReader
-from PIL import Image
-from io import BytesIO
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from apps.topics import models
@@ -47,12 +44,19 @@ def get_next_question( topic_id ):
 			)
 		)
 
+		q_type = get_question_type( topic.topic_data )
+		print( f"Question Type: {q_type}" )
+		q_src = get_question_source( topic )
+		print( f"Question Source Length: {len( q_src )}" )
+
 		# Generate the new questions
 		questions_data = ai_services.create_questions(
 			topic.name,
 			topic.description,
 			selected_concept.name,
-			previously_asked_questions
+			previously_asked_questions,
+			q_type,
+			q_src
 		)
 
 		# Check if there are any questions generated
@@ -103,6 +107,7 @@ def get_next_question( topic_id ):
 					is_code = False,
 					language_class = "",
 					boilerplate = "",
+					source = q_src,
 					answers = [ "true", "false" ],
 					correct = correct,
 					main_concept = selected_concept
@@ -194,6 +199,80 @@ def get_next_question( topic_id ):
 		}
 		return question_response
 
+def get_question_type( topic_data ):
+	settings = topic_data.get( "settings", {} )
+	mcq_frequency = settings.get( "mcq-frequency", 70 )
+	tf_frequency = settings.get( "tf-frequency", 20 )
+	open_text_frequency = settings.get( "open-text-frequency", 10 )
+
+	# Create a weighted list of question types
+	question_types = (
+		[ "mcq" ] * mcq_frequency +
+		[ "tf" ] * tf_frequency +
+		[ "open_text" ] * open_text_frequency
+	)
+
+	# If the list is empty, default to 'mcq'
+	if not question_types:
+		return "mcq"
+
+	# Randomly select a question type based on the weights
+	return random.choice( question_types )
+
+def get_question_source( topic ):
+	"""
+	Determine the source of the question: an attachment filename or an empty string for the topic 
+	description. Ensures the file exists in the user's directory before selecting it.
+
+	Args:
+		topic (Topic): The Topic object containing the user and topic_data.
+
+	Returns:
+		str: Attachment filename (if it exists) or an empty string for topic description.
+	"""
+	topic_data = topic.topic_data or {}
+	settings = topic_data.get( "settings", {} )
+	attachments = topic_data.get( "attachments", [] )
+
+	# Get frequencies for document-based and description-based sources
+	doc_frequency = settings.get( "document-frequency", 50 )
+	non_doc_frequency = settings.get( "non-document-frequency", 50 )
+
+	# Create a weighted list of sources
+	sources = (
+		[ "document" ] * doc_frequency +
+		[ "description" ] * non_doc_frequency
+	)
+
+	# If no weights are provided or list is empty, default to 'description'
+	if not sources:
+		return ""
+
+	# Choose source type
+	selected_source = random.choice( sources )
+
+	if selected_source == "document" and attachments:
+		# User folder path
+		user_folder = os.path.join( conf.settings.MEDIA_ROOT, "uploads", str( topic.user.id ) )
+
+		# Filter attachments to only include files that exist
+		existing_files = []
+		for file in attachments:
+			file_path = os.path.join( user_folder, file )
+			if os.path.exists( file_path ):
+				existing_files.append( file_path )
+		
+		# Randomly select an existing file if any exist
+		if existing_files:
+			file_path = random.choice( existing_files )
+			print( f"File: {file_path}" )
+			chunk = get_file_preview( file_path, None, 500 )
+			print( f"Chunk Size: {len(chunk)}" )
+			return chunk
+
+	# Return empty string for topic description or if no valid files are found
+	return ""
+
 def get_question_by_id( question_id ):
 	question = models.Question.objects.get( id=question_id )
 	question_response = {
@@ -265,7 +344,7 @@ def save_topic( topic_name, topic_description, user, topic_data=None ):
 			topic = models.Topic.objects.create(
 				name=topic_name,
 				description=topic_description,
-				data=topic_data,
+				topic_data=topic_data,
 				user=user
 			)
 			print( f"Topic: {topic.id} created" )
@@ -377,10 +456,14 @@ def set_answer( user, question_id, answer ):
 
 	# Evaluate if answer is correct
 	if question.is_open:
+		if question.source is None:
+			src = ""
+		else:
+			src = question.source
 		# question, answer, topic_name, topic_description, concept_name
 		ai_response = ai_services.submit_open_answer(
 			question.text, question.details, answer, question.topic.name,
-			question.topic.description, question.main_concept.name
+			question.topic.description, question.main_concept.name, src
 		)
 		is_correct = ai_response.is_correct
 		correct = ai_response.explanation
@@ -459,8 +542,12 @@ def explain_topic( question_id, user ):
 		topic_name = question.topic.name
 		topic_description = question.topic.description
 		concept_name = question.main_concept
+		if question.source is None:
+			src = ""
+		else:
+			src = question.source
 		ai_response = ai_services.explain_question(
-			question.text, question.correct,  topic_name, topic_description, concept_name
+			question.text, question.correct,  topic_name, topic_description, concept_name, src
 		)
 		explanation.text = ai_response.explanation
 		explanation.save()
@@ -531,7 +618,7 @@ def get_question_history( user ):
 	
 	return questions_data
 
-def get_file_preview( file_path ):
+def get_file_preview( file_path, chunk_start=0, chunk_size=500 ):
 	"""
 	Generate a preview for the given file based on its type.
 
@@ -543,22 +630,43 @@ def get_file_preview( file_path ):
 	"""
 	# Determine file extension
 	file_extension = os.path.splitext( file_path )[ 1 ].lower()
+	# Generate preview for plain text files
 	if file_extension in [ ".txt", ".csv", ".json" ]:
-		# Generate preview for plain text files
 		file_content = default_storage.open( file_path ).read().decode( "utf-8" )
-		return file_content[ :500 ]
+		return get_content_chunk( file_content, chunk_start, chunk_size )
 
+	# Generate preview for PDF files
 	elif file_extension == ".pdf":
-		# Generate preview for PDF files
 		pdf_file = default_storage.open( file_path )
 		reader = PdfReader( pdf_file )
 		if reader.pages:
-			return reader.pages[ 0 ].extract_text()[ :500 ]
+			return get_content_chunk( reader.pages[ 0 ].extract_text(), chunk_start, chunk_size )
+	else:
+		return ""
 
-	elif file_extension in [ ".jpg", ".jpeg", ".png", ".gif" ]:
-		image_file = default_storage.open( file_path )
-		img = Image.open( image_file )
-		img.thumbnail( ( 200, 200 ) )
-		buffer = BytesIO()
-		img.save( buffer, format="PNG" )
-		return f"data:image/png;base64,{buffer.getvalue().encode('base64').decode('utf-8')}"
+def get_content_chunk( content, chunk_start=0, chunk_size=500 ):
+
+	print( f"Chunk Start: {chunk_start}, Chunk Size: {chunk_size}" )
+	if chunk_start is None:
+		print( len( content ) )
+
+		chunk_start = max( random.randint( 0, len( content ) ) - chunk_size, 0 )
+		print( f"Random Chunk Start: {chunk_start}" )
+
+	# Move chunk-start to nearset new line or beginning of file
+	while chunk_start > 0 and content[ chunk_start ] != "\n":
+		chunk_start -= 1
+	
+	print( f"Final Chunk Start: {chunk_start}" )
+
+	# Set chunk end to end of chunk size
+	chunk_end = min( chunk_start + chunk_size, len( content ) - 1 )
+
+	# Move chunk-end to nearest paragraph or a minimum of 400 characters
+	while chunk_end > chunk_start + 400 and content[ chunk_end ] != "\n":
+		chunk_end -= 1
+	
+	print( f"Final Chunk End: {chunk_end}" )
+	print( f"Final Chunk Size: {chunk_end - chunk_start}" )
+
+	return content[ chunk_start : chunk_end ]

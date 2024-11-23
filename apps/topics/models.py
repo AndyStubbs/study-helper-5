@@ -57,6 +57,11 @@ class Question( models.Model ):
 		blank=True,
 		help_text="Boilerplate code provided as a starting point if this is a coding question."
 	)
+	source = models.TextField(
+		max_length=500,
+		blank=True,
+		help_text="Additional details added for the source of the question."
+	)
 	answers = models.JSONField( help_text="Store answers as a JSON array" )
 	correct = models.CharField( max_length=100, help_text="Text of the correct answer" )
 	concepts = models.ManyToManyField( "Concept", related_name="questions", blank=True )

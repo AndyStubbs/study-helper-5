@@ -1,6 +1,6 @@
 # services/ai_services.py
 
-import random
+import os
 from pydantic import BaseModel
 from openai import OpenAI
 from . import ai_prompts
@@ -123,15 +123,16 @@ def generate_concepts( topic_name, topic_description ):
 		response_format=AI_Concepts
 	)
 
-def create_questions( topic_name, topic_description, concept_name, previous_questions ):
+def create_questions(
+		topic_name, topic_description, concept_name, previous_questions, q_type, q_src
+	):
 	print( f"Creating question for topic: {topic_name}" )
 
-	# 20% chance of generating an open text question
-	if random.randint( 0, 10 ) >= 8:
+	if q_type == "open_text":
 		system_prompt = ai_prompts.question_generator_system_prompt
 		user_prompt = ai_prompts.question_generator_user_prompt
 		response_format = AI_GenQuestions
-	elif random.randint( 0, 10 ) >= 6:
+	elif q_type == "tf":
 		system_prompt = ai_prompts.tf_question_generator_system_prompt
 		user_prompt = ai_prompts.tf_question_generator_user_prompt
 		response_format = AI_Gen_TF_Questions
@@ -152,8 +153,9 @@ def create_questions( topic_name, topic_description, concept_name, previous_ques
 		} )
 	messages.append( {
 		"role": "user",
-		"content": user_prompt( topic_name, topic_description, concept_name )
+		"content": user_prompt( topic_name, topic_description, concept_name, q_src )
 	} )
+	print( f"Sending {len( messages )} Messages" )
 	return run_chat(
 		model="gpt-4o-mini",
 		messages=messages,
@@ -177,7 +179,7 @@ def filter_question_concepts( concepts, questions ):
 		response_format=AI_QuestionsConcepts
 	)
 
-def explain_question( question, answer, topic_name, topic_description, concept_name ):
+def explain_question( question, answer, topic_name, topic_description, concept_name, src ):
 	print( f"Creating explanation for question" )
 	return run_chat(
 		model="gpt-4o-mini",
@@ -189,14 +191,16 @@ def explain_question( question, answer, topic_name, topic_description, concept_n
 			{
 				"role": "user",
 				"content": ai_prompts.explain_question_user_prompt(
-					question, answer, topic_name, topic_description, concept_name
+					question, answer, topic_name, topic_description, concept_name, src
 				)
 			}
 		],
 		response_format=AI_QuestionExplanation
 	)
 
-def submit_open_answer( question, details, answer, topic_name, topic_description, concept_name ):
+def submit_open_answer(
+	question, details, answer, topic_name, topic_description, concept_name, src
+):
 	print( f"Creating explanation for question" )
 	print( f"""
 question: {question}
@@ -205,6 +209,7 @@ answer: {answer}
 topic: {topic_name}
 description: {topic_description}
 concept: {concept_name}
+src: {src}
 """ 
 )
 	return run_chat(
@@ -217,7 +222,7 @@ concept: {concept_name}
 			{
 				"role": "user",
 				"content": ai_prompts.submit_open_answer_user_prompt(
-					question, details, answer, topic_name, topic_description, concept_name
+					question, details, answer, topic_name, topic_description, concept_name, src
 				)
 			}
 		],
@@ -227,6 +232,7 @@ concept: {concept_name}
 def run_chat( model, messages, response_format ):
 	try:
 		client = OpenAI()
+		print( messages )
 		completion = client.beta.chat.completions.parse(
 			model=model,
 			messages=messages,
@@ -234,8 +240,8 @@ def run_chat( model, messages, response_format ):
 		)
 		message = completion.choices[ 0 ].message
 		print( "*** RUNING AI CHAT ***" )
-		if hasattr( message, 'refusal') and message.refusal:
-			raise ValueError(message.refusal)
+		if hasattr( message, "refusal" ) and message.refusal:
+			raise ValueError( message.refusal )
 		else:
 			return message.parsed
 	except Exception as e:
