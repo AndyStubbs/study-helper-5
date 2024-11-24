@@ -15,17 +15,18 @@ window.main.onReady( function () {
 
 	// Show explanation modal and load explanation content
 	function updateExplanation( question, answer, explanation, isCorrect ) {
+		const escape = window.main.escape;
 		m_explanationQuestion.style.textAlign = "left";
 		m_explanationQuestion.textContent = question;
 		if( isCorrect === undefined ) {
-			const answerSpan = `<span>${answer}</span>`;
+			const answerSpan = `<span>${escape( answer )}</span>`;
 			m_explanationAnswer.innerHTML = `<strong>Answer: </strong> ${answerSpan}`;
 		} else if( isCorrect ) {
 			const spanCheck = "<span class='result-success explanation-mark'>&#10004;</span>";
-			m_explanationAnswer.innerHTML = `${spanCheck} ${answer}`;
+			m_explanationAnswer.innerHTML = `${spanCheck} ${escape( answer )}`;
 		} else {
 			const spanCheck = "<span class='result-error explanation-mark'>&#10008;</span>";
-			m_explanationAnswer.innerHTML = `${spanCheck} ${answer}`;
+			m_explanationAnswer.innerHTML = `${spanCheck} ${escape(answer)}`;
 		}
 		m_explanationContent.innerHTML = window.marked.parse( explanation );
 

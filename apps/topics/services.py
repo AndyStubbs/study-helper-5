@@ -310,11 +310,12 @@ def save_topic( topic_name, topic_description, user, topic_data=None ):
 		if existing_topic:
 			print( "UPDATING TOPIC" )
 			is_changed = False
-			if (
-				existing_topic.description != topic_description or
-				existing_topic.topic_data != topic_data
-			):
+			if ( existing_topic.description != topic_description ):
 				is_changed = True
+				print( "TOPIC DESCRIPTION HAS CHANGED" )
+			else:
+				print( "TOPIC DESCRIPTION HAS NOT CHANGED" )
+
 			existing_topic.description = topic_description
 			existing_topic.topic_data = topic_data
 			existing_topic.save()

@@ -1,8 +1,7 @@
 # topics/views.py
 
 # TODOS:
-# 1. Switch use GET instead of POST for all getters.
-# 2. Use Django’s logging module for better error logging.
+# 1. Use Django’s logging module for better error logging.
 
 import json
 from django.http import JsonResponse
@@ -243,7 +242,15 @@ def save( request ):
 				topic_data
 			)
 
-			return JsonResponse( {"status": "success", "data": response} )
+			# Sanitize and format response data
+			response_data = {
+				"id": response.id,
+				"name": response.name,
+				"description": response.description,
+				"data": response.data
+			}
+
+			return JsonResponse( { "status": "success", "data": response_data } )
 		except Exception as e:
 			print(f"Error saving topic: {e}")
 			return JsonResponse({"error": str(e)}, status=500)

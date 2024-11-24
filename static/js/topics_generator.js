@@ -154,6 +154,7 @@ window.main.onReady( () => {
 		};
 		try {
 			loadingOverlay.style.visibility = "visible";
+			const escape = window.main.escape;
 			const topic = await main.handleRequest( "/topics/save/", {
 				"topic_name": topicName,
 				"topic_description": topicDescription,
@@ -162,15 +163,15 @@ window.main.onReady( () => {
 			setTopicId( topic.id );
 			let topicLi = document.querySelector( `[data-topic-id='${topic.id}']` );
 			if( topicLi ) {
-				topicLi.querySelector( ".short" ).innerHTML = topic.description;
+				topicLi.querySelector( ".short" ).innerHTML = escape( topic.description );
 			} else {
 				topicLi = document.createElement( "li" );
 				topicLi.classList.add( "topic-item" );
 				topicLi.dataset.topicId = topic.id;
 				topicLi.innerHTML = `
-					<h3>${ topic.name }<span class="arrow">▼</span></h3>
+					<h3>${ escape( topic.name ) }<span class="arrow">▼</span></h3>
 					<div>
-						<p class="short">${ topic.description }</p>
+						<p class="short">${ escape( topic.description ) }</p>
 					</div>
 					<div>
 						<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">

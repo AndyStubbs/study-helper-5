@@ -40,7 +40,6 @@ window.main.onReady( () => {
 	function renderTable() {
 		const searchText = m_searchInput.value.toLowerCase();
 		const selectedTopic = m_topicFilter.value;
-		
 		const filteredData = m_questionsData.filter( question => {
 			const matchesSearch = (
 				question.text.toLowerCase().includes( searchText ) ||
@@ -52,11 +51,13 @@ window.main.onReady( () => {
 
 		m_historyBody.innerHTML = "";
 		filteredData.forEach( ( question ) => {
+			const topic = window.main.escape( question.topic );
+			const text = window.main.escape( question.text );
 			const row = document.createElement( "div" );
 			row.classList.add( "history-row" );
 			row.innerHTML = `
-				<div class="row-cell">${question.topic}</div>
-				<div class="row-cell">${question.text}</div>
+				<div class="row-cell">${topic}</div>
+				<div class="row-cell">${text}</div>
 				<div class="row-cell">${Math.round(question.average * 100)}%</div>
 				<div class="row-cell">
 					<button 
@@ -118,20 +119,21 @@ window.main.onReady( () => {
 	// Show Question Modal
 	window.main.showQuestion = ( id, topicId ) => {
 		const question = m_questionsData.find( q => q.id === id );
+		const escape = window.main.escape;
 		let conceptItems = "";
 		question.concepts.forEach( concept => {
-			conceptItems += `<li>${concept}</li>`;
+			conceptItems += `<li>${escape(concept)}</li>`;
 		} );
 		const lastAskedShort = question.last_asked.substring( 0, 10 );
 		const qdModal = document.getElementById( "qd-modal" );
 		qdModal.style.display = "";
-		document.getElementById( "qd-text" ).innerHTML = question.text;
+		document.getElementById( "qd-text" ).innerHTML = escape( question.text );
 		document.getElementById( "qd-correct" ).innerHTML = question.correct;
 		document.getElementById( "qd-average" ).innerHTML = Math.round(
 			question.average * 100
 		) + "%";
 		document.getElementById( "qd-last-asked" ).innerHTML = lastAskedShort;
-		document.getElementById( "qd-main-concept" ).innerHTML = question.main_concept;
+		document.getElementById( "qd-main-concept" ).innerHTML = escape( question.main_concept );
 		document.getElementById( "qd-related-concepts" ).innerHTML = conceptItems;
 		document.getElementById( "qd-explain" ).onclick = () => {
 			window.main.explain( id );
