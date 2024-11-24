@@ -165,18 +165,21 @@ window.main.onReady( () => {
 				topicLi.querySelector( ".short" ).innerHTML = topic.description;
 			} else {
 				topicLi = document.createElement( "li" );
+				topicLi.classList.add( "topic-item" );
 				topicLi.dataset.topicId = topic.id;
 				topicLi.innerHTML = `
-					<h3>${ topic.name }</h3>
+					<h3>${ topic.name }<span class="arrow">▼</span></h3>
 					<div>
 						<p class="short">${ topic.description }</p>
 					</div>
-					<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">
-						Edit
-					</button>
-					<button onclick="window.main.quizTopic('${ topic.id }')" class="btn-sm btn-c1">
-						Quiz
-					</button>
+					<div>
+						<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">
+							Edit
+						</button>
+						<button onclick="window.main.quizTopic('${ topic.id }')" class="btn-sm btn-c1">
+							Quiz
+						</button>
+					</div>
 				`;
 				document.querySelector( "#topics-list" ).appendChild( topicLi );
 			}
