@@ -24,56 +24,41 @@ MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
 ##################
 
 @restrict_to_view( "topics:generate" )
-@login_required
 def generate( request ):
 	"""Render the HTML for the Topic Generator tab"""
-	context = {
-		"prompt_message": "What topic would you like to study?"
-	}
-	return render( request, "topics/generate.html", context )
+	return render( request, "topics/generate.html" )
 
 @restrict_to_view( "topics:topics" )
-@login_required
 def topics( request ):
 	"""Render the HTML for the Topics tab"""
-	topics = models.Topic.objects.filter( user=request.user ).order_by( "name" )
-	context = {
-		"topics": topics
-	}
-	return render( request, "topics/topics.html", context )
+	return render( request, "topics/topics.html" )
 
 @restrict_to_view( "topics:quiz" )
-@login_required
 def quiz( request ):
 	"""Render the HTML for the quiz modal popup"""
 	return render( request, "topics/quiz.html" )
 
 @restrict_to_view( "topics:explanation" )
-@login_required
 def explanation( request ):
 	"""Render the HTML for the explanation modal popup"""
 	return render( request, "topics/explain.html" )
 
 @restrict_to_view( "topics:historytab" )
-@login_required
 def historytab( request ):
 	"""Render the HTML for the history tab"""
 	return render( request, "topics/history.html" )
 
 @restrict_to_view( "topics:qd" )
-@login_required
 def qd( request ):
 	"""Render the HTML for the question-details modal popup"""
 	return render( request, "topics/question-details.html" )
 
 @restrict_to_view( "topics:documentselector" )
-@login_required
 def documentselector( request ):
 	"""Render the HTML for the document-selector modal popup"""
 	return render( request, "topics/document-selector.html" )
 
 @restrict_to_view( "topics:topicsettings" )
-@login_required
 def topicsettings( request ):
 	"""Render the HTML for the topic-settings modal popup"""
 	return render( request, "topics/topic-settings.html" )

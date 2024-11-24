@@ -1,0 +1,16 @@
+#login-modal .form-group {
+	margin-bottom: 15px;
+}
+
+#login-modal .form-group label {
+	display: block;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+#login-modal .form-group input {
+	width: calc(100% - 20px);
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}

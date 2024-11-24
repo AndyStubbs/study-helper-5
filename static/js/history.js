@@ -157,6 +157,6 @@ window.main.onReady( () => {
 	m_topicFilter.addEventListener( "change", renderTable );
 
 	// Initial data load
-	loadHistoryData();
+	window.main.onLoggedIn( loadHistoryData );
 
 } );

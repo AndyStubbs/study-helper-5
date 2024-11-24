@@ -89,7 +89,7 @@ This allows seamless integration with Django’s templating and is ideal for an 
 Database Schema
 Users
 CustomUser Model:
-Fields: username, email, is_guest, profile (FK to GuestProfile).
+Fields: email, Profile (FK to GuestProfile).
 GuestProfile Model:
 Fields: session_id, created_at, user (FK to CustomUser).
 Topics

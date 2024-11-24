@@ -23,4 +23,5 @@ urlpatterns = [
 	path( "", views.homepage, name="homepage" ),
 	path( "topics/", include( "apps.topics.urls" ) ),
 	path( "about/", include( "apps.about.urls" ) ),
+	path( "users/", include( "apps.users.urls" ) ),
 ]

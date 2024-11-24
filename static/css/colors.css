@@ -172,9 +172,18 @@ h2 {
 	background-color: var(--button-primary-bg-color);
 	color: var(--button-primary-text-color);
 }
-
 .btn-c1:hover {
 	background-color: var(--button-primary-hover-bg-color);
+}
+.btn-c1:disabled {
+	border-color: var(--button-tertiary-disabled-border-color);
+	background-color: var(--button-tertiary-hover-bg-color);
+	cursor: default;
+}
+.btn-c1:hover:disabled {
+	border-color: var(--button-tertiary-disabled-border-color);
+	background-color: var(--button-tertiary-hover-bg-color);
+	cursor: default;
 }
 
 .btn-c2 {
@@ -182,7 +191,6 @@ h2 {
 	color: var(--button-secondary-text-color);
 	border-color: var(--button-secondary-border-color) !important;
 }
-
 .btn-c2:hover {
 	background-color: var(--button-secondary-hover-bg-color);
 }

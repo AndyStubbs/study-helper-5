@@ -92,7 +92,8 @@ window.main.onReady( () => {
 		}
 	} );
 
-	getAllDocs();
+	// Load all documents when logged in
+	window.main.onLoggedIn( getAllDocs );
 
 	// Load all documents
 	async function getAllDocs() {

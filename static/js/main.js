@@ -1,13 +1,23 @@
 // static/js/main.js
 
+/* TODO:
+1. Add a modal open function that opens a modal and disables all tab-index not in the modal -
+	Except for the toggle light/dark mode button
+2. Move the toggle light/dark mode so that it can be toggled even if modal is showing
+*/
+
 "use strict";
 
 const g_readyItems = [];
+const g_loggedInItems = [];
 
 // App wide helper functions
 window.main = {
 	"onReady": ( callback ) => {
 		g_readyItems.push( callback );
+	},
+	"onLoggedIn": ( callback ) => {
+		g_loggedInItems.push( callback );
 	},
 	"editTopic": () => { alert( "Not Implemented" ); },
 	"quizTopic": () => { alert( "Not Implemented" ); },
@@ -22,6 +32,9 @@ window.main = {
 		return "";
 	},
 	"handleRequest": async ( endpoint, data ) => {
+		if( !window.main.isLoggedIn() ) {
+			throw new Error( "You must login to process this request." );
+		}
 		const response = await fetch( endpoint, {
 			method: "POST",
 			headers: {
@@ -98,7 +111,11 @@ window.main = {
 		const div = document.createElement("div");
 		div.textContent = text;
 		return div.innerHTML;
-	}
+	},
+	"loggedin": function () {
+		g_loggedInItems.forEach( callback => callback() );
+	},
+	"isLoggedIn": function () { return false; }
 };
 
 document.addEventListener( "DOMContentLoaded", function () {
