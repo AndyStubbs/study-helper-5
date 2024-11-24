@@ -181,7 +181,26 @@ window.main.onReady( () => {
 						</button>
 					</div>
 				`;
-				document.querySelector( "#topics-list" ).appendChild( topicLi );
+				
+				// Insert topic alphabetically
+				const topicsList = document.getElementById( "topics-list" );
+				const topicItemsList = topicsList.querySelectorAll( "h3" );
+				if( topicItemsList.length > 0 ) {
+					let isInserted = false;
+					for( let i = 0; i < topicItemsList.length; i += 1 ) {
+						const topicHeader = topicItemsList[ i ];
+						if( topicHeader.textContent > topic.name ) {
+							topicsList.insertBefore( topicLi, topicHeader.closest( "li" ) );
+							isInserted = true;
+							break;
+						}
+					}
+					if( !isInserted ) {
+						topicsList.appendChild( topicLi );
+					}
+				} else {
+					topicsList.appendChild( topicLi );
+				}
 			}
 			const resultMessage = document.querySelector( ".result-message" );
 			resultMessage.classList.remove( "result-error" );
