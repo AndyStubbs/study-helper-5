@@ -349,7 +349,8 @@ def save_topic( topic_name, topic_description, user, topic_data=None ):
 			response_data = {
 				"id": topic.id,
 				"name": topic.name,
-				"description": topic.description
+				"description": topic.description,
+				"data": topic_data
 			}
 			return response_data
 
@@ -376,6 +377,7 @@ def delete_topic( topic_id, user ):
 
 def generate_topic_concepts( topic_id ):
 	print( "GENERATING CONCEPTS" )
+	print( f"TOPIC: {topic_id}" )
 	topic = models.Topic.objects.get( id=topic_id )
 
 	# Clear any existing concepts associated with this topic

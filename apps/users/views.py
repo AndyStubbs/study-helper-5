@@ -1,14 +1,20 @@
-from django.contrib.auth.models import User
+import json
+import os
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render
 from django.http import JsonResponse
 from utils.decorators import restrict_to_view
-
+from .models import CustomUser
 
 @restrict_to_view( "users:loginmodal" )
 def loginmodal( request ):
 	"""Render the HTML for the Login Modal"""
-	return render( request, "users/login.html" )
+	context = {
+		"test_user_email": os.getenv( "TEST_USER_EMAIL", "" ),
+		"test_user_password": os.getenv( "TEST_USER_PASSWORD", "" )
+	}
+	print( context )
+	return render( request, "users/login.html", context )
 
 
 ##################
@@ -32,42 +38,69 @@ def userdata( request ):
 		} )
 
 def register( request ):
-	if request.method == "POST":
-		email = request.POST.get( "email" )
-		password = request.POST.get( "password" )
+	try:
+		if request.method == "POST":
+			data = json.loads( request.body )
+			email = data.get( "email", None )
+			password = data.get( "password", None )
+			
+			print( f"Email: {email}, Password: {password}" )
 
-		# Make sure email doesn't already exists
-		if User.objects.filter( email=email ).exists():
-			return JsonResponse( { "data": { "success": False } }, status=400 )
-		
-		# Create a new user
-		user = User.objects.create_user( username=email, email=email, password=password )
-		user.save()
+			# Make sure email doesn't already exists
+			if CustomUser.objects.filter( email=email ).exists():
+				print( "User already exists" )
+				return JsonResponse( { "data": { "success": False } }, status=400 )
+			
+			# Create a new user
+			user = CustomUser.objects.create_user( username=email, email=email, password=password )
+			user.save()
 
-		# Login User
-		user = authenticate( request, email=email, password=password )
-		if user is not None:
-			login( request, user )
-			return JsonResponse( { 
-				"data": {
-					"success": True,
-					"userdata": userdata( request )
-				}
-			 } )
-	return JsonResponse( { "data": { "success": False } }, status=400 )
+			print( f"User: {user.email} created!" )
 
-def login( request ):
-	if request.method == "POST":
-		email = request.POST.get("email")
-		password = request.POST.get("password")
+			# Login User
+			user = authenticate( username=email, password=password )
 
-		user = authenticate( request, email=email, password=password )
-		if user is not None:
-			login( request, user )
-			return JsonResponse( { 
-				"data": {
-					"success": True,
-					"userdata": userdata( request )
-				}
-			 } )
-	return JsonResponse( { "data": { "success": False } }, status=400 )
+			print( "User Logged In" )
+			if user is not None:
+				login( request, user )
+				return JsonResponse( { 
+					"data": {
+						"success": True,
+						"userdata": {
+							"is_authenticated": True,
+							"user": {
+								"email": email
+							}
+						}
+					}
+				} )
+			print( "Unable to Authenticate User" )
+		return JsonResponse( { "data": { "success": False } }, status=400 )
+	except Exception as e:
+		print( f"Error Logging In: {e}" )
+		return JsonResponse( { "error": str( e ) }, status=500 )
+
+def loginuser( request ):
+	try:
+		if request.method == "POST":
+			data = json.loads( request.body )
+			email = data.get( "email", None )
+			password = data.get( "password", None )
+			user = authenticate( username=email, password=password )
+			if user is not None:
+				login( request, user )
+				return JsonResponse( { 
+					"data": {
+						"success": True,
+						"userdata": {
+							"is_authenticated": True,
+							"user": {
+								"email": email
+							}
+						}
+					}
+				} )
+		return JsonResponse( { "data": { "success": False } }, status=400 )
+	except Exception as e:
+		print( f"Error Logging In: {e}" )
+		return JsonResponse( { "error": str( e ) }, status=500 )

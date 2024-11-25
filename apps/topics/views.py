@@ -68,9 +68,10 @@ def topicsettings( request ):
 # AJAX API'S
 ##################
 
-@login_required
 def question( request ):
 	"""Gets a question for the quiz modal popup"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
@@ -87,9 +88,10 @@ def question( request ):
 		print( f"Error generating question: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def question2( request ):
 	"""Gets a question for the quiz modal popup by questionId"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
@@ -109,9 +111,10 @@ def question2( request ):
 		print( f"Error generating question: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def answer( request ):
 	"""Submit an answer from from the user"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
@@ -130,9 +133,10 @@ def answer( request ):
 		print( f"Error generating question: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def evaluate( request ):
 	"""Gets topic title suggestions and topic description"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
@@ -148,9 +152,10 @@ def evaluate( request ):
 		print( f"Error evaluating topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def summarize( request ):
 	"""Get a topic description"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
@@ -166,9 +171,10 @@ def summarize( request ):
 		print( f"Error summarizing topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def suggest( request ):
 	"""Get a topic suggestions"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
@@ -184,9 +190,10 @@ def suggest( request ):
 		print( f"Error suggesting topics: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def save( request ):
 	"""Save a topic to the database"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			print( "SAVING TOPIC" )
@@ -229,10 +236,10 @@ def save( request ):
 
 			# Sanitize and format response data
 			response_data = {
-				"id": response.id,
-				"name": response.name,
-				"description": response.description,
-				"data": response.data
+				"id": response[ "id" ],
+				"name": response[ "name" ],
+				"description": response[ "description" ],
+				"data": response[ "data" ]
 			}
 
 			return JsonResponse( { "status": "success", "data": response_data } )
@@ -243,9 +250,10 @@ def save( request ):
 		print(f"Error saving topic: Wrong request method: {request.method}")
 		return JsonResponse({"error": "Invalid request"}, status=400)
 
-@login_required
 def delete( request ):
 	"""Delete a topic to the database"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			print( "DELETING TOPIC" )
@@ -262,9 +270,10 @@ def delete( request ):
 		print( f"Error deleting topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def explain( request ):
 	"""Explain a topic"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			print( "EXPLAIN TOPIC" )
@@ -281,9 +290,10 @@ def explain( request ):
 		print( f"Error explaining topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def history( request ):
 	"""Fetch all questions answered by the user"""
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			print( "GETTING HISTORY FOR USER" )
@@ -296,8 +306,9 @@ def history( request ):
 		print( f"Error getting history: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def uploaddoc( request ):
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		if not request.FILES.get( "file" ):
 			return JsonResponse( { "error": "Invalid request" }, status=400 )
@@ -317,8 +328,9 @@ def uploaddoc( request ):
 		print( f"Error uploading doc: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def getalldocs( request ):
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			document_names = []
@@ -333,8 +345,9 @@ def getalldocs( request ):
 		print( f"Error retrieving documents: Wrong request method: {request.method}" )
 		return JsonResponse( {"error": "Invalid request"}, status=400 )
 
-@login_required
 def previewdoc( request ):
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			# Parse user request and get the filename
@@ -365,8 +378,9 @@ def previewdoc( request ):
 		print( f"Error uploading doc: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
-@login_required
 def deletedoc( request ):
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			# Parse user request and get the filename

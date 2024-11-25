@@ -10,7 +10,7 @@ window.main.onReady( () => {
 	const m_loginContainer = document.getElementById( "login-form-container" );
 	const m_registerContainer = document.getElementById( "register-form-container" );
 	const m_loginForm = document.getElementById( "login-form" );
-	const m_registerForm = document.getElementById( "register-form-container" );
+	const m_registerForm = document.getElementById( "register-form" );
 	const m_loadingOverlay = document.getElementById( "login-loading-overlay" );
 	const m_registerInput = document.getElementById( "register-email" );
 	const m_registerStatus = document.getElementById( "register-status" );
@@ -32,7 +32,9 @@ window.main.onReady( () => {
 		return false;
 	};
 
-	/* 
+	validateForm();
+
+	/*
 	{
 		"is_authenticated": True,
 		"user": {
@@ -93,7 +95,7 @@ window.main.onReady( () => {
 			m_registerStatus.textContent = `* Chars Remaining: ${charLength}`;
 			return false;
 		}
-
+			
 		// Check if the password contains at least one special symbol
 		const specialSymbols = "!@#$%^&*()-+";
 		let containsSymbol = false;
@@ -127,8 +129,11 @@ window.main.onReady( () => {
 	m_registerForm.addEventListener( "submit", async ( e ) => {
 		e.preventDefault();
 		m_loadingOverlay.style.visibility = "visible";
-		const formData = new FormData( m_registerForm );
-		const response = await window.main.handleRequest( "/users/register/", formData );
+		const formData = {
+			"email": m_registerForm.querySelector( "#register-email" ).value,
+			"password": m_registerForm.querySelector( "#register-password" ).value,
+		};
+		const response = await window.main.handleRequest( "/users/register/", formData, true );
 		m_loadingOverlay.style.visibility = "hidden";
 
 		if( response.success && getUserData( response.userdata ) ) {
@@ -143,8 +148,11 @@ window.main.onReady( () => {
 	m_loginForm.addEventListener( "submit", async ( e ) => {
 		e.preventDefault();
 		m_loadingOverlay.style.visibility = "visible";
-		const formData = new FormData( m_loginForm );
-		const response = await window.main.handleRequest( "/users/login/", formData );
+		const formData = {
+			"email": m_loginForm.querySelector( "#login-email" ).value,
+			"password": m_loginForm.querySelector( "#login-password" ).value,
+		};
+		const response = await window.main.handleRequest( "/users/login/", formData, true );
 		m_loadingOverlay.style.visibility = "hidden";
 
 		if( response.success && getUserData( response.userdata ) ) {

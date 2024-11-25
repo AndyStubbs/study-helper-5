@@ -31,8 +31,8 @@ window.main = {
 		}
 		return "";
 	},
-	"handleRequest": async ( endpoint, data ) => {
-		if( !window.main.isLoggedIn() ) {
+	"handleRequest": async ( endpoint, data, skipLogin ) => {
+		if( !skipLogin && !window.main.isLoggedIn() ) {
 			throw new Error( "You must login to process this request." );
 		}
 		const response = await fetch( endpoint, {
