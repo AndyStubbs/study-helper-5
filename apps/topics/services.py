@@ -14,6 +14,9 @@ from services import ai_services, sanity
 
 def get_next_question( topic_id ):
 
+	# TODO: Make sure question frequency is accurate, need to pick question type first and
+	# then filter the questions in the database after picking the question type
+	
 	# Load topic from database
 	topic = models.Topic.objects.get( id=topic_id )
 

@@ -133,14 +133,20 @@ window.main.onReady( () => {
 			"email": m_registerForm.querySelector( "#register-email" ).value,
 			"password": m_registerForm.querySelector( "#register-password" ).value,
 		};
-		const response = await window.main.handleRequest( "/users/register/", formData, true );
-		m_loadingOverlay.style.visibility = "hidden";
+		try {
+			const response = await window.main.handleRequest( "/users/register/", formData, true );
+			m_loadingOverlay.style.visibility = "hidden";
 
-		if( response.success && getUserData( response.userdata ) ) {
-			window.main.alert( "Registration successful!" );
-			m_loginModal.style.display = "none";
-		} else {
+			if( response.success && getUserData( response.userdata ) ) {
+				window.main.alert( "Registration successful!" );
+				m_loginModal.style.display = "none";
+			} else {
+				window.main.alert( "Registration failed. Please try again." );
+			}
+		} catch( ex ) {
 			window.main.alert( "Registration failed. Please try again." );
+		} finally {
+			m_loadingOverlay.style.visibility = "hidden";
 		}
 	} );
 
@@ -152,14 +158,18 @@ window.main.onReady( () => {
 			"email": m_loginForm.querySelector( "#login-email" ).value,
 			"password": m_loginForm.querySelector( "#login-password" ).value,
 		};
-		const response = await window.main.handleRequest( "/users/login/", formData, true );
-		m_loadingOverlay.style.visibility = "hidden";
-
-		if( response.success && getUserData( response.userdata ) ) {
-			window.main.alert( "You are now logged in. Have fun!" );
-			m_loginModal.style.display = "none";
-		} else {
+		try {
+			const response = await window.main.handleRequest( "/users/login/", formData, true );
+			if( response.success && getUserData( response.userdata ) ) {
+				window.main.alert( "You are now logged in. Have fun!" );
+				m_loginModal.style.display = "none";
+			} else {
+				window.main.alert( "Login failed. Please try again." );
+			}
+		} catch( ex ) {
 			window.main.alert( "Login failed. Please try again." );
+		} finally {
+			m_loadingOverlay.style.visibility = "hidden";
 		}
 	} );
 

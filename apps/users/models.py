@@ -3,7 +3,7 @@ from django.db import models
 
 # Create your models here.
 class CustomUser( AbstractUser ):
-	username = models.CharField( max_length=150, unique=True )
+	username = models.CharField( max_length=320, unique=True )
 	email = models.EmailField( unique=True )
 	is_verified = models.BooleanField( default=False )
 	

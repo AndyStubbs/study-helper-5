@@ -1,5 +1,7 @@
 import json
 import os
+from django.contrib.auth.password_validation import validate_password
+from django.core.validators import EmailValidator
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -44,6 +46,10 @@ def register( request ):
 			email = data.get( "email", None )
 			password = data.get( "password", None )
 			
+			# Validate input
+			if not validate_email_format( email ) or not validate_password_format( password ):
+				return JsonResponse( { "data": { "success": False } }, status=400 )
+			
 			print( f"Email: {email}, Password: {password}" )
 
 			# Make sure email doesn't already exists
@@ -86,6 +92,11 @@ def loginuser( request ):
 			data = json.loads( request.body )
 			email = data.get( "email", None )
 			password = data.get( "password", None )
+
+			# Validate input
+			if not validate_email_format( email ) or not validate_password_format( password ):
+				return JsonResponse( { "data": { "success": False } }, status=400 )
+			
 			user = authenticate( username=email, password=password )
 			if user is not None:
 				login( request, user )
@@ -104,3 +115,23 @@ def loginuser( request ):
 	except Exception as e:
 		print( f"Error Logging In: {e}" )
 		return JsonResponse( { "error": str( e ) }, status=500 )
+
+
+##################
+# Helper Methods
+##################
+
+def validate_password_format( password ):
+	try:
+		validate_password( password )
+		return True
+	except Exception:
+		return False
+
+def validate_email_format( email ):
+	validator = EmailValidator()
+	try:
+		validator( email )
+		return True
+	except Exception:
+		return False
