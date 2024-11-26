@@ -145,6 +145,46 @@ window.main.onReady( () => {
 		}
 	}
 
+	function createTopicListItem( topic ) {
+		const topicLi = document.createElement( "li" );
+		topicLi.classList.add( "topic-item" );
+		topicLi.dataset.topicId = topic.id;
+		topicLi.innerHTML = `
+			<h3>${ escape( topic.name ) }<span class="arrow">▼</span></h3>
+			<div>
+				<p class="short">${ escape( topic.description ) }</p>
+			</div>
+			<div>
+				<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">
+					Edit
+				</button>
+				<button onclick="window.main.quizTopic('${ topic.id }')" class="btn-sm btn-c1">
+					Quiz
+				</button>
+			</div>
+		`;
+		
+		// Insert topic alphabetically
+		const topicsList = document.getElementById( "topics-list" );
+		const topicItemsList = topicsList.querySelectorAll( "h3" );
+		if( topicItemsList.length > 0 ) {
+			let isInserted = false;
+			for( let i = 0; i < topicItemsList.length; i += 1 ) {
+				const topicHeader = topicItemsList[ i ];
+				if( topicHeader.textContent > topic.name ) {
+					topicsList.insertBefore( topicLi, topicHeader.closest( "li" ) );
+					isInserted = true;
+					break;
+				}
+			}
+			if( !isInserted ) {
+				topicsList.appendChild( topicLi );
+			}
+		} else {
+			topicsList.appendChild( topicLi );
+		}
+	}
+	
 	// Save topic function
 	async function saveTopic( topicName, topicDescription ) {
 		const loadingOverlay = document.getElementById( "loading-overlay" );
@@ -165,43 +205,7 @@ window.main.onReady( () => {
 			if( topicLi ) {
 				topicLi.querySelector( ".short" ).innerHTML = escape( topic.description );
 			} else {
-				topicLi = document.createElement( "li" );
-				topicLi.classList.add( "topic-item" );
-				topicLi.dataset.topicId = topic.id;
-				topicLi.innerHTML = `
-					<h3>${ escape( topic.name ) }<span class="arrow">▼</span></h3>
-					<div>
-						<p class="short">${ escape( topic.description ) }</p>
-					</div>
-					<div>
-						<button onclick="window.main.editTopic('${ topic.id }')" class="btn-sm btn-c2">
-							Edit
-						</button>
-						<button onclick="window.main.quizTopic('${ topic.id }')" class="btn-sm btn-c1">
-							Quiz
-						</button>
-					</div>
-				`;
-				
-				// Insert topic alphabetically
-				const topicsList = document.getElementById( "topics-list" );
-				const topicItemsList = topicsList.querySelectorAll( "h3" );
-				if( topicItemsList.length > 0 ) {
-					let isInserted = false;
-					for( let i = 0; i < topicItemsList.length; i += 1 ) {
-						const topicHeader = topicItemsList[ i ];
-						if( topicHeader.textContent > topic.name ) {
-							topicsList.insertBefore( topicLi, topicHeader.closest( "li" ) );
-							isInserted = true;
-							break;
-						}
-					}
-					if( !isInserted ) {
-						topicsList.appendChild( topicLi );
-					}
-				} else {
-					topicsList.appendChild( topicLi );
-				}
+				createTopicListItem( topic );
 			}
 			const resultMessage = document.querySelector( ".result-message" );
 			resultMessage.classList.remove( "result-error" );

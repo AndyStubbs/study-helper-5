@@ -40,4 +40,5 @@ window.main.onReady( () => {
 			}
 		}
 	} );
+	
 } );
