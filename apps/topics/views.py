@@ -68,6 +68,28 @@ def topicsettings( request ):
 # AJAX API'S
 ##################
 
+def getalltopics( request ):
+	if not request.user.is_authenticated:
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
+	print( "GETTING TOPICS FOR USER" )
+	if request.method == "POST":
+		try:
+			topics = []
+			topics_data = models.Topic.objects.filter( user=request.user ).order_by( "name" )
+			for topic in topics_data:
+				topics.append( {
+					"id": topic.id,
+					"name": topic.name,
+					"description": topic.description
+				} )
+			return JsonResponse( { "status": "success", "data": topics } )
+		except Exception as e:
+			print( f"Error getting topics: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		print( f"Error getting topics: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
 def question( request ):
 	"""Gets a question for the quiz modal popup"""
 	if not request.user.is_authenticated:

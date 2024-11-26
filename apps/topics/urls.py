@@ -32,5 +32,6 @@ urlpatterns = [
 	path( "previewdoc/", views.previewdoc, name="previewdoc" ),
 	path( "deletedoc/", views.deletedoc, name="deletedoc" ),
 	path( "getalldocs/", views.getalldocs, name="getalldocs" ),
+	path( "getalltopics/", views.getalltopics, name="getalltopics" ),
 
 ]

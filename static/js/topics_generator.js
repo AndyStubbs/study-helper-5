@@ -147,6 +147,7 @@ window.main.onReady( () => {
 
 	function createTopicListItem( topic ) {
 		const topicLi = document.createElement( "li" );
+		const escape = window.main.escape;
 		topicLi.classList.add( "topic-item" );
 		topicLi.dataset.topicId = topic.id;
 		topicLi.innerHTML = `
@@ -310,6 +311,14 @@ window.main.onReady( () => {
 		}
 		window.requestAnimationFrame( () => {
 			topicLi.scrollIntoView( { "behavior": "smooth", "block": "center" } );
+		} );
+	} );
+
+	// Get all the topics
+	window.main.onLoggedIn( async () => {
+		const topics = await window.main.handleRequest( "/topics/getalltopics/" );
+		topics.forEach( topic => {
+			createTopicListItem( topic );
 		} );
 	} );
 } );
