@@ -9,6 +9,7 @@ body {
 header {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 }
 #theme-toggle {
 	background-color: var(--button-bg-color-2);
