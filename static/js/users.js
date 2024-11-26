@@ -194,4 +194,19 @@ window.main.onReady( () => {
 		m_loginContainer.style.display = "";
 	} );
 
+	m_loginModal.querySelectorAll( ".password-container button" ).forEach( btn => {
+		btn.addEventListener( "click", e => {
+			e.preventDefault();
+			const passwordField = btn.parentElement.querySelector( ".password" );
+			if(passwordField.type === "password") {
+				passwordField.type = "text";
+				btn.querySelector( ".eye" ).style.display = "none";
+				btn.querySelector( ".eye-slash" ).style.display = "";
+			} else {
+				passwordField.type = "password";
+				btn.querySelector( ".eye" ).style.display = "";
+				btn.querySelector( ".eye-slash" ).style.display = "none";
+			}
+		} );
+	} );
 } );

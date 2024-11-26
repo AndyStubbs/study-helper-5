@@ -14,7 +14,13 @@
 				</div>
 				<div class="form-group">
 					<label for="login-password">Password:</label>
-					<input type="password" id="login-password" name="password" required value="{{ test_user_password }}">
+					<div class="password-container">
+						<input type="password" class="password" id="login-password" name="password" required value="{{ test_user_password }}">
+						<button>
+							<img class="eye" src="{% static 'svg/eye.svg' %}" alt="" >
+							<img class="eye-slash" src="{% static 'svg/eye-slash.svg' %}" alt="" style="display: none;">
+						</button>
+					</div>
 				</div>
 				<button type="submit" id="login-submit-btn" class="btn btn-c1">Login</button>
 			</form>
@@ -34,11 +40,23 @@
 				</div>
 				<div class="form-group">
 					<label for="register-password">Password:</label>
-					<input type="password" id="register-password" name="register-password" required value="{{ test_user_password }}">
+					<div class="password-container">
+						<input type="password" class="password" id="register-password" name="password" required value="{{ test_user_password }}">
+						<button>
+							<img class="eye" src="{% static 'svg/eye.svg' %}" alt="" >
+							<img class="eye-slash" src="{% static 'svg/eye-slash.svg' %}" alt="" style="display: none;">
+						</button>
+					</div>
 				</div>
 				<div class="form-group">
 					<label for="confirm-password">Confirm Password:</label>
-					<input type="password" id="confirm-password" name="confirm-password" required value="{{ test_user_password }}">
+					<div class="password-container">
+						<input type="password" class="password" id="confirm-password" name="password" required value="{{ test_user_password }}">
+						<button>
+							<img class="eye" src="{% static 'svg/eye.svg' %}" alt="" >
+							<img class="eye-slash" src="{% static 'svg/eye-slash.svg' %}" alt="" style="display: none;">
+						</button>
+					</div>
 				</div>
 				<div id="register-status" class="result-error" style="margin-bottom: 10px;">&nbsp;</div>
 				<button type="submit" id="register-submit-btn" class="btn btn-c1" disabled>Register</button>

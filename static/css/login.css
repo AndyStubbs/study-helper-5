@@ -13,4 +13,24 @@
 	padding: 10px;
 	border: 1px solid #ccc;
 	border-radius: 5px;
+	font-family: 'Times New Roman', Times, serif;
+	font-size: 17px;
+}
+
+.password-container {
+	display: flex;
+}
+
+.password-container button {
+	margin-left: 8px;
+	border-radius: 5px;
+	border: 1px solid #999;
+}
+
+.password-container img {
+	width: 30px;
+	height: 30px;
+	position: relative;
+	top: 2px;
+	cursor: pointer;
 }
