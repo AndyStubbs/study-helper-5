@@ -197,4 +197,13 @@ document.addEventListener( "DOMContentLoaded", function () {
 		document.getElementById( "hljs-light-theme" ).disabled = theme === "dark";
 		document.getElementById( "hljs-dark-theme" ).disabled = theme !== "dark";
 	}
+
+	// Handle menu button
+	document.getElementById( "burger-menu-btn" ).addEventListener( "click", async () => {
+		const confirm = await window.main.confirm( "Logout?" );
+		if( confirm ) {
+			window.main.logout();
+			//alert( "Confirm" );
+		}
+	} );
 } );

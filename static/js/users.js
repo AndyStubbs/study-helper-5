@@ -25,11 +25,18 @@ window.main.onReady( () => {
 
 	getUserData();
 	
+	// Handle login
 	window.main.isLoggedIn = () => {
 		if( m_userData ) {
 			return m_userData.is_authenticated;
 		}
 		return false;
+	};
+
+	// Handle logout
+	window.main.logout = async () => {
+		await window.main.handleRequest( "/users/logout/" );
+		window.location.reload();
 	};
 
 	validateForm();
@@ -186,4 +193,5 @@ window.main.onReady( () => {
 		m_registerContainer.style.display = "none";
 		m_loginContainer.style.display = "";
 	} );
+
 } );

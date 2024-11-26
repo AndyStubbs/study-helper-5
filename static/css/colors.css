@@ -52,7 +52,7 @@
 	--status-error-color: #833;
 	--status-error-color-light: #fa333308;
 
-	.icon-light {
+	.icon-dark {
 		display: none;
 	}
 }
@@ -104,10 +104,10 @@
 	--status-success-color-light: #091209ee;
 	--status-error-color-light: #120909ee;
 
-	.icon-light {
+	.icon-dark {
 		display: block;
 	}
-	.icon-dark {
+	.icon-light {
 		display: none;
 	}
 }
@@ -119,11 +119,11 @@ body {
 	color: var(--text-color-primary);
 }
 
-#theme-toggle {
+.icon-btn {
 	background-color: var(--button-bg-color-2);
 	color: var(--text-color-primary);
 }
-#theme-toggle:hover {
+.icon-btn:hover {
 	background-color: var(--button-hover-bg-color-2);
 }
 

@@ -1,5 +1,6 @@
 import json
 import os
+from django.contrib.auth import logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import EmailValidator
 from django.contrib.auth import authenticate, login
@@ -17,7 +18,6 @@ def loginmodal( request ):
 	}
 	print( context )
 	return render( request, "users/login.html", context )
-
 
 ##################
 # AJAX API'S
@@ -115,6 +115,12 @@ def loginuser( request ):
 	except Exception as e:
 		print( f"Error Logging In: {e}" )
 		return JsonResponse( { "error": str( e ) }, status=500 )
+
+def logoutuser( request ):
+	if request.method == "POST":
+		logout( request )
+		return JsonResponse( { "data": { "success": True } } )
+	return JsonResponse( { "data": { "success": False } }, status=400 )
 
 
 ##################

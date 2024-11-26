@@ -24,14 +24,18 @@
 </head>
 <body>
 	<header id="main-header">
+		<button id="burger-menu-btn" class="icon-btn">
+			<img class="icon-light" src="{% static 'svg/burger.svg' %}" alt="Menu" >
+			<img class="icon-dark" src="{% static 'svg/burger-dark.svg' %}" alt="Menu" >
+		</button>
 		<h1>Study Helper</h1>
-		<button id="theme-toggle">
-			<img class="icon-dark"
+		<button id="theme-toggle" class="icon-btn">
+			<img class="icon-light"
 				src="{% static 'svg/darkmode-btn.svg' %}"
 				alt="Dark mode icon"
 			>
 			<img
-				class="icon-light"
+				class="icon-dark"
 				src="{% static 'svg/lightmode-btn.svg' %}"
 				alt="Light mode icon"
 			>

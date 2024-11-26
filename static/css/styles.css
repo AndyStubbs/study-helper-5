@@ -11,11 +11,10 @@ header {
 	justify-content: space-between;
 	align-items: center;
 }
-#theme-toggle {
+.icon-btn {
 	background-color: var(--button-bg-color-2);
 	color: var(--text-color);
 	border: none;
-	border-radius: 20px;
 	padding: 5px 10px;
 	cursor: pointer;
 	display: flex;
@@ -28,7 +27,7 @@ header {
 	width: 48px;
 	height: 48px;
 }
-#theme-toggle:hover {
+.icon-btn:hover {
 	background-color: var(--button-hover-bg-color-2);
 	transform: scale(1.1);
 }
