@@ -3,6 +3,7 @@
 import random
 import re
 import os
+from utils.globals import QuestionType
 from django import conf
 from django.core.files.storage import default_storage
 from PyPDF2 import PdfReader
@@ -28,8 +29,18 @@ def get_next_question( topic_id ):
 	selected_concept = models.Concept.objects.get( id=selected_concept_id )
 	print( f"Selected concept: {selected_concept.name}" )
 
+	# Pick question type
+	q_type = get_question_type( topic.topic_data )
+	print( f"Question Type: {q_type}" )
+
+	# Pick question source
+	source_chunk = get_random_question_source( topic )
+	print( f"Question Source: {source_chunk}" )
+
 	# Load all questions from database
-	all_questions = models.Question.objects.filter( topic=topic, concepts=selected_concept )
+	all_questions = models.Question.objects.filter(
+		topic=topic, concepts=selected_concept, type=q_type, source_chunk=source_chunk
+	)
 	unasked_questions = all_questions.filter( last_asked__isnull=True )
 	question_count = all_questions.count()
 	unasked_question_count = unasked_questions.count()
@@ -47,19 +58,19 @@ def get_next_question( topic_id ):
 			)
 		)
 
-		q_type = get_question_type( topic.topic_data )
-		print( f"Question Type: {q_type}" )
-		q_src = get_random_question_source( topic )
-		print( f"Question Source Length: {len( q_src )}" )
-
 		# Generate the new questions
+		if source_chunk is not None:
+			src_text = source_chunk.text
+		else:
+			src_text = ""
+		
 		questions_data = ai_services.create_questions(
 			topic.name,
 			topic.description,
 			selected_concept.name,
 			previously_asked_questions,
 			q_type,
-			q_src
+			src_text
 		)
 
 		# Check if there are any questions generated
@@ -96,51 +107,46 @@ def get_next_question( topic_id ):
 				else:
 					print( f"Warning: Concept '{concept_name}' not found." )
 
-			# Create the question database record
+			# Set the defaults for question
+			correct = ""
+			answers = ""
+			is_code = False
+			language_class = ""
+			boilerplate = ""
+
+			# True/False Question
 			if isinstance( question_data, ai_services.AI_TF_Question ):
 				if question_data.is_true:
 					correct = "true"
 				else:
 					correct = "false"
-				question = models.Question.objects.create(
-					topic = topic,
-					text = question_data.text,
-					details = getattr( question_data, "details", "" ),
-					is_open = False,
-					is_code = False,
-					language_class = "",
-					boilerplate = "",
-					source = q_src,
-					answers = [ "true", "false" ],
-					correct = correct,
-					main_concept = selected_concept
-				)
+				answers = [ "true", "false" ]
+			
+			# Open Text Question
 			elif isinstance( question_data, ai_services.AI_OpenQuestion ):
-				question = models.Question.objects.create(
-					topic = topic,
-					text = question_data.text,
-					details = getattr( question_data, "details", "" ),
-					is_open = True,
-					is_code = question_data.is_code,
-					language_class = question_data.language_class,
-					boilerplate = question_data.boilerplate,
-					answers = "",
-					correct = "",
-					main_concept = selected_concept
-				)
+				is_code = question_data.is_code
+				language_class = question_data.language_class
+				boilerplate = question_data.boilerplate
+			
+			# Multiple Choice Question
 			else:
-				question = models.Question.objects.create(
-					topic = topic,
-					text = question_data.text,
-					details = getattr( question_data, "details", "" ),
-					is_open = False,
-					is_code = False,
-					language_class = "",
-					boilerplate = "",
-					answers = question_data.answers,
-					correct = question_data.correct,
-					main_concept = selected_concept
-				)
+				answers = question_data.answers
+				correct = question_data.correct
+
+			# Create the question database record
+			question = models.Question.objects.create(
+				topic = topic,
+				text = question_data.text,
+				details = getattr( question_data, "details", "" ),
+				type = q_type,
+				is_code = is_code,
+				language_class = language_class,
+				boilerplate = boilerplate,
+				source_chunk = source_chunk,
+				answers = answers,
+				correct = correct,
+				main_concept = selected_concept
+			)
 
 			# Set qeustion concepts
 			question.concepts.set( concept_instances )
@@ -156,7 +162,7 @@ def get_next_question( topic_id ):
 			"id": question.id,
 			"text": question.text,
 			"details": question.details,
-			"is_open": question.is_open,
+			"is_open": question.type == QuestionType.open,
 			"is_code": question.is_code,
 			"language_class": question.language_class,
 			"boilerplate": question.boilerplate,
@@ -193,7 +199,7 @@ def get_next_question( topic_id ):
 			"id": question.id,
 			"text": question.text,
 			"details": question.details,
-			"is_open": question.is_open,
+			"is_open": question.type == QuestionType.open,
 			"is_code": question.is_code,
 			"language_class": question.language_class,
 			"boilerplate": question.boilerplate,
@@ -210,9 +216,9 @@ def get_question_type( topic_data ):
 
 	# Create a weighted list of question types
 	question_types = (
-		[ "mcq" ] * mcq_frequency +
-		[ "tf" ] * tf_frequency +
-		[ "open_text" ] * open_text_frequency
+		[ QuestionType.mcq ] * mcq_frequency +
+		[ QuestionType.tf ] * tf_frequency +
+		[ QuestionType.open ] * open_text_frequency
 	)
 
 	# If the list is empty, default to 'mcq'
@@ -249,7 +255,7 @@ def get_random_question_source( topic ):
 
 	# If no weights are provided or list is empty, default to 'description'
 	if not sources:
-		return ""
+		return None
 
 	# Choose source type
 	selected_source = random.choice( sources )
@@ -264,10 +270,10 @@ def get_random_question_source( topic ):
 			chunks = document.chunks.all()
 			if chunks.exists():
 				chunk = chunks.order_by( "?" ).first()
-				return chunk.text
+				return chunk
 
 	# Return empty string for topic description or if no valid documents are found
-	return ""
+	return None
 
 def get_question_by_id( question_id ):
 	question = models.Question.objects.get( id=question_id )
@@ -275,7 +281,7 @@ def get_question_by_id( question_id ):
 		"id": question.id,
 		"text": question.text,
 		"details": question.details,
-		"is_open": question.is_open,
+		"is_open": question.type == QuestionType.open,
 		"is_code": question.is_code,
 		"language_class": question.language_class,
 		"boilerplate": question.boilerplate,
@@ -454,7 +460,7 @@ def set_answer( user, question_id, answer ):
 		return { "is_skipped": True }
 
 	# Evaluate if answer is correct
-	if question.is_open:
+	if question.type == QuestionType.open:
 		if question.source is None:
 			src = ""
 		else:
@@ -491,7 +497,7 @@ def set_answer( user, question_id, answer ):
 		"correct": correct,
 		"is_correct": is_correct,
 		"is_skipped": False,
-		"is_open": question.is_open
+		"is_open": question.type == QuestionType.open
 	}
 
 def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):

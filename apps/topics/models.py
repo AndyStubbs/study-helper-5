@@ -6,6 +6,25 @@ from apps.users.models import CustomUser
 from django.utils import timezone
 
 
+class Document( models.Model ):
+	name = models.CharField( max_length=256 )
+	user = models.ForeignKey( CustomUser, on_delete=models.SET_NULL, null=True, blank=True )
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		unique_together = ( "name", "user" )
+	
+	def __str__(self):
+		return f"Document: {self.name} (User: {self.user})"
+
+class Chunk( models.Model ):
+	document = models.ForeignKey( Document, on_delete=models.CASCADE, related_name="chunks" )
+	text = models.TextField( max_length=1000, blank=True, null=True )
+
+	def __str__(self):
+		return f"Chunk: {self.text[:30]}... (Document: {self.document.name})"
+
 class Topic( models.Model ):
 	name = models.CharField( max_length=100 )
 	description = models.TextField( max_length=1000, blank=True, null=True )
@@ -40,10 +59,7 @@ class Question( models.Model ):
 	topic = models.ForeignKey( Topic, on_delete=models.CASCADE, related_name="questions" )
 	text = models.CharField( max_length=300 )
 	details = models.TextField( max_length=1000, blank=True, null=True )
-	is_open = models.BooleanField(
-		default=False,
-		help_text="Indicates if the question is an open-ended question (not multiple choice)."
-	)
+	type = models.CharField( max_length=5 )
 	is_code = models.BooleanField(
 		default=False,
 		help_text="Indicates if the question involves coding."
@@ -57,10 +73,13 @@ class Question( models.Model ):
 		blank=True,
 		help_text="Boilerplate code provided as a starting point if this is a coding question."
 	)
-	source = models.TextField(
-		max_length=1000,
+	source_chunk = models.ForeignKey(
+		Chunk,
+		on_delete=models.SET_NULL,
+		null=True,
 		blank=True,
-		help_text="Additional details added for the source of the question."
+		related_name="questions",
+		help_text="The chunk that serves as the source for the question."
 	)
 	answers = models.JSONField( help_text="Store answers as a JSON array" )
 	correct = models.CharField( max_length=100, help_text="Text of the correct answer" )
@@ -166,22 +185,3 @@ class UserKnowledge( models.Model ):
 			f"{self.user} - {self.topic} - {self.concept} "
 			f"(Correct Points: {self.correct_points}, Wrong Points: {self.wrong_points})"
 		)
-
-class Document( models.Model ):
-	name = models.CharField( max_length=256 )
-	user = models.ForeignKey( CustomUser, on_delete=models.SET_NULL, null=True, blank=True )
-	created_at = models.DateTimeField(auto_now_add=True)
-	updated_at = models.DateTimeField(auto_now=True)
-
-	class Meta:
-		unique_together = ( "name", "user" )
-	
-	def __str__(self):
-		return f"Document: {self.name} (User: {self.user})"
-
-class Chunk( models.Model ):
-	document = models.ForeignKey( Document, on_delete=models.CASCADE, related_name="chunks" )
-	text = models.TextField( max_length=1000, blank=True, null=True )
-
-	def __str__(self):
-		return f"Chunk: {self.text[:30]}... (Document: {self.document.name})"

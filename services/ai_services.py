@@ -4,6 +4,7 @@ import os
 from pydantic import BaseModel
 from openai import OpenAI
 from . import ai_prompts
+from utils.globals import QuestionType
 
 class AI_TopicInfo( BaseModel ):
 	summary: str
@@ -128,11 +129,11 @@ def create_questions(
 	):
 	print( f"Creating question for topic: {topic_name}" )
 
-	if q_type == "open_text":
+	if q_type == QuestionType.mcq:
 		system_prompt = ai_prompts.question_generator_system_prompt
 		user_prompt = ai_prompts.question_generator_user_prompt
 		response_format = AI_GenQuestions
-	elif q_type == "tf":
+	elif q_type == QuestionType.tf:
 		system_prompt = ai_prompts.tf_question_generator_system_prompt
 		user_prompt = ai_prompts.tf_question_generator_user_prompt
 		response_format = AI_Gen_TF_Questions
