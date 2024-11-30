@@ -436,7 +436,6 @@ def get_topic_description( topic_name ):
 	return response_data
 
 def set_answer( user, question_id, answer ):
-	# TODO FIX BUG Error explaining topic: 'Question' object has no attribute 'source'
 	try:
 		question = models.Question.objects.select_related( "topic" ).get( id=question_id )
 	except ObjectDoesNotExist:
@@ -458,10 +457,10 @@ def set_answer( user, question_id, answer ):
 
 	# Evaluate if answer is correct
 	if question.type == QuestionType.open:
-		if question.source is None:
+		if question.source_chunk is None:
 			src = ""
 		else:
-			src = question.source
+			src = question.source_chunk.text
 		# question, answer, topic_name, topic_description, concept_name
 		ai_response = ai_services.submit_open_answer(
 			question.text, question.details, answer, question.topic.name,
@@ -519,7 +518,6 @@ def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):
 	user_knowledge.save()
 
 def explain_topic( question_id, user ):
-	# TODO FIX BUG Error explaining topic: 'Question' object has no attribute 'source'
 	try:
 		question = models.Question.objects.select_related( "topic" ).get( id=question_id )
 	except ObjectDoesNotExist:
@@ -545,10 +543,10 @@ def explain_topic( question_id, user ):
 		topic_name = question.topic.name
 		topic_description = question.topic.description
 		concept_name = question.main_concept
-		if question.source is None:
+		if question.source_chunk is None:
 			src = ""
 		else:
-			src = question.source
+			src = question.source_chunk.text
 		ai_response = ai_services.explain_question(
 			question.text, question.correct,  topic_name, topic_description, concept_name, src
 		)
