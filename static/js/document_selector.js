@@ -1,5 +1,7 @@
 // static/js/document_selector.js
 
+// TODO: When editing a document need to auto check selected documents.
+
 "use strict";
 
 window.main.onReady( () => {

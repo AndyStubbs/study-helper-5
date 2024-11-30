@@ -15,9 +15,6 @@ from services import ai_services, sanity
 
 def get_next_question( topic_id ):
 
-	# TODO: Make sure question frequency is accurate, need to pick question type first and
-	# then filter the questions in the database after picking the question type
-	
 	# Load topic from database
 	topic = models.Topic.objects.get( id=topic_id )
 
@@ -439,7 +436,7 @@ def get_topic_description( topic_name ):
 	return response_data
 
 def set_answer( user, question_id, answer ):
-	
+	# TODO FIX BUG Error explaining topic: 'Question' object has no attribute 'source'
 	try:
 		question = models.Question.objects.select_related( "topic" ).get( id=question_id )
 	except ObjectDoesNotExist:
@@ -522,6 +519,7 @@ def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):
 	user_knowledge.save()
 
 def explain_topic( question_id, user ):
+	# TODO FIX BUG Error explaining topic: 'Question' object has no attribute 'source'
 	try:
 		question = models.Question.objects.select_related( "topic" ).get( id=question_id )
 	except ObjectDoesNotExist:

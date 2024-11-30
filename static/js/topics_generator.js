@@ -1,6 +1,9 @@
 // static/js/topics_generator.js
 "use strict";
 
+// TODO: Need to add indicator when topic settings have been changed and are unsaved.
+// TODO: Add a warning before changing active topics if active topic has been changed and unsaved
+
 /* global window.main */
 
 window.main.onReady( () => {

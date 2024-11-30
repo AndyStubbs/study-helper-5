@@ -1,5 +1,7 @@
 // static/js/topic_settings.js
 
+// TODO: Make sure when a topic is edited that settings get updated correctly.
+
 "use strict";
 
 window.main.onReady( () => {
