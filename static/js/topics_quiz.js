@@ -50,13 +50,13 @@ window.main.onReady( function () {
 
 	// Close modal event
 	m_closeModal.addEventListener( "click", () => {
-		m_quizModal.style.display = "none";
+		window.main.closeModal( m_quizModal );
 	} );
 
 	// Close modal when clicking off modal
 	m_quizModal.addEventListener( "click", ( e ) => {
 		if( e.target === e.currentTarget ) {
-			m_quizModal.style.display = "none";
+			window.main.closeModal( m_quizModal );
 		}
 	} );
 
@@ -220,14 +220,14 @@ window.main.onReady( function () {
 	function openQuizModal( topicId ) {
 		resetScore();
 		m_topicId = parseInt( topicId );
-		m_quizModal.style.display = "block";
+		window.main.openModal( m_quizModal );
 		loadNextQuestion();
 	}
 
 	function openQuestionModal( questionId, topicId ) {
 		resetScore();
 		m_topicId = parseInt( topicId );
-		m_quizModal.style.display = "block";
+		window.main.closeModal( m_quizModal );
 		loadQuestion( questionId );
 	}
 

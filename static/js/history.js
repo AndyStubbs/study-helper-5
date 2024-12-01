@@ -124,7 +124,7 @@ window.main.onReady( () => {
 		} );
 		const lastAskedShort = question.last_asked.substring( 0, 10 );
 		const qdModal = document.getElementById( "qd-modal" );
-		qdModal.style.display = "";
+		window.main.openModal( qdModal );
 		document.getElementById( "qd-text" ).innerHTML = escape( question.text );
 		document.getElementById( "qd-correct" ).innerHTML = question.correct;
 		document.getElementById( "qd-average" ).innerHTML = Math.round(
@@ -135,18 +135,17 @@ window.main.onReady( () => {
 		document.getElementById( "qd-related-concepts" ).innerHTML = conceptItems;
 		document.getElementById( "qd-explain" ).onclick = () => {
 			window.main.explain( id );
-			qdModal.style.display = "none";
 		};
 		document.getElementById( "qd-try" ).onclick = () => {
 			window.main.quizQuestion( id, topicId );
-			qdModal.style.display = "none";
+			window.main.closeModal( qdModal );
 		};
 		document.getElementById( "qd-close" ).onclick = () => {
-			qdModal.style.display = "none";
+			window.main.closeModal( qdModal );
 		};
 		qdModal.onclick = ( e ) => {
 			if( e.target === e.currentTarget ) {
-				qdModal.style.display = "none";
+				window.main.closeModal( qdModal );
 			}
 		}
 	}

@@ -41,14 +41,6 @@ window.main.onReady( () => {
 
 	validateForm();
 
-	/*
-	{
-		"is_authenticated": True,
-		"user": {
-			"email": request.user.email
-		},
-	} 
-	*/
 	async function getUserData( userData ) {
 		if( userData ) {
 			m_userData = userData;
@@ -76,7 +68,7 @@ window.main.onReady( () => {
 
 	// Function to open the modal
 	function openLoginModal() {
-		m_loginModal.style.display = "block";
+		window.main.openModal( m_loginModal );
 	}
 
 	function validateForm() {
@@ -145,8 +137,8 @@ window.main.onReady( () => {
 			m_loadingOverlay.style.visibility = "hidden";
 
 			if( response.success && getUserData( response.userdata ) ) {
+				window.main.closeModal( m_loginModal );
 				window.main.alert( "Registration successful!" );
-				m_loginModal.style.display = "none";
 			} else {
 				window.main.alert( "Registration failed. Please try again." );
 			}
@@ -168,8 +160,8 @@ window.main.onReady( () => {
 		try {
 			const response = await window.main.handleRequest( "/users/login/", formData, true );
 			if( response.success && getUserData( response.userdata ) ) {
+				window.main.closeModal( m_loginModal );
 				window.main.alert( "You are now logged in. Have fun!" );
-				m_loginModal.style.display = "none";
 			} else {
 				window.main.alert( "Login failed. Please try again." );
 			}

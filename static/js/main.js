@@ -1,11 +1,8 @@
 // static/js/main.js
 
 /* TODO:
-1. Add a modal open function that opens a modal and disables all tab-index not in the modal -
-	Except for the toggle light/dark mode button
-2. Move the toggle light/dark mode so that it can be toggled even if modal is showing
-3. Make sure that all handleRequest callers have try-catch blocks and report errors.
-4. Clear all error messages when handleRequest is successful
+1. Make sure that all handleRequest callers have try-catch blocks and report errors.
+2. Clear all error messages when handleRequest is successful
 */
 
 "use strict";
@@ -55,21 +52,21 @@ window.main = {
 	"alert": ( msg, hideButtons ) => {
 		return new Promise( ( resolve ) => {
 			const alertModal = document.getElementById( "modal-alert" );
-			alertModal.style.display = "block";
+			window.main.openModal( alertModal );
 			alertModal.querySelector( ".alert-message" ).innerHTML = msg;
 	
 			const okButton = document.getElementById( "modal-ok" );
 	
 			// Event listener for "Ok" button
 			okButton.onclick = () => {
-				alertModal.style.display = "none";
+				window.main.closeModal( alertModal );
 				resolve();
 			};
 	
 			// Close modal if the background is clicked
 			alertModal.addEventListener( "click", (e) => {
 				if (e.target === alertModal) {
-					alertModal.style.display = "none";
+					window.main.closeModal( alertModal );
 					resolve();
 				}
 			} );
@@ -82,7 +79,7 @@ window.main = {
 	"confirm": async ( msg ) => {
 		return new Promise( ( resolve ) => {
 			const confirmModal = document.getElementById( "modal-confirm" );
-			confirmModal.style.display = "block";
+			window.main.openModal( confirmModal );
 			confirmModal.querySelector( ".alert-message" ).innerHTML = msg;
 	
 			const yesButton = document.getElementById( "modal-confirm-yes" );
@@ -90,20 +87,20 @@ window.main = {
 	
 			// Event listener for "Yes" button
 			yesButton.onclick = () => {
-				confirmModal.style.display = "none";
+				window.main.closeModal( confirmModal );
 				resolve( true );
 			};
 	
 			// Event listener for "No" button
 			noButton.onclick = () => {
-				confirmModal.style.display = "none";
+				window.main.closeModal( confirmModal );
 				resolve( false );
 			};
 	
 			// Close modal if the background is clicked
 			confirmModal.addEventListener( "click", ( e ) => {
 				if( e.target === confirmModal ) {
-					confirmModal.style.display = "none";
+					window.main.closeModal( confirmModal );
 					resolve( false );
 				}
 			} );
@@ -117,7 +114,46 @@ window.main = {
 	"loggedin": function () {
 		g_loggedInItems.forEach( callback => callback() );
 	},
-	"isLoggedIn": function () { return false; }
+	"isLoggedIn": function () { return false; },
+	"openModalList": [],
+	"openModal": function ( modal ) {
+		modal.style.display = "";
+		window.main.disableTabbing( modal );
+		window.main.openModalList.push( modal );
+	},
+	"closeModal": function ( modal ) {
+		modal.style.display = "none";
+		window.main.enableTabbing();
+		window.main.openModalList.pop();
+		if( window.main.openModalList.length > 0 ) {
+			const nextModal = window.main.openModalList[ window.main.openModalList.length - 1 ];
+			window.main.disableTabbing( nextModal );
+		}
+	},
+	"disableTabbing": function ( modal ) {
+		const tabbable = document.querySelectorAll(
+			"button, [href], input, select, textarea"
+		);
+		tabbable.forEach( el => {
+			if( modal.contains( el ) ) {
+				el.removeAttribute( "tabindex" );
+			} else if( el.id !== "theme-toggle" ) {
+				el.setAttribute( "tabindex", "-1" );
+			}
+		} );
+	},
+	"enableTabbing": function () {
+		const tabbable = document.querySelectorAll(
+			"button, [href], input, select, textarea"
+		);
+		tabbable.forEach( el => {
+			if( 
+				el.id !== "theme-toggle"
+			) {
+				el.removeAttribute( "tabindex" );
+			}
+		} );
+	}
 };
 
 document.addEventListener( "DOMContentLoaded", function () {

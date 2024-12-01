@@ -15,7 +15,7 @@ window.main.onReady( () => {
 
 	// Open select documents modal
 	window.main.topicSettings = async ( topicId ) => {
-		m_topicSettingsModal.style.display = "";
+		window.main.openModal( m_topicSettingsModal );
 
 		// Get topic settings from server
 		toggleLoadingOverlay( false );
@@ -25,7 +25,7 @@ window.main.onReady( () => {
 			} );
 			m_data = response.settings;
 		} catch( ex ) {
-			m_topicSettingsModal.style.display = "none";
+			window.main.closeModal( m_topicSettingsModal );
 			window.main.alert( ex );
 		}
 		finally {
@@ -47,19 +47,19 @@ window.main.onReady( () => {
 	
 	// Close modal event
 	m_topicSettingsModal.querySelector( ".close" ).addEventListener( "click", () => {
-		m_topicSettingsModal.style.display = "none";
+		window.main.closeModal( m_topicSettingsModal );
 	} );
 
 	// Close modal when clicking off modal
 	m_topicSettingsModal.addEventListener( "click", ( e ) => {
 		if( e.target === e.currentTarget ) {
-			m_topicSettingsModal.style.display = "none";
+			window.main.closeModal( m_topicSettingsModal );
 		}
 	} );
 
 	// Close button
 	m_closeBtn.addEventListener( "click", () => {
-		m_topicSettingsModal.style.display = "none";
+		window.main.closeModal( m_topicSettingsModal );
 	} );
 
 	// Update frequency values in real-time

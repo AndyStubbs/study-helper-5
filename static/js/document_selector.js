@@ -17,9 +17,7 @@ window.main.onReady( () => {
 
 	// Open select documents modal
 	window.main.selectDocuments = async ( topicId ) => {
-		m_documentSelectorModal.style.display = "";
-
-		
+		window.main.openModal( m_documentSelectorModal );
 		// Get topic settings from server
 		toggleLoadingOverlay( false );
 		try {
@@ -36,7 +34,7 @@ window.main.onReady( () => {
 				chk.checked = true;
 			} );
 		} catch( ex ) {
-			m_documentSelectorModal.style.display = "none";
+			window.main.closeModal( m_documentSelectorModal );
 			window.main.alert( ex );
 		}
 		finally {
@@ -56,19 +54,19 @@ window.main.onReady( () => {
 
 	// Close modal event
 	m_documentSelectorModal.querySelector( ".close" ).addEventListener( "click", () => {
-		m_documentSelectorModal.style.display = "none";
+		window.main.closeModal( m_documentSelectorModal );
 	} );
 
 	// Close modal when clicking off modal
 	m_documentSelectorModal.addEventListener( "click", ( e ) => {
 		if( e.target === e.currentTarget ) {
-			m_documentSelectorModal.style.display = "none";
+			window.main.closeModal( m_documentSelectorModal );
 		}
 	} );
 
 	// Close button
 	m_closeBtn.addEventListener( "click", () => {
-		m_documentSelectorModal.style.display = "none";
+		window.main.closeModal( m_documentSelectorModal );
 	} );
 
 	// Handle Select all items

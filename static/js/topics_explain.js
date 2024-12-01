@@ -36,7 +36,7 @@ window.main.onReady( function () {
 
 	// Hide the explanation modal
 	function hideExplanation() {
-		m_explanationModal.style.display = "none";
+		window.main.closeModal( m_explanationModal );
 		m_explanationQuestion.textContent = "Loading explanation...";
 		m_explanationAnswer.textContent = "";
 		m_explanationContent.textContent = "";
@@ -52,7 +52,7 @@ window.main.onReady( function () {
 	// Attach event listener to "Explain" button in the quiz modal
 	window.main.explain = async function( question_id ) {
 		m_explanationQuestion.style.textAlign = "center";
-		m_explanationModal.style.display = "block";
+		window.main.openModal( m_explanationModal );
 		m_loadingOverlay.style.visibility = "visible";
 
 		// Fetch explanation data
@@ -71,7 +71,7 @@ window.main.onReady( function () {
 
 	// Explain open question
 	window.main.explainOpen = function( data ) {
-		m_explanationModal.style.display = "block";
+		window.main.openModal( m_explanationModal );
 		updateExplanation( data.question, data.answer, data.explanation, data.isCorrect );
 	}
 
