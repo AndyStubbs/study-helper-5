@@ -197,23 +197,28 @@ window.main.onReady( () => {
 	}
 
 	async function getDocPreview( name, docItem ) {
-		const docData = await main.handleRequest(
-			"/topics/previewdoc/",
-			{ "name": name }
-		);
-		showDocumentPreview( docData, docItem );
+		try {
+			const docData = await main.handleRequest(
+				"/topics/previewdoc/",
+				{ "name": name }
+			);
+			showDocumentPreview( docData, docItem );
+		} catch( ex ) {
+			window.main.alert( ex );
+		}
 	}
 
 	async function deleteDocument( name, docItem ) {
-		const docData = await main.handleRequest(
-			"/topics/deletedoc/",
-			{ "name": name }
-		);
-		if( docItem.querySelector( ".active" ) ) {
-			resetUploadState();
+		try {
+			await main.handleRequest( "/topics/deletedoc/", { "name": name } );
+			if( docItem.querySelector( ".active" ) ) {
+				resetUploadState();
+			}
+			docItem.remove();
+			updateCheckCount();
+		} catch( ex ) {
+			window.main.alert( ex );
 		}
-		docItem.remove();
-		updateCheckCount();
 	}
 
 	// Show document preview

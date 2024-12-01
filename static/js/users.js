@@ -35,7 +35,11 @@ window.main.onReady( () => {
 
 	// Handle logout
 	window.main.logout = async () => {
-		await window.main.handleRequest( "/users/logout/" );
+		try {
+			await window.main.handleRequest( "/users/logout/" );
+		} catch {
+			// Do nothing
+		}
 		window.location.reload();
 	};
 

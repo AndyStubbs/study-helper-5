@@ -1,8 +1,7 @@
 // static/js/main.js
 
 /* TODO:
-1. Make sure that all handleRequest callers have try-catch blocks and report errors.
-2. Clear all error messages when handleRequest is successful
+1. Clear all error messages when handleRequest is successful
 */
 
 "use strict";
