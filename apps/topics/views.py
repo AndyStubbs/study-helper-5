@@ -1,8 +1,5 @@
 # topics/views.py
 
-# TODOS:
-# 1. Use Django’s logging module for better error logging.
-
 import json
 import logging
 from django.http import JsonResponse

@@ -1,8 +1,5 @@
 # services/ai_prompts.py
 
-# TODO Need to add question a question count variable based on the frequency of the type of
-# question being asked. Base it on a formula that calculates based on the % values. Minimum of 1
-
 def topic_evaluator_system_prompt():
 	return """
 You are a topic evaluator for a study helper app. Your task is to evaluate topics submitted 
