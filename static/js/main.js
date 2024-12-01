@@ -46,6 +46,13 @@ window.main = {
 			throw new Error( `HTTP error! status: ${response.status}` );
 		}
 		const responseObj = await response.json();
+
+		// Clear previous error messages
+		document.querySelectorAll( ".result-message" ).forEach( msg  => {
+			msg.textContent = "";
+			msg.classList.remove( "result-success" );
+			msg.classList.remove( "result-error" );
+		} );
 		return responseObj.data;
 	},
 	"alert": ( msg, hideButtons ) => {
