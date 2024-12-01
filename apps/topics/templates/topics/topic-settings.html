@@ -1,5 +1,7 @@
 <!-- topics/templates/topics/topic-settings.html -->
 
+{% load static %}
+
 <div class="modal">
 	<div class="modal-content">
 		<span class="close">&times;</span>
@@ -36,6 +38,10 @@
 		<!-- Action Buttons -->
 		<div class="settings-buttons">
 			<button id="topic-settings-ok" class="btn btn-c2">Ok</button>
+		</div>
+
+		<div class="loading-overlay">
+			<img src="{% static 'svg/bars-scale-middle.svg' %}" alt="Loading..." >
 		</div>
 	</div>
 </div>

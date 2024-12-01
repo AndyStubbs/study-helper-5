@@ -1,13 +1,11 @@
 // static/js/topic_settings.js
 
-// TODO: Make sure when a topic is edited that settings get updated correctly.
-
 "use strict";
 
 window.main.onReady( () => {
 	const m_topicSettingsModal = document.getElementById( "topic-settings-modal" );
 	const m_closeBtn = document.getElementById( "topic-settings-ok" );
-	const m_data = {
+	let m_data = {
 		"mcq-frequency": 70,
 		"tf-frequency": 20,
 		"open-text-frequency": 10,
@@ -16,8 +14,25 @@ window.main.onReady( () => {
 	};
 
 	// Open select documents modal
-	window.main.topicSettings = ( topicId ) => {
+	window.main.topicSettings = async ( topicId ) => {
 		m_topicSettingsModal.style.display = "";
+
+		// Get topic settings from server
+		toggleLoadingOverlay( false );
+		try {
+			const response = await main.handleRequest( "/topics/getsettings/", {
+				"topic_id": topicId,
+			} );
+			m_data = response.settings;
+		} catch( ex ) {
+			m_topicSettingsModal.style.display = "none";
+			window.main.alert( ex );
+		}
+		finally {
+			toggleLoadingOverlay( true );
+		}
+
+		// Load data values
 		Object.entries( m_data ).forEach( ( [ key, value ] ) => {
 			m_topicSettingsModal.querySelector( `#${key}` ).value = value;
 			const valueSpan = m_topicSettingsModal.querySelector( `#${key}-value` );
@@ -55,4 +70,13 @@ window.main.onReady( () => {
 			valueSpan.textContent = `${this.value}%`;
 		} );
 	} );
+
+	function toggleLoadingOverlay( isHidden ) {
+		const loadingOverlay = m_topicSettingsModal.querySelector( ".loading-overlay" );
+		if( isHidden ) {
+			loadingOverlay.style.visibility = "hidden";
+		} else {
+			loadingOverlay.style.visibility = "visible";
+		}
+	}
 } );

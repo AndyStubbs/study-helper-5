@@ -93,6 +93,32 @@ def getalltopics( request ):
 		logger.error( f"Error getting topics: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
+def getsettings( request ):
+	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to getsettings." )
+		return JsonResponse( {"error": "Authentication required"}, status=403 )
+	logger.info( "Fetching settings for topic." )
+	if request.method == "POST":
+		try:
+			data = json.loads( request.body )
+			topic_id = data.get( "topic_id", -1 )
+			if not isinstance( topic_id, int ) or topic_id == -1:
+				logger.error( f"Get topic by id missing for user {request.user.id}." )
+				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			
+			# Fetch the topic
+			topic = get_object_or_404(models.Topic, id=topic_id, user=request.user)
+			
+			# Return the topic_data
+			logger.info( f"Successfully fetched settings for topic {topic.name}." )
+			return JsonResponse( { "status": "success", "data": topic.topic_data } )
+		except Exception as e:
+			logger.error( f"Error getting settings: {e}" )
+			return JsonResponse( { "error": str( e ) }, status=500 )
+	else:
+		logger.error( f"Error getting settings: Wrong request method: {request.method}" )
+		return JsonResponse( { "error": "Invalid request" }, status=400 )
+
 def question( request ):
 	"""Gets a question for the quiz modal popup"""
 	if not request.user.is_authenticated:

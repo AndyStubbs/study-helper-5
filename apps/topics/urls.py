@@ -33,5 +33,6 @@ urlpatterns = [
 	path( "deletedoc/", views.deletedoc, name="deletedoc" ),
 	path( "getalldocs/", views.getalldocs, name="getalldocs" ),
 	path( "getalltopics/", views.getalltopics, name="getalltopics" ),
+	path( "getsettings/", views.getsettings, name="getsettings" ),
 
 ]

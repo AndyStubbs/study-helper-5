@@ -1,7 +1,5 @@
 // static/js/document_selector.js
 
-// TODO: When editing a document need to auto check selected documents.
-
 "use strict";
 
 window.main.onReady( () => {
@@ -18,8 +16,32 @@ window.main.onReady( () => {
 	const m_closeBtn = document.getElementById( "document-close-upload" );
 
 	// Open select documents modal
-	window.main.selectDocuments = ( topicId ) => {
+	window.main.selectDocuments = async ( topicId ) => {
 		m_documentSelectorModal.style.display = "";
+
+		
+		// Get topic settings from server
+		toggleLoadingOverlay( false );
+		try {
+			document.querySelectorAll( "#document-list input[type='checkbox']" ).forEach( chk => {
+				chk.checked = false;
+			} );
+			const response = await main.handleRequest( "/topics/getsettings/", {
+				"topic_id": topicId,
+			} );
+			response.attachments.forEach( id => {
+				const chk = document.querySelector(
+					`[data-document-id="${id}"] input[type="checkbox"]`
+				);
+				chk.checked = true;
+			} );
+		} catch( ex ) {
+			m_documentSelectorModal.style.display = "none";
+			window.main.alert( ex );
+		}
+		finally {
+			toggleLoadingOverlay( true );
+		}
 	};
 
 	// Get topic attachments
@@ -240,6 +262,15 @@ window.main.onReady( () => {
 		m_uploadInput.value = "";
 		m_previewPlaceholder.style.display = "block";
 		m_previewDoc.style.display = "none";
+	}
+
+	function toggleLoadingOverlay( isHidden ) {
+		const loadingOverlay = m_documentSelectorModal.querySelector( ".loading-overlay" );
+		if( isHidden ) {
+			loadingOverlay.style.visibility = "hidden";
+		} else {
+			loadingOverlay.style.visibility = "visible";
+		}
 	}
 
 } );
