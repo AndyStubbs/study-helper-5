@@ -82,7 +82,9 @@ WSGI_APPLICATION = 'studyhelper.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-if DEBUG:
+DBASE = os.getenv( "DJANGO_DBASE", "SQLITE" )
+
+if DBASE == "SQLITE":
 	DATABASES = {
 		"default": {
 			"ENGINE": "django.db.backends.sqlite3",
