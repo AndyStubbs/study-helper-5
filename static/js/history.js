@@ -1,7 +1,5 @@
 // static/js/history.js
 
-// TODO update content when topics are deleted or questions are added
-
 "use strict";
 
 window.main.onReady( () => {

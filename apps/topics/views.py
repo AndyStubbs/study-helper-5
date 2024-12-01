@@ -108,7 +108,7 @@ def getsettings( request ):
 			
 			# Fetch the topic
 			topic = get_object_or_404(models.Topic, id=topic_id, user=request.user)
-			
+
 			# Return the topic_data
 			logger.info( f"Successfully fetched settings for topic {topic.name}." )
 			return JsonResponse( { "status": "success", "data": topic.topic_data } )
@@ -315,7 +315,6 @@ def save( request ):
 				"description": response[ "description" ],
 				"data": response[ "data" ]
 			}
-			logger.warning("test")
 
 			return JsonResponse( { "status": "success", "data": response_data } )
 		except Exception as e:

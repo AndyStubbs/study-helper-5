@@ -4,6 +4,8 @@
 1. Add a modal open function that opens a modal and disables all tab-index not in the modal -
 	Except for the toggle light/dark mode button
 2. Move the toggle light/dark mode so that it can be toggled even if modal is showing
+3. Make sure that all handleRequest callers have try-catch blocks and report errors.
+4. Clear all error messages when handleRequest is successful
 */
 
 "use strict";
