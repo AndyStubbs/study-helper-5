@@ -1,17 +1,18 @@
 #topics/services
 
+
 import random
 import re
 import os
 import logging
-from utils.globals import QuestionType
-from django import conf
-from django.core.files.storage import default_storage
 from PyPDF2 import PdfReader
+from django.db.models import F, Value, FloatField, IntegerField, Prefetch
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from apps.topics import models
 from services import ai_services, sanity
+from utils.globals import QuestionType
 
 logger = logging.getLogger( __name__ )
 
@@ -573,7 +574,7 @@ def explain_topic( question_id, user ):
 	
 	return  response_data
 
-def get_question_history( user ):
+def get_question_history2( user ):
 	
 	# Fetch questions with selected fields
 	questions = (
@@ -623,6 +624,58 @@ def get_question_history( user ):
 			"last_asked": last_asked
 		} )
 	
+	return questions_data
+
+
+def get_question_history(user):
+	# Fetch questions with annotations and prefetch related concepts
+	questions = (
+		models.Question.objects.filter(topic__user=user, last_asked__isnull=False)
+		.annotate(
+			topic_name=F("topic__name"),
+			main_concept_name=F("main_concept__name"),
+			total_attempts=Coalesce(
+				F("correct_count") + F("wrong_count"),
+				Value(0),
+				output_field=IntegerField(),
+			),
+			average_score=Coalesce(
+				F("correct_count") * 1.0 / (F("correct_count") + F("wrong_count")),
+				Value(0.0),
+				output_field=FloatField(),
+			),
+		)
+		.select_related("topic", "main_concept")
+		.prefetch_related(Prefetch("concepts"))
+	)
+
+	# Process and format questions data
+	questions_data = []
+	for question in questions:
+		# Use attribute access for model fields
+		concepts = [concept.name for concept in question.concepts.all()]
+		last_asked = (
+			question.last_asked.strftime("%Y-%m-%d %H:%M:%S")
+			if question.last_asked
+			else None
+		)
+
+		# Append formatted data
+		questions_data.append(
+			{
+				"id": question.id,
+				"topic_id": question.topic.id,
+				"topic": question.topic_name,
+				"text": question.text,
+				"correct": question.correct_count,
+				"wrong": question.wrong_count,
+				"average": round(question.average_score, 2) if question.average_score else 0,
+				"concepts": concepts,
+				"main_concept": question.main_concept_name,
+				"last_asked": last_asked,
+			}
+		)
+
 	return questions_data
 
 def store_document( user, name, file_content ):
