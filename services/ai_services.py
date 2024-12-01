@@ -1,10 +1,12 @@
 # services/ai_services.py
 
-import os
+import logging
 from pydantic import BaseModel
 from openai import OpenAI
 from . import ai_prompts
 from utils.globals import QuestionType
+
+logger = logging.getLogger( __name__ )
 
 class AI_TopicInfo( BaseModel ):
 	summary: str
@@ -108,7 +110,8 @@ def suggest_topics( topic_name ):
 	)
 
 def generate_concepts( topic_name, topic_description ):
-	print( f"Creating concepts for topic: {topic_name} - {topic_description}" )
+	logger.info( f"Creating concepts for topic: {topic_name}" )
+	logger.debug( f"Description: {topic_description}" )
 	return run_chat(
 		model="gpt-4o-mini",
 		messages=[
@@ -127,7 +130,7 @@ def generate_concepts( topic_name, topic_description ):
 def create_questions(
 		topic_name, topic_description, concept_name, previous_questions, q_type, q_src
 	):
-	print( f"Creating question for topic: {topic_name}" )
+	logger.info( f"Creating question for topic: {topic_name}" )
 
 	if q_type == QuestionType.mcq:
 		system_prompt = ai_prompts.question_generator_system_prompt
@@ -156,7 +159,7 @@ def create_questions(
 		"role": "user",
 		"content": user_prompt( topic_name, topic_description, concept_name, q_src )
 	} )
-	print( f"Sending {len( messages )} Messages" )
+	logger.debug( f"Sending {len( messages )} Messages" )
 	return run_chat(
 		model="gpt-4o-mini",
 		messages=messages,
@@ -164,7 +167,7 @@ def create_questions(
 	)
 
 def filter_question_concepts( concepts, questions ):
-	print( f"Filtering concepts for questions" )
+	logger.info( f"Filtering concepts for questions" )
 	return run_chat(
 		model="gpt-4o-mini",
 		messages=[
@@ -181,7 +184,7 @@ def filter_question_concepts( concepts, questions ):
 	)
 
 def explain_question( question, answer, topic_name, topic_description, concept_name, src ):
-	print( f"Creating explanation for question" )
+	logger.info( f"Creating explanation for question" )
 	return run_chat(
 		model="gpt-4o-mini",
 		messages=[
@@ -202,8 +205,8 @@ def explain_question( question, answer, topic_name, topic_description, concept_n
 def submit_open_answer(
 	question, details, answer, topic_name, topic_description, concept_name, src
 ):
-	print( f"Creating explanation for question" )
-	print( f"""
+	logger.info( f"Creating explanation for question" )
+	logger.debug( f"""
 question: {question}
 details: {details}
 answer: {answer}
@@ -233,20 +236,20 @@ src: {src}
 def run_chat( model, messages, response_format ):
 	try:
 		client = OpenAI()
-		print( messages )
+		logger.debug( messages )
 		completion = client.beta.chat.completions.parse(
 			model=model,
 			messages=messages,
 			response_format=response_format
 		)
 		message = completion.choices[ 0 ].message
-		print( "*** RUNING AI CHAT ***" )
+		logger.debug( f"Message recieved from AI, length" )
 		if hasattr( message, "refusal" ) and message.refusal:
 			raise ValueError( message.refusal )
 		else:
 			return message.parsed
 	except Exception as e:
-		print( f"Error running AI CHAT: {e}" )
+		logger.error( f"Error running AI CHAT: {e}" )
 		return {
 			"status": "error",
 			"message": "An error occurred while processing."

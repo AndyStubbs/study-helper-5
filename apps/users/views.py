@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 from django.contrib.auth import logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import EmailValidator
@@ -9,6 +10,8 @@ from django.http import JsonResponse
 from utils.decorators import restrict_to_view
 from .models import CustomUser
 
+logger = logging.getLogger( __name__ )
+
 @restrict_to_view( "users:loginmodal" )
 def loginmodal( request ):
 	"""Render the HTML for the Login Modal"""
@@ -16,7 +19,7 @@ def loginmodal( request ):
 		"test_user_email": os.getenv( "TEST_USER_EMAIL", "" ),
 		"test_user_password": os.getenv( "TEST_USER_PASSWORD", "" )
 	}
-	print( context )
+	logger.warning( f"Creating test user: {context}" )
 	return render( request, "users/login.html", context )
 
 ##################
@@ -50,23 +53,23 @@ def register( request ):
 			if not validate_email_format( email ) or not validate_password_format( password ):
 				return JsonResponse( { "data": { "success": False } }, status=400 )
 			
-			print( f"Email: {email}, Password: {password}" )
+			logger.debug( f"Creating user, Email: {email}" )
 
 			# Make sure email doesn't already exists
 			if CustomUser.objects.filter( email=email ).exists():
-				print( "User already exists" )
+				logger.warning( "User already exists" )
 				return JsonResponse( { "data": { "success": False } }, status=400 )
 			
 			# Create a new user
 			user = CustomUser.objects.create_user( username=email, email=email, password=password )
 			user.save()
 
-			print( f"User: {user.email} created!" )
+			logger.debug( f"User: {user.email} created!" )
 
 			# Login User
 			user = authenticate( username=email, password=password )
 
-			print( "User Logged In" )
+			logger.debug( "User Logged In" )
 			if user is not None:
 				login( request, user )
 				return JsonResponse( { 
@@ -80,10 +83,10 @@ def register( request ):
 						}
 					}
 				} )
-			print( "Unable to Authenticate User" )
+			logger.error( "Unable to Authenticate User" )
 		return JsonResponse( { "data": { "success": False } }, status=400 )
 	except Exception as e:
-		print( f"Error Logging In: {e}" )
+		logger.error( f"Error Logging In: {e}" )
 		return JsonResponse( { "error": str( e ) }, status=500 )
 
 def loginuser( request ):
@@ -113,13 +116,14 @@ def loginuser( request ):
 				} )
 		return JsonResponse( { "data": { "success": False } }, status=400 )
 	except Exception as e:
-		print( f"Error Logging In: {e}" )
+		logger.error( f"Error Logging In: {e}" )
 		return JsonResponse( { "error": str( e ) }, status=500 )
 
 def logoutuser( request ):
 	if request.method == "POST":
 		logout( request )
 		return JsonResponse( { "data": { "success": True } } )
+	logger.error( f"Error Logging Out" )
 	return JsonResponse( { "data": { "success": False } }, status=400 )
 
 

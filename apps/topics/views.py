@@ -4,6 +4,7 @@
 # 1. Use Django’s logging module for better error logging.
 
 import json
+import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
@@ -18,6 +19,9 @@ from services import sanity
 
 MAX_FILE_SIZE_MB = 30
 MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
+
+# Set up logger
+logger = logging.getLogger( __name__ )
 
 ##################
 # HTML COMPONENTS
@@ -70,8 +74,9 @@ def topicsettings( request ):
 
 def getalltopics( request ):
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to getalltopics." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
-	print( "GETTING TOPICS FOR USER" )
+	logger.info( "Fetching topics for user." )
 	if request.method == "POST":
 		try:
 			topics = []
@@ -82,60 +87,70 @@ def getalltopics( request ):
 					"name": topic.name,
 					"description": topic.description
 				} )
+			logger.debug( f"Retrieved {len(topics)} topics for user {request.user.id}." )
 			return JsonResponse( { "status": "success", "data": topics } )
 		except Exception as e:
-			print( f"Error getting topics: {e}" )
+			logger.error( f"Error getting topics: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error getting topics: Wrong request method: {request.method}" )
+		logger.error( f"Error getting topics: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def question( request ):
 	"""Gets a question for the quiz modal popup"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to question endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
 			topic_id = data.get( "topic_id", -1 )
 			if not isinstance( topic_id, int ) or topic_id == -1:
+				logger.error( f"Create question missing topic_id for user {request.user.id}." )
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			topic_id = int( topic_id )
+			logger.debug( f"Create question for topic ID {topic_id} for user {request.user.id}." )
 			response = services.get_next_question( topic_id )
 			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
-			print( f"Error generating question topic: {e}" )
+			logger.error( f"Error generating question topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error generating question: Wrong request method: {request.method}" )
+		logger.warning( f"Invalid request method for question: {request.method}." )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def question2( request ):
-	"""Gets a question for the quiz modal popup by questionId"""
+	"""Gets a question by id for the quiz modal popup by questionId"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to question2 endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
 			question_id = data.get( "question_id", -1 )
 			if not isinstance( question_id, int ) or question_id == -1:
+				logger.error( f"Get question by id missing for user {request.user.id}." )
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
 			question_id = int( question_id )
+			logger.debug(
+				f"Get question by id for question ID {question_id} for user {request.user.id}."
+			)
 			response = services.get_question_by_id( question_id )
 			return JsonResponse( {
 				"status": "success",
 				"data": response
 			} )
 		except Exception as e:
-			print( f"Error generating question topic: {e}" )
+			logger.error( f"Error generating question topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error generating question: Wrong request method: {request.method}" )
+		logger.warning( f"Error generating question: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def answer( request ):
 	"""Submit an answer from from the user"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to answer endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
@@ -143,82 +158,91 @@ def answer( request ):
 			question_id = data.get( "question_id", -1 )
 			answer = data.get( "answer", "" )
 			if( question_id == -1 ):
+				logger.error( f"Submit answer missing question id for user {request.user.id}." )
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			logger.debug( f"Submit answer for quetion {question_id} for user {request.user.id}." )
 			response = services.set_answer( request.user, question_id, answer )
-			print( "************************" )
-			print( response )
 			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
-			print( f"Error setting answer: {e}" )
+			logger.error( f"Error setting answer: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error generating question: Wrong request method: {request.method}" )
+		logger.error( f"Error generating question: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def evaluate( request ):
 	"""Gets topic title suggestions and topic description"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to evaluate endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
 			topic_name = data.get( "topic_name", "" )
 			if topic_name == "":
+				logger.error( f"Evaluate topic missing topic_name for user {request.user.id}." )
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			logger.debug( f"Evaluate topic for {topic_name} for user {request.user.id}." )
 			response = services.get_topic_evaluation( topic_name )
 			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
-			print( f"Error evaluating topic: {e}" )
+			logger.error( f"Error evaluating topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error evaluating topic: Wrong request method: {request.method}" )
+		logger.error( f"Error evaluating topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def summarize( request ):
 	"""Get a topic description"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to summarize endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
 			topic_name = data.get( "topic_name", "" ).strip()
 			if topic_name == "":
+				logger.error( f"Summarize topic missing topic_name for user {request.user.id}." )
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			logger.debug( f"Get topic description for {topic_name} for user {request.user.id}." )
 			response = services.get_topic_description( topic_name )
 			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
-			print( f"Error summarizing topic: {e}" )
+			logger.error( f"Error summarizing topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error summarizing topic: Wrong request method: {request.method}" )
+		logger.error( f"Error summarizing topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def suggest( request ):
 	"""Get a topic suggestions"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to suggest endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
 			data = json.loads( request.body )
 			topic_name = data.get( "topic_name", "" ).strip()
 			if topic_name == "":
+				logger.error( f"Suggest topic missing topic_name for user {request.user.id}." )
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			logger.debug( f"Suggest for {topic_name} for user {request.user.id}." )
 			response = services.get_topic_suggestions( topic_name )
 			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
-			print( f"Error suggesting topics: {e}" )
+			logger.error( f"Error suggesting topics: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error suggesting topics: Wrong request method: {request.method}" )
+		logger.error( f"Error suggesting topics: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def save( request ):
 	"""Save a topic to the database"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to save endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
-			print( "SAVING TOPIC" )
 			data = json.loads( request.body )
 			
 			# Extract and validate inputs
@@ -227,11 +251,13 @@ def save( request ):
 			topic_data = data.get( "topic_data", {} )
 			
 			if not topic_name or not topic_description:
+				logger.error( f"Save topic missing topic details for user {request.user.id}." )
 				return JsonResponse( {
 					"error": "Invalid request. Both topic name and description are required."
 				}, status=400 )
 
 			if not isinstance( topic_data, dict ):
+				logger.error( f"Save topic topic_data is invalid for user {request.user.id}." )
 				return JsonResponse( {
 					"error": "Invalid request. 'topic_data' must be a dictionary."
 				}, status=400 )
@@ -244,9 +270,12 @@ def save( request ):
 			]
 
 			if invalid_keys:
+				logger.error( f"Save topic data_keys is invalid for user {request.user.id}." )
 				return JsonResponse( {
 					"error": f"Invalid keys in topic_data: {', '.join(invalid_keys)}"
 				}, status=400 )
+
+			logger.debug( f"Saving topic for {topic_name} for user {request.user.id}." )
 
 			# Save topic using the service
 			response = services.save_topic(
@@ -263,76 +292,84 @@ def save( request ):
 				"description": response[ "description" ],
 				"data": response[ "data" ]
 			}
+			logger.warning("test")
 
 			return JsonResponse( { "status": "success", "data": response_data } )
 		except Exception as e:
-			print(f"Error saving topic: {e}")
-			return JsonResponse({"error": str(e)}, status=500)
+			logger.error( f"Error saving topic: {e}" )
+			return JsonResponse( {"error": str(e)}, status=500 )
 	else:
-		print(f"Error saving topic: Wrong request method: {request.method}")
-		return JsonResponse({"error": "Invalid request"}, status=400)
+		logger.error( f"Error saving topic: Wrong request method: {request.method}" )
+		return JsonResponse( {"error": "Invalid request"}, status=400 )
 
 def delete( request ):
 	"""Delete a topic to the database"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to delete endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
-			print( "DELETING TOPIC" )
 			data = json.loads( request.body )
 			topic_id = data.get( "topic_id", -1 )
 			if not isinstance( topic_id, int ) or topic_id == -1:
+				logger.error( f"Delete topic missing topic_id for user {request.user.id}." )
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			logger.debug( f"Deleting topic {topic_id} for user {request.user.id}." )
 			response = services.delete_topic( topic_id, request.user )
 			return JsonResponse( { "status": "success",	"data": response } )
 		except Exception as e:
-			print( f"Error deleting topic: {e}" )
+			logger.error( f"Error deleting topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error deleting topic: Wrong request method: {request.method}" )
+		logger.error( f"Error deleting topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def explain( request ):
-	"""Explain a topic"""
+	"""Explain a question and answer"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to explain endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
-			print( "EXPLAIN TOPIC" )
 			data = json.loads( request.body )
 			question_id = data.get( "question_id", -1 )
 			if not isinstance( question_id, int ) or question_id == -1:
+				logger.error( f"Explain question missing question for user {request.user.id}." )
 				return JsonResponse( { "error": "Invalid request" }, status=400 )
+			logger.debug( f"Explain question {question_id} for user {request.user.id}." )
 			response = services.explain_topic( question_id, request.user )
 			return JsonResponse( { "status": "success", "data": response } )
 		except Exception as e:
-			print( f"Error explaining topic: {e}" )
+			logger.error( f"Error explaining topic: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error explaining topic: Wrong request method: {request.method}" )
+		logger.error( f"Error explaining topic: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def history( request ):
 	"""Fetch all questions answered by the user"""
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to history endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
-			print( "GETTING HISTORY FOR USER" )
 			questions_data = services.get_question_history( request.user )
+			logger.debug( f"Getting question history for user {request.user.id}." )
 			return JsonResponse( { "status": "success", "data": questions_data } )
 		except Exception as e:
-			print( f"Error getting history: {e}" )
+			logger.error( f"Error getting history: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error getting history: Wrong request method: {request.method}" )
+		logger.error( f"Error getting history: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def uploaddoc( request ):
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to uploaddoc endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		if not request.FILES.get( "file" ):
+			logger.error( f"Upload doc missing doc for user {request.user.id}." )
 			return JsonResponse( { "error": "Invalid request" }, status=400 )
 		try:
 			
@@ -347,11 +384,12 @@ def uploaddoc( request ):
 		except Exception as e:
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error uploading doc: Wrong request method: {request.method}" )
+		logger.error( f"Error uploading doc: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def getalldocs( request ):
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to getalldocs endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
@@ -361,14 +399,15 @@ def getalldocs( request ):
 				document_names.append( doc.name )
 			return JsonResponse( { "data": document_names } )
 		except Exception as e:
-			print( f"Error retrieving documents: {e}" )
+			logger.error( f"Error retrieving documents: {e}" )
 			return JsonResponse( {"error": str(e)}, status=500 )
 	else:
-		print( f"Error retrieving documents: Wrong request method: {request.method}" )
+		logger.error( f"Error retrieving documents: Wrong request method: {request.method}" )
 		return JsonResponse( {"error": "Invalid request"}, status=400 )
 
 def previewdoc( request ):
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to previewdoc endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
@@ -394,14 +433,15 @@ def previewdoc( request ):
 			}
 			return JsonResponse( { "data": response } )
 		except Exception as e:
-			print( f"Error uploading doc: {e}" )
+			logger.error( f"Error uploading doc: {e}" )
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error uploading doc: Wrong request method: {request.method}" )
+		logger.error( f"Error uploading doc: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )
 
 def deletedoc( request ):
 	if not request.user.is_authenticated:
+		logger.warning( "Unauthenticated access to deletedoc endpoint." )
 		return JsonResponse( {"error": "Authentication required"}, status=403 )
 	if request.method == "POST":
 		try:
@@ -422,5 +462,5 @@ def deletedoc( request ):
 		except Exception as e:
 			return JsonResponse( { "error": str( e ) }, status=500 )
 	else:
-		print( f"Error uploading doc: Wrong request method: {request.method}" )
+		logger.error( f"Error uploading doc: Wrong request method: {request.method}" )
 		return JsonResponse( { "error": "Invalid request" }, status=400 )

@@ -3,6 +3,7 @@
 import random
 import re
 import os
+import logging
 from utils.globals import QuestionType
 from django import conf
 from django.core.files.storage import default_storage
@@ -12,8 +13,11 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from apps.topics import models
 from services import ai_services, sanity
 
+logger = logging.getLogger( __name__ )
 
 def get_next_question( topic_id ):
+
+	logger.info( f"Getting next question for {topic_id}" )
 
 	# Load topic from database
 	topic = models.Topic.objects.get( id=topic_id )
@@ -24,15 +28,18 @@ def get_next_question( topic_id ):
 		raise ValueError( "No concepts found for the topic." )
 	selected_concept_id  = random.choice( concept_ids )
 	selected_concept = models.Concept.objects.get( id=selected_concept_id )
-	print( f"Selected concept: {selected_concept.name}" )
+
+	logger.debug( f"Selected concept: {selected_concept.name}" )
 
 	# Pick question type
 	q_type = get_question_type( topic.topic_data )
-	print( f"Question Type: {q_type}" )
+	logger.debug( f"Question Type: {q_type}" )
 
 	# Pick question source
 	source_chunk = get_random_question_source( topic )
-	print( f"Question Source: {source_chunk}" )
+
+	if source_chunk is not None:
+		logger.debug( f"Question Source: {source_chunk.id}" )
 
 	# Load all questions from database
 	all_questions = models.Question.objects.filter(
@@ -46,7 +53,7 @@ def get_next_question( topic_id ):
 	q_scale = 20
 	generate_new_chance = max( 1, q_scale - question_count )
 	if unasked_question_count == 0 and random.randint( 0, q_scale ) <= generate_new_chance:
-		print( "GENERATING NEW QUESTIONS" )
+		logger.debug( "GENERATING NEW QUESTIONS" )
 
 		# Get previously asked questions text
 		previously_asked_questions = list(
@@ -88,10 +95,10 @@ def get_next_question( topic_id ):
 		saved_questions = []
 		for i, question_data in enumerate( questions_data.questions ):
 			if not questions_concepts[ i ]:
-				print( f"Warning: No concepts matched for question {i}" )
+				logger.debug( f"Warning: No concepts matched for question {i}" )
 				continue
 			
-			print( f"New Question: {question_data.text}" )
+			logger.debug( f"New Question: {question_data.text}" )
 
 			# Get concept instances and associate them with the question
 			question_concepts = questions_concepts[ i ]
@@ -102,7 +109,7 @@ def get_next_question( topic_id ):
 				if concept:
 					concept_instances.append( concept )
 				else:
-					print( f"Warning: Concept '{concept_name}' not found." )
+					logger.warning( f"Warning: Concept '{concept_name}' not found." )
 
 			# Set the defaults for question
 			correct = ""
@@ -170,7 +177,7 @@ def get_next_question( topic_id ):
 	
 	# Return a random question from the database
 	else:
-		print( "LOADING RANDOM QUESITON FROM DB" )
+		logger.debug( "LOADING RANDOM QUESITON FROM DB" )
 		if unasked_question_count > 0:
 			question = models.Question.objects.filter(
 				topic=topic, concepts=selected_concept, last_asked__isnull=True
@@ -303,9 +310,9 @@ def get_topic_suggestions( topic_name ):
 	return response_data
 
 def save_topic( topic_name, topic_description, user, topic_data=None ):
-		print( "SAVING TOPIC IN SERVICE" )
-		print( topic_name )
-		print( topic_data )
+		logger.info( f"Saving topic {topic_name} to database." )
+		logger.debug( f"Topic Description: {topic_description}" )
+		logger.debug( f"Topic Data: {topic_data}" )
 
 		# Validate topic_data
 		topic_data = sanity.sanitize_topic_data( topic_data )
@@ -314,13 +321,13 @@ def save_topic( topic_name, topic_description, user, topic_data=None ):
 		existing_topic = models.Topic.objects.filter( name=topic_name ).first()
 
 		if existing_topic:
-			print( "UPDATING TOPIC" )
+			logger.debug( "Updating exisiting topic" )
 			is_changed = False
 			if ( existing_topic.description != topic_description ):
 				is_changed = True
-				print( "TOPIC DESCRIPTION HAS CHANGED" )
+				logger.debug( "Topic description has changed" )
 			else:
-				print( "TOPIC DESCRIPTION HAS NOT CHANGED" )
+				logger.debug( "Topic description has not changed" )
 
 			existing_topic.description = topic_description
 			existing_topic.topic_data = topic_data
@@ -331,7 +338,7 @@ def save_topic( topic_name, topic_description, user, topic_data=None ):
 				"description": existing_topic.description,
 				"data": topic_data
 			}
-			print( f"Topic: {existing_topic.id} updated" )
+			logger.debug( f"Topic: {existing_topic.id} updated" )
 
 			# Generate the concepts for the topic
 			if is_changed:
@@ -339,7 +346,7 @@ def save_topic( topic_name, topic_description, user, topic_data=None ):
 
 			return response_data
 		else:
-			print( "CREATING TOPIC" )
+			logger.debug( "Creating Topic" )
 			# If the topic does not exist, create a new topic
 			topic = models.Topic.objects.create(
 				name=topic_name,
@@ -347,7 +354,7 @@ def save_topic( topic_name, topic_description, user, topic_data=None ):
 				topic_data=topic_data,
 				user=user
 			)
-			print( f"Topic: {topic.id} created" )
+			logger.debug( f"Topic: {topic.id} created" )
 
 			# Generate the concepts for the topic
 			generate_topic_concepts( topic.id )
@@ -382,8 +389,8 @@ def delete_topic( topic_id, user ):
 	}
 
 def generate_topic_concepts( topic_id ):
-	print( "GENERATING CONCEPTS" )
-	print( f"TOPIC: {topic_id}" )
+	logger.info( f"Generating topic info for {topic_id}" )
+	logger.debug( f"Topic: {topic_id}" )
 	topic = models.Topic.objects.get( id=topic_id )
 
 	# Clear any existing concepts associated with this topic
@@ -399,7 +406,7 @@ def generate_topic_concepts( topic_id ):
 		# Normalize the name for searching
 		normalized_name = normalize_name( concept_name )
 
-		print( f"Normalized name: {normalized_name}" )
+		logger.debug( f"Normalized name: {normalized_name}" )
 
 		# Find a similar concept name
 		similar_concept = models.Concept.objects.filter(
@@ -421,7 +428,7 @@ def generate_topic_concepts( topic_id ):
 		if not topic.concepts.filter( id=concept.id ).exists():
 			topic.concepts.add( concept )
 		
-		print(
+		logger.debug(
 			f"Concept '{concept_name}' {'created' if created else 'found'} and added to the topic."
 		)
 
@@ -518,6 +525,7 @@ def update_user_knowledge( user, topic, concept, is_correct, is_main_concept ):
 	user_knowledge.save()
 
 def explain_topic( question_id, user ):
+	logger.info( f"Explaining topic for question {question_id}" )
 	try:
 		question = models.Question.objects.select_related( "topic" ).get( id=question_id )
 	except ObjectDoesNotExist:
@@ -529,17 +537,15 @@ def explain_topic( question_id, user ):
 			f"User '{user.id}', attempted to access other question '{question_id}'."
 		)
 	
-	print( "LOADING FROM DATABASE" )
 	# Load or create a new explanation instance
 	explanation, created = models.Explanation.objects.get_or_create(
 		question=question,
 		defaults={"text": ""}
 	)
-	print( "LOADED" )
 
 	# Create a new explanation for question
 	if created:
-		print( "CREATING NEW EXPLANATION" )
+		logger.debug( "Creating new explanation for question/answer" )
 		topic_name = question.topic.name
 		topic_description = question.topic.description
 		concept_name = question.main_concept
@@ -558,7 +564,7 @@ def explain_topic( question_id, user ):
 			"explanation": ai_response.explanation
 		}
 	else:
-		print( "LOADED EXPLANATION" )
+		logger.debug( "Loaded explanation for question" )
 		response_data = {
 			"question": question.text,
 			"answer": question.correct,
