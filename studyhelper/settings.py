@@ -17,23 +17,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path( __file__ ).resolve().parent.parent
 
 # Ensure the logs directory exists
-LOG_DIR = Path(BASE_DIR) / 'logs'
-LOG_DIR.mkdir(exist_ok=True)
+LOG_DIR = Path( BASE_DIR ) / 'logs'
+LOG_DIR.mkdir( exist_ok=True )
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+SECRET_KEY = os.getenv( "DJANGO_SECRET_KEY" )
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u%s9x(ly_k0b%vppt#$&_!36r#h)6+9yqo6q%kvdzpym4_q1kt'
+if not SECRET_KEY:
+	raise RuntimeError( "DJANGO_SECRET_KEY environment variable is required but not set." )
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv( "DJANGO_DEBUG", "False" ).lower() == "true"
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv( "DJANGO_ALLOWED_HOSTS", "" ).split( "," )
 
 # Application definition
 
@@ -85,13 +82,24 @@ WSGI_APPLICATION = 'studyhelper.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-	'default': {
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+	DATABASES = {
+		"default": {
+			"ENGINE": "django.db.backends.sqlite3",
+			"NAME": BASE_DIR / "db.sqlite3",
+		}
 	}
-}
-
+else:
+	DATABASES = {
+		"default": {
+			"ENGINE": "django.db.backends.postgresql",
+			"NAME": os.getenv( "POSTGRES_DB" ),
+			"USER": os.getenv( "POSTGRES_USER" ),
+			"PASSWORD": os.getenv( "POSTGRES_PASSWORD" ),
+			"HOST": os.getenv( "POSTGRES_HOST", "localhost" ),
+			"PORT": os.getenv( "POSTGRES_PORT", "5432" ),
+		}
+	}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
