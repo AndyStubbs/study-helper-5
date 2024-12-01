@@ -1,9 +1,5 @@
 // static/js/main.js
 
-/* TODO:
-1. Clear all error messages when handleRequest is successful
-*/
-
 "use strict";
 
 const g_readyItems = [];
