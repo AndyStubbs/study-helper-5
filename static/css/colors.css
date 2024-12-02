@@ -21,6 +21,8 @@
 	--thumb-horizontal-bg-color: #eee;
 	--editor-color-background: #eee;
 	--editor-color-overlay: rgba(0, 0, 0, 0.5);
+	--link-color: #2153c7;
+	--link-hover-color: #0e2d66;
 
 	/* Button 1 */
 	--button-primary-text-color: #fff;
@@ -78,6 +80,8 @@
 	--thumb-horizontal-bg-color: #333;
 	--editor-color-background: #111;
 	--editor-color-overlay: rgba(255, 255, 255, 0.35);
+	--link-color: #91ADD4;
+	--link-hover-color: #6f88be;
 
 	/* Button 1 */
 	--button-primary-text-color: #eaeaea;
@@ -119,6 +123,16 @@ body {
 	color: var(--text-color-primary);
 }
 
+a,
+a:visited,
+a:active,
+a:link {
+	color: var(--link-color);
+}
+a:hover {
+	color: var(--link-hover-color);
+}
+
 .icon-btn {
 	background-color: var(--button-bg-color-2);
 	color: var(--text-color-primary);
@@ -127,11 +141,29 @@ body {
 	background-color: var(--button-hover-bg-color-2);
 }
 
+.btn-eye {
+	background-color: var(--border-color-light);
+}
+.btn-eye:hover {
+	background-color: var(--button-hover-bg-color-2);
+}
+
 input,
 textarea,
-select {
+select,
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active,
+input:-internal-autofill-selected,
+input[type="password"]:-webkit-autofill,
+input[type="password"]:-webkit-autofill:hover, 
+input[type="password"]:-webkit-autofill:focus, 
+input[type="password"]:-webkit-autofill:active,
+input[type="password"]:-internal-autofill-selected
+{
 	border: 1px solid var(--text-color-primary);
-	background-color: var(--input-bg-color);
+	background-color: var(--input-bg-color) !important;
 	color: var(--text-color-primary);
 }
 
