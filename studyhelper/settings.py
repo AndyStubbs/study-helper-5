@@ -19,6 +19,11 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path( __file__ ).resolve().parent.parent
 
+if os.getenv( "DJANGO_ENV" ) == "production":
+	STATIC_ROOT = os.path.join( BASE_DIR, "staticfiles" )
+else:
+	STATIC_ROOT = None
+
 # Ensure the logs directory exists
 LOG_DIR = Path( BASE_DIR ) / 'logs'
 LOG_DIR.mkdir( exist_ok=True )
