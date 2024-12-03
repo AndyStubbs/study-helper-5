@@ -5,7 +5,7 @@ import random
 import re
 import os
 import logging
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from django.db.models import F, Value, FloatField, IntegerField, Prefetch
 from django.db.models.functions import Coalesce
 from django.utils import timezone

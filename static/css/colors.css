@@ -133,11 +133,13 @@ a:hover {
 	color: var(--link-hover-color);
 }
 
-.icon-btn {
+.icon-btn,
+.close {
 	background-color: var(--button-bg-color-2);
 	color: var(--text-color-primary);
 }
-.icon-btn:hover {
+.icon-btn:hover,
+.close {
 	background-color: var(--button-hover-bg-color-2);
 }
 
