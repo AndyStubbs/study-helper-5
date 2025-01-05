@@ -6,3 +6,4 @@ db.sqlite3
 .vscode/
 reset.bat
 logs/
+staticfiles/
