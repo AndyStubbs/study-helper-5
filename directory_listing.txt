@@ -1,0 +1,120 @@
+.
+  db.sqlite3
+  directory_listing.txt
+  dirlist.py
+  instructions.txt
+  LICENSE
+  manage.py
+  README.md
+  requirements-prod.txt
+  requirements.txt
+  reset.bat
+.\apps
+.\apps\about
+  admin.py
+  apps.py
+  models.py
+  tests.py
+  urls.py
+  views.py
+  __init__.py
+.\apps\about\migrations
+  __init__.py
+.\apps\about\templates
+.\apps\about\templates\about
+  about.html
+.\apps\topics
+  admin.py
+  apps.py
+  models.py
+  services.py
+  tests.py
+  urls.py
+  views.py
+  __init__.py
+.\apps\topics\migrations
+  0001_initial.py
+  __init__.py
+.\apps\topics\templates
+.\apps\topics\templates\topics
+  document-selector.html
+  explain.html
+  generate.html
+  history.html
+  question-details.html
+  quiz.html
+  topic-settings.html
+  topics.html
+.\apps\users
+  admin.py
+  apps.py
+  models.py
+  tests.py
+  urls.py
+  views.py
+  __init__.py
+.\apps\users\middleware
+.\apps\users\migrations
+  0001_initial.py
+  0002_alter_customuser_username.py
+  0003_alter_customuser_username.py
+  __init__.py
+.\apps\users\templates
+.\apps\users\templates\users
+  login.html
+.\licenses
+  spinner.txt
+.\logs
+  django.debug.log
+  django.info.log
+.\services
+  ai_prompts.py
+  ai_services.py
+  sanity.py
+.\static
+.\static\css
+  colors.css
+  document_selector.css
+  explanation.css
+  generate.css
+  history.css
+  login.css
+  question-details.css
+  quiz.css
+  styles.css
+  topics.css
+  topic_settings.css
+.\static\js
+  document_selector.js
+  history.js
+  main.js
+  topics_explain.js
+  topics_filter.js
+  topics_generator.js
+  topics_quiz.js
+  topic_settings.js
+  users.js
+.\static\svg
+  bars-scale-middle.svg
+  burger-dark.svg
+  burger.svg
+  darkmode-btn.svg
+  document.svg
+  eye-slash.svg
+  eye.svg
+  lightmode-btn.svg
+  preview-active.svg
+  preview.svg
+  trashcan.svg
+.\studyhelper
+  asgi.py
+  settings.py
+  urls.py
+  views.py
+  wsgi.py
+  __init__.py
+.\templates
+  homepage.html
+.\utils
+  decorators.py
+  globals.py
