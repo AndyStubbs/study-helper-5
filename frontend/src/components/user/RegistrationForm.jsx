@@ -1,9 +1,8 @@
 import { useState } from "react";
 import "./RegistrationForm.css";
-import useAuth from "@/contexts/useAuth";
+import auth from "@/utils/auth";
 
 const RegistrationForm = () => {
-	const { register } = useAuth();
 	const [formData, setFormData] = useState({
 		email: "astubbs50@gmail.com",
 		password: "TestPassword1$",
@@ -32,7 +31,7 @@ const RegistrationForm = () => {
 		}
 
 		try {
-			await register(formData.email, formData.password);
+			await auth.register(formData.email, formData.password);
 			setSuccess(true);
 		} catch (err) {
 			console.error("Registration failed:", err.message);

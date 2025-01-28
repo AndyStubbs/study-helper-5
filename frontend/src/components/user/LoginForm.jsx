@@ -1,9 +1,8 @@
 import { useState } from "react";
-import useAuth from "@/contexts/useAuth";
+import auth from "@/utils/auth";
 import "./LoginForm.css";
 
 const LoginForm = () => {
-	const { login } = useAuth();
 	const [formData, setFormData] = useState({
 		email: "astubbs50@gmail.com",
 		password: "TestPassword1$",
@@ -24,7 +23,7 @@ const LoginForm = () => {
 		setError(null);
 
 		try {
-			await login(formData.email, formData.password);
+			await auth.login(formData.email, formData.password);
 			alert("Login successful!");
 		} catch (err) {
 			setError(err.message);
