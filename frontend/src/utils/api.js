@@ -12,11 +12,9 @@ const api = axios.create({
 	},
 });
 
-// Optional: Add interceptors for request/response handling
 api.interceptors.response.use(
 	(response) => response,
 	(error) => {
-		// Handle errors globally
 		console.error("API Error:", error.response || error.message);
 		return Promise.reject(error);
 	}

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import "./RegistrationForm.css";
-import api from "@/utils/api";
+import useAuth from "@/contexts/useAuth";
 
 const RegistrationForm = () => {
+	const { register } = useAuth();
 	const [formData, setFormData] = useState({
 		email: "astubbs50@gmail.com",
 		password: "TestPassword1$",
+		confirm: "TestPassword1$",
 	});
 
 	const [error, setError] = useState(null);
@@ -24,13 +26,17 @@ const RegistrationForm = () => {
 		setError(null);
 		setSuccess(false);
 
+		if (formData.password !== formData.confirm) {
+			setError("Passwords do not match.");
+			return;
+		}
+
 		try {
-			const response = await api.post("/users/register/", formData);
-			console.log("Registration successful:", response.data);
+			await register(formData.email, formData.password);
 			setSuccess(true);
 		} catch (err) {
-			console.error("Registration failed:", err.response?.data || err.message);
-			setError(err.response?.data?.detail || "Something went wrong. Please try again.");
+			console.error("Registration failed:", err.message);
+			setError(err.message || "Something went wrong. Please try again.");
 		}
 	};
 
@@ -65,7 +71,7 @@ const RegistrationForm = () => {
 					<input
 						type="password"
 						name="confirm"
-						value={formData.password}
+						value={formData.confirm}
 						onChange={handleChange}
 						required
 					/>
