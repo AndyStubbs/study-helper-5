@@ -1,0 +1,8 @@
+svg.menu-icon {
+	width: 36px;
+	height: 36px;
+	fill: #333;
+}
+.dark svg.menu-icon {
+	fill: #ccc;
+}

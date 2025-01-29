@@ -1,0 +1,9 @@
+svg.darkmode-icon {
+	width: 28px;
+	height: 28px;
+	margin-top: 1px;
+}
+
+.dark svg.darkmode-icon {
+	display: none;
+}

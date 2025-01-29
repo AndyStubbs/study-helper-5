@@ -1,0 +1,31 @@
+
+header.main-header  {
+	background-color: var(--bg-color-2);
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+}
+header.main-header ul {
+	display: flex;
+	justify-content: space-around;
+	gap: 25px;
+	margin: 0;
+	padding: 0;
+}
+header.main-header li {
+	list-style-type: none;
+}
+header.main-header nav {
+	display: flex;
+}
+header.main-header nav a {
+	text-decoration: none;
+}
+header.main-header .other-links {
+	display: flex;
+}
+
+header.main-header .auth-links button {
+	padding: 0.3rem;
+}

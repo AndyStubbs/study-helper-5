@@ -4,10 +4,20 @@ import "./index.css";
 import App from "./App.jsx";
 import auth from "@/utils/auth";
 
+function onToggleTheme() {
+	if (document.body.classList.contains("dark")) {
+		document.body.classList.remove("dark");
+		document.body.classList.add("light");
+	} else {
+		document.body.classList.remove("light");
+		document.body.classList.add("dark");
+	}
+}
+
 auth.checkAuth();
 
 createRoot(document.getElementById("root")).render(
 	<StrictMode>
-		<App />
+		<App onToggleTheme={onToggleTheme} />
 	</StrictMode>,
 );
