@@ -11,9 +11,6 @@ const App = () => {
 	const [showLoginForm, setShowLoginForm] = useState(true);
 	const [showAccountModal, setShowAccountModal] = useState(false);
 
-	function handleAuthChange(authData) {
-		setShowLoginModal(!authData.isAuthenticated);
-	}
 
 	function onSetShowLoginForm(isShowLoginForm) {
 		console.log(isShowLoginForm);
@@ -29,8 +26,14 @@ const App = () => {
 	}
 
 	useEffect(() => {
+		function handleAuthChange(authData) {
+			setShowLoginModal(!authData.isAuthenticated);
+			if (showAccountModal && !authData.isAuthenticated) {
+				setShowAccountModal(false);
+			}
+		}
 		auth.watchAuthData(handleAuthChange);
-	}, []);
+	}, [showAccountModal]);
 
 	return (
 		<main>

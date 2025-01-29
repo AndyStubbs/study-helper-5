@@ -55,9 +55,11 @@ const CustomModal = ( { title, isVisible, closeOnBackdrop = true, onClose, child
 			>
 				<div className="modal-header">
 					{title && <h3>{title}</h3>}
-					<button className="btn-icon" onClick={closeModal}>
-						&times;
-					</button>
+					{onClose &&
+						<button className="btn-icon" onClick={closeModal}>
+							&times;
+						</button>
+					}
 				</div>
 				<div className="modal-body">{children}</div>
 				{footer && <div className="modal-footer">{footer}</div>}
