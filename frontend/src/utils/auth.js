@@ -80,7 +80,7 @@ async function logout() {
 async function deleteAccount() {
 	try {
 		await api.delete("/users/delete-user/", { withCredentials: true });
-		await logout();
+		resetAuthData();
 	} catch (error) {
 		throw new Error(error.response?.data?.error || "Failed to delete account.");
 	}

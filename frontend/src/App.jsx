@@ -13,7 +13,6 @@ const App = () => {
 
 
 	function onSetShowLoginForm(isShowLoginForm) {
-		console.log(isShowLoginForm);
 		setShowLoginForm(isShowLoginForm);
 	}
 

@@ -25,7 +25,6 @@ const LoginForm = ({ onSetShowLoginForm }) => {
 
 		try {
 			await auth.login(formData.email, formData.password);
-			alert("Login successful!");
 		} catch (err) {
 			setError(err.message);
 		}
