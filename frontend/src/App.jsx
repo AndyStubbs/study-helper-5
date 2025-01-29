@@ -1,37 +1,54 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
+import { useState, useEffect } from "react";
+import auth from "@/utils/auth";
 import MainHeader from "@/components/header/MainHeader";
 import RegistrationForm from "@/components/user/RegistrationForm";
 import LoginForm from "@/components/user/LoginForm";
 import CustomModal from "@/components/custom/CustomModal";
+import AccountPage from "@/components/user/AccountPage";
 
-const App = ({onToggleTheme}) => {
-	const [isModalVisible, setModalVisible] = useState(false);
+const App = () => {
+	const [showLoginModal, setShowLoginModal] = useState(false);
+	const [showLoginForm, setShowLoginForm] = useState(true);
+	const [showAccountModal, setShowAccountModal] = useState(false);
+
+	function handleAuthChange(authData) {
+		setShowLoginModal(!authData.isAuthenticated);
+	}
+
+	function onSetShowLoginForm(isShowLoginForm) {
+		console.log(isShowLoginForm);
+		setShowLoginForm(isShowLoginForm);
+	}
+
+	function onOpenAccountModal() {
+		setShowAccountModal(true);
+	}
+
+	function onCloseAccountModal() {
+		setShowAccountModal(false);
+	}
+
+	useEffect(() => {
+		auth.watchAuthData(handleAuthChange);
+	}, []);
 
 	return (
-		<div>
-			<MainHeader onToggleTheme={onToggleTheme} />
-			<LoginForm />
-			<hr />
-			<RegistrationForm />
-			<hr />
-			<div>
-				<button onClick={() => setModalVisible(true)}>Open Modal</button>
-				<CustomModal
-					title="My Modal"
-					isVisible={isModalVisible}
-					onClose={() => setModalVisible(false)}
-					footer={<button onClick={() => setModalVisible(false)}>Close</button>}
-				>
-					<p>This is the modal content.</p>
-				</CustomModal>
-			</div>
-		</div>
+		<main>
+			<MainHeader onOpenAccountModal={onOpenAccountModal} />
+			<CustomModal title={showLoginForm ? "Login" : "Register"} isVisible={showLoginModal}>
+			{
+				showLoginForm ? (
+					<LoginForm onSetShowLoginForm={onSetShowLoginForm} />
+				) : (
+					<RegistrationForm onSetShowLoginForm={onSetShowLoginForm} />
+				)
+			}
+			</CustomModal>
+			<CustomModal title="Account" isVisible={showAccountModal} onClose={onCloseAccountModal}>
+				<AccountPage />
+			</CustomModal>
+		</main>
 	);
 };
 
 export default App;
-
-App.propTypes = {
-	onToggleTheme: PropTypes.func
-};

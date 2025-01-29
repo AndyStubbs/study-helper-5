@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import LightmodeIcon from  "@/components/svg/LightmodeIcon";
+import DarkmodeIcon from  "@/components/svg/DarkmodeIcon";
 import App from "./App.jsx";
 import auth from "@/utils/auth";
 
@@ -19,5 +21,15 @@ auth.checkAuth();
 createRoot(document.getElementById("root")).render(
 	<StrictMode>
 		<App onToggleTheme={onToggleTheme} />
+		<div className="theme-toggle">
+			<button
+				onClick={onToggleTheme}
+				className="btn btn-icon"
+				title="Toggle Light/Dark Mode"
+			>
+				<LightmodeIcon />
+				<DarkmodeIcon />
+			</button>
+		</div>
 	</StrictMode>,
 );

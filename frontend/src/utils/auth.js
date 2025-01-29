@@ -7,7 +7,7 @@ const authData = {
 	email: "",
 	tokenExp: -1
 };
-
+const watchers = [];
 let refreshTimeout = null;
 
 // Reset the auth data
@@ -17,6 +17,7 @@ function resetAuthData() {
 	authData.email = "";
 	authData.tokenExp = -1;
 	clearTimeout(refreshTimeout);
+	watchers.map(watch => watch(authData));
 }
 
 function updateAuthData(username, email, tokenExp) {
@@ -25,6 +26,7 @@ function updateAuthData(username, email, tokenExp) {
 	authData.email = email;
 	authData.tokenExp = tokenExp;
 	scheduleRefreshToken(tokenExp);
+	watchers.map(watch => watch(authData));
 }
 
 // Check if the user is authenticated
@@ -32,7 +34,6 @@ async function checkAuth() {
 	try {
 		const response = await api.get("/users/check-auth/", { withCredentials: true });
 		const data = response.data;
-		console.log(data);
 		if (data.is_authenticated) {
 			updateAuthData(data.username, data.email, data.token_exp);
 		} else {
@@ -112,9 +113,15 @@ function scheduleRefreshToken(expirationTime) {
 	console.log(`Token refresh scheduled for ${refreshTime / 1000} seconds`);
 }
 
+function watchAuthData(action) {
+	watchers.push(action);
+}
+
 export default {
 	checkAuth,
 	login,
 	register,
-	deleteAccount
+	logout,
+	deleteAccount,
+	watchAuthData
 };

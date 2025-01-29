@@ -1,8 +1,9 @@
 import { useState } from "react";
 import "./RegistrationForm.css";
 import auth from "@/utils/auth";
+import PropTypes from "prop-types";
 
-const RegistrationForm = () => {
+const RegistrationForm = ({onSetShowLoginForm}) => {
 	const [formData, setFormData] = useState({
 		email: "astubbs50@gmail.com",
 		password: "TestPassword1$",
@@ -41,7 +42,6 @@ const RegistrationForm = () => {
 
 	return (
 		<div className="registration-form">
-			<h2>Register</h2>
 			{error && <p className="error">{error}</p>}
 			{success && <p className="success">Registration successful! You can now log in.</p>}
 			<form onSubmit={handleSubmit}>
@@ -75,10 +75,20 @@ const RegistrationForm = () => {
 						required
 					/>
 				</div>
-				<button type="submit">Register</button>
+				<button type="submit" className="btn-full">Register</button>
 			</form>
+			<p>
+				Already have an account? <span>&nbsp;&nbsp;</span>
+				<button className="btn-link" onClick={() => onSetShowLoginForm(true)}>
+					Login
+				</button>
+			</p>
 		</div>
 	);
+};
+
+RegistrationForm.propTypes = {
+	onSetShowLoginForm: PropTypes.func.isRequired,
 };
 
 export default RegistrationForm;

@@ -55,7 +55,7 @@ const CustomModal = ( { title, isVisible, closeOnBackdrop = true, onClose, child
 			>
 				<div className="modal-header">
 					{title && <h3>{title}</h3>}
-					<button className="close-button" onClick={closeModal}>
+					<button className="btn-icon" onClick={closeModal}>
 						&times;
 					</button>
 				</div>
@@ -70,8 +70,8 @@ CustomModal.propTypes = {
 	title: PropTypes.string,
 	isVisible: PropTypes.bool.isRequired,
 	closeOnBackdrop: PropTypes.bool,
-	onClose: PropTypes.func.isRequired,
-	children: PropTypes.node.isRequired,
+	onClose: PropTypes.func,
+	children: PropTypes.node,
 	footer: PropTypes.node,
 };
 

@@ -25,7 +25,6 @@ header.main-header nav a {
 header.main-header .other-links {
 	display: flex;
 }
-
 header.main-header .auth-links button {
-	padding: 0.3rem;
+	padding-top: 8px;
 }

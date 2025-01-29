@@ -234,7 +234,6 @@ button:disabled {
 	cursor: not-allowed;
 }
 
-
 /* Button 1 */
 .btn-1 {
 	color: var(--btn-fg-color-1);
@@ -288,6 +287,10 @@ button.btn-icon-b {
 	font-family: var(--font-body);
 	transition-duration: 0.35s;
 	min-width: auto;
+	color: var(--fg-color-1);
+	font-size: 24px;
+	font-weight: bold;
+	padding: 0;
 }
 button.btn-icon:hover {
 	opacity: 0.8;
@@ -312,6 +315,27 @@ button.btn-link {
 	color: var(--link-color);
 	text-decoration: underline;
 }
-.btn-link:hover {
+button.btn-link:hover {
 	color: var(--link-hover-color);
+}
+
+button.btn-full {
+	width: 100%;
+	padding: 0.5em;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+button.btn-full:hover {
+	background-color: #0056b3;
+}
+
+.theme-toggle {
+	position: fixed;
+	bottom: 25px;
+	right: 25px;
+	z-index: 1000;
 }
