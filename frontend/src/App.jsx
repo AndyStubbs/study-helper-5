@@ -11,7 +11,6 @@ const App = () => {
 	const [showLoginForm, setShowLoginForm] = useState(true);
 	const [showAccountModal, setShowAccountModal] = useState(false);
 
-
 	function onSetShowLoginForm(isShowLoginForm) {
 		setShowLoginForm(isShowLoginForm);
 	}
