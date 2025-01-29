@@ -16,8 +16,8 @@ const CustomConfirm = ({
 			onClose={onCancel}
 			footer={
 				<div className="confirm-footer">
-					<button className="confirm-btn" onClick={onConfirm}>Yes</button>
-					<button className="confirm-btn cancel" onClick={onCancel}>No</button>
+					<button className="btn-confirm" onClick={onConfirm}>Yes</button>
+					<button className="btn-confirm cancel" onClick={onCancel}>No</button>
 				</div>
 			}
 		>

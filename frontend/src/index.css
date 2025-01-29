@@ -333,6 +333,29 @@ button.btn-full:hover {
 	background-color: #0056b3;
 }
 
+
+button.btn-confirm {
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 10px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+button.btn-confirm:hover {
+	background-color: #0056b3;
+}
+
+button.btn-confirm.cancel {
+	background-color: #6c757d;
+}
+
+button.btn-confirm:hover {
+	background-color: #5a6268;
+}
+
 .theme-toggle {
 	position: fixed;
 	bottom: 25px;

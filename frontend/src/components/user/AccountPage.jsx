@@ -19,9 +19,13 @@ const AccountPage = () => {
 		setShowConfirmMessage(false);
 	}
 
+	function handleLogout() {
+		auth.logout();
+	}
+
 	return (
 		<div className="account-page">
-			<button onClick={auth.logout}>Logout</button>
+			<button onClick={handleLogout}>Logout</button>
 			<button onClick={handleDelete}>Delete Account</button>
 			<CustomConfirm
 				isVisible={showConfirmMessage}
