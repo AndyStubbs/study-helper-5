@@ -5,3 +5,8 @@
 .account-page p {
 	margin-top: 0;
 }
+
+.account-page .email-title {
+	font-weight: bold;
+	color: var(--fg-color-1);
+}

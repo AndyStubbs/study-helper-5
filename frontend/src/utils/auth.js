@@ -113,8 +113,11 @@ function scheduleRefreshToken(expirationTime) {
 	console.log(`Token refresh scheduled for ${refreshTime / 1000} seconds`);
 }
 
-function watchAuthData(action) {
+function watchAuthData(action, isImmediate = false) {
 	watchers.push(action);
+	if (isImmediate) {
+		action(authData);
+	}
 }
 
 export default {

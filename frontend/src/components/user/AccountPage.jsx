@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import auth from "@/utils/auth";
 import "./AccountPage.css";
 import CustomConfirm from "@/components/custom/CustomConfirm";
@@ -6,6 +6,7 @@ import CustomConfirm from "@/components/custom/CustomConfirm";
 const AccountPage = () => {
 
 	const [showConfirmMessage, setShowConfirmMessage] = useState(false);
+	const [email, setEmail] = useState("example@email.com");
 
 	function handleDelete() {
 		setShowConfirmMessage(true);
@@ -23,8 +24,18 @@ const AccountPage = () => {
 		auth.logout();
 	}
 
+	useEffect(() => {
+		function handleAuthChange(authData) {
+			setEmail(authData.email);
+		}
+		auth.watchAuthData(handleAuthChange, true);
+	}, [setEmail]);
+
 	return (
 		<div className="account-page">
+			<p>
+				<span className="email-title">Email:</span> <span>{email}</span>
+			</p>
 			<button onClick={handleLogout}>Logout</button>
 			<button onClick={handleDelete}>Delete Account</button>
 			<CustomConfirm

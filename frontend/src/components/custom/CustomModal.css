@@ -28,6 +28,7 @@
 	border-bottom: 1px solid #ccc;
 	padding-bottom: 0.5rem;
 	margin-bottom: 1rem;
+	color: var(--fg-color-1);
 }
 
 .modal-overlay .modal-body {
