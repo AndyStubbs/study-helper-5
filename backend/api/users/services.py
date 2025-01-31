@@ -44,6 +44,7 @@ def login_user_service(request):
 	email = request.data.get('email')
 	password = request.data.get('password')
 
+	print(f"Email: {email} Password: {password}")
 	if not email or not password:
 		return Response({"error": "Email and password are required."}, status=400)
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import auth from "@/utils/auth";
+import CustomPassword from "@/components/custom/CustomPassword";
 import "./LoginForm.css";
 
 const LoginForm = ({ onSetShowLoginForm }) => {
@@ -11,8 +12,9 @@ const LoginForm = ({ onSetShowLoginForm }) => {
 
 	const [error, setError] = useState(null);
 
-	const handleChange = (e) => {
-		const { name, value } = e.target;
+	const handleChange = (name, value) => {
+		console.log("Handle Change");
+		console.log(name, value);
 		setFormData((prev) => ({
 			...prev,
 			[name]: value,
@@ -40,18 +42,14 @@ const LoginForm = ({ onSetShowLoginForm }) => {
 						type="email"
 						placeholder="Email"
 						value={formData.email}
-						onChange={(e) => handleChange(e.target.value)}
+						onChange={(e) => handleChange("email", e.target.value)}
 					/>
 				</div>
-				<div>
-					<label>Password</label>
-					<input
-						type="password"
-						placeholder="Password"
-						value={formData.password}
-						onChange={(e) => handleChange(e.target.value)}
-					/>
-				</div>
+				<CustomPassword
+					label="Password"
+					password={formData.password}
+					onChange={(password) => handleChange("password", password)}
+				/>
 				<button type="submit" className="btn-full">Login</button>
 			</form>
 			<p>
