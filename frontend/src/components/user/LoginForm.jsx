@@ -2,6 +2,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import auth from "@/utils/auth";
 import CustomPassword from "@/components/custom/CustomPassword";
+import CustomLoading from "@/components/custom/CustomLoading";
 import "./LoginForm.css";
 
 const LoginForm = ({ onSetShowLoginForm }) => {
@@ -9,6 +10,7 @@ const LoginForm = ({ onSetShowLoginForm }) => {
 		email: "astubbs50@gmail.com",
 		password: "TestPassword1$",
 	});
+	const [showLoading, setShowLoading] = useState(false);
 
 	const [error, setError] = useState(null);
 
@@ -26,9 +28,12 @@ const LoginForm = ({ onSetShowLoginForm }) => {
 		setError(null);
 
 		try {
+			setShowLoading(true);
 			await auth.login(formData.email, formData.password);
 		} catch (err) {
 			setError(err.message);
+		} finally {
+			setShowLoading(false);
 		}
 	};
 
@@ -58,6 +63,7 @@ const LoginForm = ({ onSetShowLoginForm }) => {
 					Register
 				</button>
 			</p>
+			<CustomLoading isVisible={showLoading} />
 		</div>
 	);
 };

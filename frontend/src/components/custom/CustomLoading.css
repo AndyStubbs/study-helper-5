@@ -1,0 +1,44 @@
+.custom-loading {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+	background-color: var(--shadow-color-1);
+}
+
+.custom-loading svg {
+	width: 60px;
+	height: 160px;
+}
+
+.custom-loading .spinner-bar {
+	animation: spinner_animation 0.9s linear infinite;
+	animation-delay: -0.9s;
+}
+
+.custom-loading .spinner-bar-delay1 {
+	animation-delay: -0.7s;
+}
+
+.custom-loading .spinner-bar-delay2 {
+	animation-delay: -0.5s;
+}
+
+@keyframes spinner_animation {
+	0%, 66.66% {
+		animation-timing-function: cubic-bezier(0.14, 0.73, 0.34, 1);
+		y: 6px;
+		height: 12px;
+	}
+
+	33.33% {
+		animation-timing-function: cubic-bezier(0.65, 0.26, 0.82, 0.45);
+		y: 1px;
+		height: 22px;
+	}
+}

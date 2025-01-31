@@ -16,7 +16,7 @@
 	--fg-color-1: #000000;
 	--fg-color-2: #333;
 	--fg-color-3: #fff;
-	--shadow-color-1: rgba(0, 0, 0, 0.1);
+	--shadow-color-1: rgba(0, 0, 0, 0.25);
 	--shadow-color-2: rgba(0, 0, 0, 0.5);
 	--shadow-color-3: #0a3543;
 	--shadow-color-4: #0a3543aa;
@@ -80,7 +80,7 @@
 	--fg-color-2: #aaa;
 	--fg-color-3: #000;
 	--input-bg-color-1: #1e1e1e;
-	--shadow-color-1: rgba(255, 255, 255, 0.1);
+	--shadow-color-1: rgba(0, 0, 0, 0.75);
 	--shadow-color-2: rgba(255, 255, 255, 0.25);
 	--shadow-color-3: #add8e6;
 	--shadow-color-4: #add8e6aa;

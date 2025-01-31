@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./RegistrationForm.css";
 import auth from "@/utils/auth";
+import CustomPassword from "@/components/custom/CustomPassword";
+import CustomLoading from "@/components/custom/CustomLoading";
 import PropTypes from "prop-types";
 
 const RegistrationForm = ({onSetShowLoginForm}) => {
@@ -12,9 +14,8 @@ const RegistrationForm = ({onSetShowLoginForm}) => {
 
 	const [error, setError] = useState(null);
 	const [success, setSuccess] = useState(false);
-
-	const handleChange = (e) => {
-		const { name, value } = e.target;
+	const [showLoading, setShowLoading] = useState(false);
+	const handleChange = (name, value) => {
 		setFormData((prev) => ({
 			...prev,
 			[name]: value,
@@ -32,11 +33,14 @@ const RegistrationForm = ({onSetShowLoginForm}) => {
 		}
 
 		try {
+			setShowLoading(true);
 			await auth.register(formData.email, formData.password);
 			setSuccess(true);
 		} catch (err) {
 			console.error("Registration failed:", err.message);
 			setError(err.message || "Something went wrong. Please try again.");
+		} finally {
+			setShowLoading(false);
 		}
 	};
 
@@ -51,30 +55,20 @@ const RegistrationForm = ({onSetShowLoginForm}) => {
 						type="email"
 						name="email"
 						value={formData.email}
-						onChange={handleChange}
+						onChange={(e) => handleChange("email", e.target.value)}
 						required
 					/>
 				</div>
-				<div>
-					<label>Password</label>
-					<input
-						type="password"
-						name="password"
-						value={formData.password}
-						onChange={handleChange}
-						required
-					/>
-				</div>
-				<div>
-					<label>Confirm</label>
-					<input
-						type="password"
-						name="confirm"
-						value={formData.confirm}
-						onChange={handleChange}
-						required
-					/>
-				</div>
+				<CustomPassword
+					label="Password"
+					password={formData.password}
+					onChange={(password) => handleChange("password", password)}
+				/>
+				<CustomPassword
+					label="Password"
+					password={formData.confirm}
+					onChange={(confirm) => handleChange("confirm", confirm)}
+				/>
 				<button type="submit" className="btn-full">Register</button>
 			</form>
 			<p>
@@ -83,6 +77,7 @@ const RegistrationForm = ({onSetShowLoginForm}) => {
 					Login
 				</button>
 			</p>
+			<CustomLoading isVisible={showLoading} />
 		</div>
 	);
 };
