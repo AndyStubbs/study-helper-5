@@ -149,6 +149,11 @@ body {
 		color 0.3s ease;
 }
 
+main {
+	max-width: 800px;
+	margin: auto;
+}
+
 #app {
 	background-color: var(--bg-color-1);
 }

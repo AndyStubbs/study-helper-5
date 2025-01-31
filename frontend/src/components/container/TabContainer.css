@@ -1,0 +1,32 @@
+.tab-container {
+	margin-top: 32px;
+}
+.tab-container h2 {
+	text-align: center;
+	margin: 8px 0 16px 0;
+}
+.tab-container .tab-buttons {
+	display: flex;
+	background-color: var(--bg-color-1);
+}
+.tab-container .tab {
+	padding: 10px 20px;
+	cursor: pointer;
+	border: none;
+	background-color: transparent;
+	font-size: 16px;
+	border: 2px solid rgba(0,0,0,0);
+	border-radius: 0;
+	user-select: none;
+	color: var(--fg-color-2);
+}
+.tab-container .tab.active {
+	color: var(--fg-color-1);
+	background-color: var(--bg-color-2);
+	border-top: 2px solid var(--status-success-color);
+}
+.tab-container .tab-contents {
+	background-color: var(--bg-color-2);
+	height: calc(100vh - 128px);
+	padding: 16px;
+}

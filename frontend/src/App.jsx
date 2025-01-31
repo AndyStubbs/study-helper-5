@@ -5,6 +5,7 @@ import RegistrationForm from "@/components/user/RegistrationForm";
 import LoginForm from "@/components/user/LoginForm";
 import CustomModal from "@/components/custom/CustomModal";
 import AccountPage from "@/components/user/AccountPage";
+import TabContainer from "./components/container/TabContainer";
 
 const App = () => {
 	const [showLoginModal, setShowLoginModal] = useState(false);
@@ -34,21 +35,24 @@ const App = () => {
 	}, [showAccountModal]);
 
 	return (
-		<main>
+		<>
 			<MainHeader onOpenAccountModal={onOpenAccountModal} />
-			<CustomModal title={showLoginForm ? "Login" : "Register"} isVisible={showLoginModal}>
-			{
-				showLoginForm ? (
-					<LoginForm onSetShowLoginForm={onSetShowLoginForm} />
-				) : (
-					<RegistrationForm onSetShowLoginForm={onSetShowLoginForm} />
-				)
-			}
-			</CustomModal>
-			<CustomModal title="Account" isVisible={showAccountModal} onClose={onCloseAccountModal}>
-				<AccountPage />
-			</CustomModal>
-		</main>
+			<main>
+				<TabContainer />
+				<CustomModal title={showLoginForm ? "Login" : "Register"} isVisible={showLoginModal}>
+				{
+					showLoginForm ? (
+						<LoginForm onSetShowLoginForm={onSetShowLoginForm} />
+					) : (
+						<RegistrationForm onSetShowLoginForm={onSetShowLoginForm} />
+					)
+				}
+				</CustomModal>
+				<CustomModal title="Account" isVisible={showAccountModal} onClose={onCloseAccountModal}>
+					<AccountPage />
+				</CustomModal>
+			</main>
+		</>
 	);
 };
 
